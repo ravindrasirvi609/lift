@@ -69,7 +69,7 @@ const RideSearch: React.FC = () => {
           </div>
           <button
             type="submit"
-            className="mt-6 w-full bg-[#F96167] text-white py-3 px-6 rounded-md font-semibold hover:bg-[#F73D43] transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
+            className="mt-6 w-full bg-[#F96167] text-white py-3 px-6 rounded-md font-semibold hover:bg-[#F9D423] transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
           >
             Search Rides
           </button>
