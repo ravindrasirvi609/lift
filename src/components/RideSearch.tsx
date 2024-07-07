@@ -1,9 +1,12 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { FaMapMarkerAlt, FaCalendarAlt, FaUsers } from "react-icons/fa";
+import React, { useState } from "react";
+import { FaCalendarAlt, FaUsers } from "react-icons/fa";
 import AutocompleteInput from "./AutocompleteInput";
+import { useRouter } from "next/navigation";
 
 const RideSearch: React.FC = () => {
+  const router = useRouter();
+
   const [leavingFrom, setLeavingFrom] = useState("");
   const [destination, setDestination] = useState("");
   const [date, setDate] = useState("");
@@ -11,6 +14,13 @@ const RideSearch: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const searchParams = new URLSearchParams({
+      leavingFrom,
+      destination,
+      date,
+      passengerCount: passengerCount.toString(),
+    });
+    router.push(`/search/${searchParams.toString()}`);
   };
 
   return (
@@ -60,7 +70,6 @@ const RideSearch: React.FC = () => {
           <button
             type="submit"
             className="mt-6 w-full bg-[#F96167] text-white py-3 px-6 rounded-md font-semibold hover:bg-[#F73D43] transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
-            onClick={handleSubmit}
           >
             Search Rides
           </button>
