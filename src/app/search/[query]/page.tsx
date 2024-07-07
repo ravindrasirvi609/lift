@@ -47,14 +47,13 @@ const Rides: React.FC = () => {
             passengerCount: 1,
           },
         });
-        setRides(rides);
+        setRides(response.data);
         setLoading(false);
       } catch (err) {
         setError("Failed to fetch rides. Please try again.");
         setLoading(false);
       }
     };
-
     fetchRides();
   }, []);
 
@@ -70,45 +69,63 @@ const Rides: React.FC = () => {
     setFilters((prev) => ({ ...prev, [name]: parseFloat(value) }));
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-yellow-500"></div>
+      </div>
+    );
+
+  if (error) return <div className="text-red-600 text-center p-4">{error}</div>;
 
   return (
-    <div style={{ backgroundColor: "#F9E795", padding: "20px" }}>
-      <h1 style={{ color: "#F96167", textAlign: "center" }}>Available Rides</h1>
+    <div className="bg-yellow-50 min-h-screen p-6">
+      <h1 className="text-4xl font-bold text-red-600 text-center mb-8">
+        Available Rides
+      </h1>
 
-      <div
-        style={{
-          backgroundColor: "#F9D423",
-          padding: "15px",
-          marginBottom: "20px",
-          borderRadius: "8px",
-        }}
-      >
-        <h2>Filters</h2>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
+      <div className="bg-yellow-200 p-6 rounded-lg shadow-md mb-8">
+        <h2 className="text-2xl font-semibold mb-4">Filters</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <label htmlFor="minPrice">Min Price:</label>
+            <label
+              htmlFor="minPrice"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Min Price:
+            </label>
             <input
               type="number"
               id="minPrice"
               name="minPrice"
               value={filters.minPrice}
               onChange={handleFilterChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring focus:ring-yellow-200 focus:ring-opacity-50"
             />
           </div>
           <div>
-            <label htmlFor="maxPrice">Max Price:</label>
+            <label
+              htmlFor="maxPrice"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Max Price:
+            </label>
             <input
               type="number"
               id="maxPrice"
               name="maxPrice"
               value={filters.maxPrice}
               onChange={handleFilterChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring focus:ring-yellow-200 focus:ring-opacity-50"
             />
           </div>
           <div>
-            <label htmlFor="minRating">Min Rating:</label>
+            <label
+              htmlFor="minRating"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Min Rating:
+            </label>
             <input
               type="number"
               id="minRating"
@@ -118,6 +135,7 @@ const Rides: React.FC = () => {
               min="0"
               max="5"
               step="0.1"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring focus:ring-yellow-200 focus:ring-opacity-50"
             />
           </div>
         </div>
@@ -126,7 +144,9 @@ const Rides: React.FC = () => {
       {filteredRides.length > 0 ? (
         <AvailableRides rides={filteredRides} />
       ) : (
-        <p>No rides available matching your criteria.</p>
+        <p className="text-center text-gray-600 text-lg">
+          No rides available matching your criteria.
+        </p>
       )}
     </div>
   );
