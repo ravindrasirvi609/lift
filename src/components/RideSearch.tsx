@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 const RideSearch: React.FC = () => {
   const router = useRouter();
 
-  const [leavingFrom, setLeavingFrom] = useState("");
+  const [departure, setDeparture] = useState("");
   const [destination, setDestination] = useState("");
   const [date, setDate] = useState("");
   const [passengerCount, setPassengerCount] = useState(1);
@@ -15,7 +15,7 @@ const RideSearch: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const searchParams = new URLSearchParams({
-      leavingFrom,
+      departure,
       destination,
       date,
       passengerCount: passengerCount.toString(),
@@ -35,9 +35,9 @@ const RideSearch: React.FC = () => {
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <AutocompleteInput
-              placeholder="Leaving From"
-              value={leavingFrom}
-              onChange={setLeavingFrom}
+              placeholder="Departure From"
+              value={departure}
+              onChange={setDeparture}
             />
             <AutocompleteInput
               placeholder="Destination"
