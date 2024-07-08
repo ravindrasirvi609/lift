@@ -49,7 +49,7 @@ const SignIn: React.FC<SignInProps> = ({ userType, onSwitch }) => {
     setIsLoading(true);
 
     try {
-      const endpoint = isSignUp ? "/api/auth/signin" : "/api/auth/login";
+      const endpoint = isSignUp ? "/api/auth" : "/api/auth";
       const response = await axios.post(endpoint, {
         ...formData,
         isDriver: userType === "vehicle-owner",

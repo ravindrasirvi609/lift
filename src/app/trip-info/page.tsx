@@ -1,7 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import AutocompleteInput from "@/components/AutocompleteInput";
+import { useAuth } from "../contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 interface TripInfo {
   departureLocation: string;
@@ -15,6 +17,9 @@ interface TripInfo {
 }
 
 const CreateTrip: React.FC = () => {
+  const { user } = useAuth();
+  const router = useRouter();
+
   const [tripInfo, setTripInfo] = useState<TripInfo>({
     departureLocation: "",
     destination: "",
@@ -29,6 +34,14 @@ const CreateTrip: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (!user) {
+      router.push("/auth");
+    }
+  }, [user, router]);
+
+  if (!user) return null;
 
   const handleChange = (
     e: React.ChangeEvent<
