@@ -49,16 +49,15 @@ const SignIn: React.FC<SignInProps> = ({ userType, onSwitch }) => {
     setIsLoading(true);
 
     try {
-      const endpoint = isSignUp ? "/api/auth" : "/api/auth";
+      const endpoint = isSignUp ? "/api/auth/signin" : "/api/auth/login";
       const response = await axios.post(endpoint, {
         ...formData,
         isDriver: userType === "vehicle-owner",
       });
 
       console.log("Success:", response.data);
-      // Handle successful authentication here
       if (response.data.success) {
-        router.push("/dashboard"); // Redirect to dashboard on success
+        router.push("/dashboard");
       }
     } catch (err: any) {
       setError(
@@ -89,195 +88,95 @@ const SignIn: React.FC<SignInProps> = ({ userType, onSwitch }) => {
           <div className="rounded-md shadow-sm -space-y-px">
             {isSignUp && (
               <>
-                <div className="mb-4">
-                  <label htmlFor="firstName" className="sr-only">
-                    First Name
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaUser className="h-5 w-5 text-[#F96167]" />
-                    </div>
-                    <input
-                      id="firstName"
-                      name="firstName"
-                      type="text"
-                      required
-                      className="appearance-none rounded-lg relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] focus:z-10 sm:text-sm"
-                      placeholder="First Name"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="lastName" className="sr-only">
-                    Last Name
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaUser className="h-5 w-5 text-[#F96167]" />
-                    </div>
-                    <input
-                      id="lastName"
-                      name="lastName"
-                      type="text"
-                      required
-                      className="appearance-none rounded-lg relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] focus:z-10 sm:text-sm"
-                      placeholder="Last Name"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="dateOfBirth" className="sr-only">
-                    Date of Birth
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaBirthdayCake className="h-5 w-5 text-[#F96167]" />
-                    </div>
-                    <input
-                      id="dateOfBirth"
-                      name="dateOfBirth"
-                      type="date"
-                      required
-                      className="appearance-none rounded-lg relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] focus:z-10 sm:text-sm"
-                      value={formData.dateOfBirth}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="gender" className="sr-only">
-                    Gender
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaVenusMars className="h-5 w-5 text-[#F96167]" />
-                    </div>
-                    <select
-                      id="gender"
-                      name="gender"
-                      required
-                      className="appearance-none rounded-lg relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] focus:z-10 sm:text-sm"
-                      value={formData.gender}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                </div>
+                <InputField
+                  icon={<FaUser className="h-5 w-5 text-[#F96167]" />}
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  placeholder="First Name"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                />
+                <InputField
+                  icon={<FaUser className="h-5 w-5 text-[#F96167]" />}
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  placeholder="Last Name"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                />
+                <InputField
+                  icon={<FaBirthdayCake className="h-5 w-5 text-[#F96167]" />}
+                  id="dateOfBirth"
+                  name="dateOfBirth"
+                  type="date"
+                  placeholder="Date of Birth"
+                  value={formData.dateOfBirth}
+                  onChange={handleChange}
+                />
+                <SelectField
+                  icon={<FaVenusMars className="h-5 w-5 text-[#F96167]" />}
+                  id="gender"
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  options={[
+                    { value: "", label: "Select Gender" },
+                    { value: "Male", label: "Male" },
+                    { value: "Female", label: "Female" },
+                    { value: "Other", label: "Other" },
+                  ]}
+                />
               </>
             )}
-            <div className="mb-4">
-              <label htmlFor="email-address" className="sr-only">
-                Email address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaEnvelope className="h-5 w-5 text-[#F96167]" />
-                </div>
-                <input
-                  id="email-address"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="appearance-none rounded-lg relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] focus:z-10 sm:text-sm"
-                  placeholder="Email address"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-            <div className="mb-4">
-              <label htmlFor="phone-number" className="sr-only">
-                Phone Number
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaPhone className="h-5 w-5 text-[#F96167]" />
-                </div>
-                <input
-                  id="phone-number"
-                  name="phoneNumber"
-                  type="tel"
-                  autoComplete="tel"
-                  required
-                  className="appearance-none rounded-lg relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] focus:z-10 sm:text-sm"
-                  placeholder="Phone Number"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-            <div className="mb-4">
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaLock className="h-5 w-5 text-[#F96167]" />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  className="appearance-none rounded-lg relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] focus:z-10 sm:text-sm"
-                  placeholder="Password"
-                  value={formData.password}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
+            <InputField
+              icon={<FaEnvelope className="h-5 w-5 text-[#F96167]" />}
+              id="email-address"
+              name="email"
+              type="email"
+              placeholder="Email address"
+              value={formData.email}
+              onChange={handleChange}
+            />
+            <InputField
+              icon={<FaPhone className="h-5 w-5 text-[#F96167]" />}
+              id="phone-number"
+              name="phoneNumber"
+              type="tel"
+              placeholder="Phone Number"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+            />
+            <InputField
+              icon={<FaLock className="h-5 w-5 text-[#F96167]" />}
+              id="password"
+              name="password"
+              type="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+            />
             {isSignUp && userType === "vehicle-owner" && (
               <>
-                <div className="mb-4">
-                  <label htmlFor="driverLicense" className="sr-only">
-                    Driver&apos;s License
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaCar className="h-5 w-5 text-[#F96167]" />
-                    </div>
-                    <input
-                      id="driverLicense"
-                      name="driverLicense"
-                      type="text"
-                      required
-                      className="appearance-none rounded-lg relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] focus:z-10 sm:text-sm"
-                      placeholder="Driver's License Number"
-                      value={formData.driverLicense}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="vehicleInfo" className="sr-only">
-                    Vehicle Information
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaCar className="h-5 w-5 text-[#F96167]" />
-                    </div>
-                    <input
-                      id="vehicleInfo"
-                      name="vehicleInfo"
-                      type="text"
-                      required
-                      className="appearance-none rounded-lg relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] focus:z-10 sm:text-sm"
-                      placeholder="Vehicle Information"
-                      value={formData.vehicleInfo}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
+                <InputField
+                  icon={<FaCar className="h-5 w-5 text-[#F96167]" />}
+                  id="driverLicense"
+                  name="driverLicense"
+                  type="text"
+                  placeholder="Driver's License Number"
+                  value={formData.driverLicense}
+                  onChange={handleChange}
+                />
+                <InputField
+                  icon={<FaCar className="h-5 w-5 text-[#F96167]" />}
+                  id="vehicleInfo"
+                  name="vehicleInfo"
+                  type="text"
+                  placeholder="Vehicle Information"
+                  value={formData.vehicleInfo}
+                  onChange={handleChange}
+                />
               </>
             )}
           </div>
@@ -311,7 +210,7 @@ const SignIn: React.FC<SignInProps> = ({ userType, onSwitch }) => {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#F96167] hover:bg-[#F9D423] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#F96167] transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#F96167] hover:bg-[#F9D423] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#F96167] transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
             >
               {isLoading ? (
                 <svg
@@ -375,5 +274,53 @@ const SignIn: React.FC<SignInProps> = ({ userType, onSwitch }) => {
     </div>
   );
 };
+
+const InputField = ({ icon, ...props }: any) => (
+  <div className="mb-4">
+    <label
+      htmlFor={props.id}
+      className="block text-sm font-medium text-gray-700 mb-1"
+    >
+      {props.placeholder}
+    </label>
+    <div className="relative rounded-md shadow-sm">
+      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        {icon}
+      </div>
+      <input
+        {...props}
+        required
+        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] sm:text-sm"
+      />
+    </div>
+  </div>
+);
+
+const SelectField = ({ icon, options, ...props }: any) => (
+  <div className="mb-4">
+    <label
+      htmlFor={props.id}
+      className="block text-sm font-medium text-gray-700 mb-1"
+    >
+      {props.name}
+    </label>
+    <div className="relative rounded-md shadow-sm">
+      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        {icon}
+      </div>
+      <select
+        {...props}
+        required
+        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] sm:text-sm"
+      >
+        {options.map((option: any) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  </div>
+);
 
 export default SignIn;

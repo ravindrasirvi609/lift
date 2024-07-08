@@ -6,10 +6,15 @@ export function middleware(request: NextRequest) {
 
   // Define public paths
   const isPublicPath =
-    path === "/" || path === "/search" || path.startsWith("/auth");
+    path === "/" ||
+    path === "/search" ||
+    path === "/verifyemail" ||
+    path === "/forgotpassword" ||
+    path === "/resetpassword" ||
+    path.startsWith("/auth");
 
   // Check for authentication token
-  const token = request.cookies.get("authToken")?.value;
+  const token = request.cookies.get("token")?.value;
 
   // Redirect logic
   if (!isPublicPath && !token) {
@@ -17,7 +22,7 @@ export function middleware(request: NextRequest) {
   }
 
   if (isPublicPath && token) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();

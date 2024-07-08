@@ -38,11 +38,9 @@ const userSchema = new mongoose.Schema(
       default: "Not Applied",
     },
     driverLicense: {
-      number: String,
-      expiryDate: Date,
-      state: String,
+      type: String,
     },
-    vehicleInfo: { type: mongoose.Schema.Types.ObjectId, ref: "Vehicle" },
+    vehicleInfo: { type: String },
     driverRating: { type: Number, default: 0 },
     totalRidesAsDriver: { type: Number, default: 0 },
     driverAvailabilityStatus: {

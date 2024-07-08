@@ -124,6 +124,7 @@ export async function POST(request: NextRequest) {
     }
 
     const savedUser = await newUser.save();
+    console.log(" savedUser", savedUser);
 
     // Generate verification token
     const verifyToken = await bcryptjs.hash(
@@ -135,7 +136,7 @@ export async function POST(request: NextRequest) {
     await savedUser.save();
 
     // Send verification email
-    await sendVerificationEmail(savedUser.email, verifyToken);
+    await sendVerificationEmail(savedUser.email, verifyToken, savedUser._id);
 
     return NextResponse.json({
       message:
@@ -152,12 +153,17 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function sendVerificationEmail(email: string, token: string) {
+async function sendVerificationEmail(
+  email: string,
+  token: string,
+  userId: string
+) {
   try {
     await sendEmail({
       email,
       emailType: "VERIFY",
-      userId: token,
+      token,
+      userId: userId,
     });
   } catch (error) {
     console.error("Error sending verification email:", error);
