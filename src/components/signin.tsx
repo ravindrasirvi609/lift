@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import {
   FaUser,
@@ -6,8 +8,11 @@ import {
   FaEnvelope,
   FaExchangeAlt,
   FaPhone,
+  FaBirthdayCake,
+  FaVenusMars,
 } from "react-icons/fa";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 interface SignInProps {
   userType: "user" | "vehicle-owner";
@@ -17,14 +22,20 @@ interface SignInProps {
 const SignIn: React.FC<SignInProps> = ({ userType, onSwitch }) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
-    name: "",
     phoneNumber: "",
-    vehicleType: "",
+    dateOfBirth: "",
+    gender: "",
+    isDriver: false,
+    driverLicense: "",
+    vehicleInfo: "",
   });
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -38,16 +49,21 @@ const SignIn: React.FC<SignInProps> = ({ userType, onSwitch }) => {
     setIsLoading(true);
 
     try {
-      const endpoint = isSignUp ? "/api/signup" : "/api/signin";
+      const endpoint = isSignUp ? "/api/auth/signin" : "/api/auth/login";
       const response = await axios.post(endpoint, {
         ...formData,
-        userType,
+        isDriver: userType === "vehicle-owner",
       });
 
       console.log("Success:", response.data);
       // Handle successful authentication here
-    } catch (err) {
-      setError("Authentication failed. Please try again.");
+      if (response.data.success) {
+        router.push("/dashboard"); // Redirect to dashboard on success
+      }
+    } catch (err: any) {
+      setError(
+        err.response?.data?.error || "Authentication failed. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -72,26 +88,90 @@ const SignIn: React.FC<SignInProps> = ({ userType, onSwitch }) => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             {isSignUp && (
-              <div className="mb-4">
-                <label htmlFor="name" className="sr-only">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaUser className="h-5 w-5 text-[#F96167]" />
+              <>
+                <div className="mb-4">
+                  <label htmlFor="firstName" className="sr-only">
+                    First Name
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaUser className="h-5 w-5 text-[#F96167]" />
+                    </div>
+                    <input
+                      id="firstName"
+                      name="firstName"
+                      type="text"
+                      required
+                      className="appearance-none rounded-lg relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] focus:z-10 sm:text-sm"
+                      placeholder="First Name"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                    />
                   </div>
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    required
-                    className="appearance-none rounded-lg relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] focus:z-10 sm:text-sm"
-                    placeholder="Full Name"
-                    value={formData.name}
-                    onChange={handleChange}
-                  />
                 </div>
-              </div>
+                <div className="mb-4">
+                  <label htmlFor="lastName" className="sr-only">
+                    Last Name
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaUser className="h-5 w-5 text-[#F96167]" />
+                    </div>
+                    <input
+                      id="lastName"
+                      name="lastName"
+                      type="text"
+                      required
+                      className="appearance-none rounded-lg relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] focus:z-10 sm:text-sm"
+                      placeholder="Last Name"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="dateOfBirth" className="sr-only">
+                    Date of Birth
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaBirthdayCake className="h-5 w-5 text-[#F96167]" />
+                    </div>
+                    <input
+                      id="dateOfBirth"
+                      name="dateOfBirth"
+                      type="date"
+                      required
+                      className="appearance-none rounded-lg relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] focus:z-10 sm:text-sm"
+                      value={formData.dateOfBirth}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="gender" className="sr-only">
+                    Gender
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaVenusMars className="h-5 w-5 text-[#F96167]" />
+                    </div>
+                    <select
+                      id="gender"
+                      name="gender"
+                      required
+                      className="appearance-none rounded-lg relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] focus:z-10 sm:text-sm"
+                      value={formData.gender}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+              </>
             )}
             <div className="mb-4">
               <label htmlFor="email-address" className="sr-only">
@@ -157,30 +237,48 @@ const SignIn: React.FC<SignInProps> = ({ userType, onSwitch }) => {
               </div>
             </div>
             {isSignUp && userType === "vehicle-owner" && (
-              <div>
-                <label htmlFor="vehicleType" className="sr-only">
-                  Vehicle Type
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaCar className="h-5 w-5 text-[#F96167]" />
+              <>
+                <div className="mb-4">
+                  <label htmlFor="driverLicense" className="sr-only">
+                    Driver&apos;s License
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaCar className="h-5 w-5 text-[#F96167]" />
+                    </div>
+                    <input
+                      id="driverLicense"
+                      name="driverLicense"
+                      type="text"
+                      required
+                      className="appearance-none rounded-lg relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] focus:z-10 sm:text-sm"
+                      placeholder="Driver's License Number"
+                      value={formData.driverLicense}
+                      onChange={handleChange}
+                    />
                   </div>
-                  <select
-                    id="vehicleType"
-                    name="vehicleType"
-                    required
-                    className="appearance-none rounded-lg relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] focus:z-10 sm:text-sm"
-                    value={formData.vehicleType}
-                    onChange={handleChange}
-                  >
-                    <option value="">Select Vehicle Type</option>
-                    <option value="car">Car</option>
-                    <option value="suv">SUV</option>
-                    <option value="van">Van</option>
-                    <option value="bus">Bus</option>
-                  </select>
                 </div>
-              </div>
+                <div className="mb-4">
+                  <label htmlFor="vehicleInfo" className="sr-only">
+                    Vehicle Information
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaCar className="h-5 w-5 text-[#F96167]" />
+                    </div>
+                    <input
+                      id="vehicleInfo"
+                      name="vehicleInfo"
+                      type="text"
+                      required
+                      className="appearance-none rounded-lg relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] focus:z-10 sm:text-sm"
+                      placeholder="Vehicle Information"
+                      value={formData.vehicleInfo}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+              </>
             )}
           </div>
 
