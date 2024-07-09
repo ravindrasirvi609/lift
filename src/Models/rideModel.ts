@@ -5,15 +5,20 @@ const rideSchema = new mongoose.Schema({
   vehicle: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Vehicle",
-    required: true,
   },
   startLocation: {
     type: { type: String, enum: ["Point"], default: "Point" },
     coordinates: { type: [Number], required: true }, // [longitude, latitude]
+    city: { type: String, required: true },
+    region: { type: String, required: true },
+    locationId: { type: String, required: true },
   },
   endLocation: {
     type: { type: String, enum: ["Point"], default: "Point" },
     coordinates: { type: [Number], required: true }, // [longitude, latitude]
+    city: { type: String, required: true },
+    region: { type: String, required: true },
+    locationId: { type: String, required: true },
   },
   startAddress: { type: String, required: true },
   endAddress: { type: String, required: true },
