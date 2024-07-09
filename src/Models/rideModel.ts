@@ -3,8 +3,7 @@ import mongoose from "mongoose";
 const rideSchema = new mongoose.Schema({
   driver: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   vehicle: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Vehicle",
+    type: String,
   },
   startLocation: {
     type: { type: String, enum: ["Point"], default: "Point" },
@@ -20,8 +19,8 @@ const rideSchema = new mongoose.Schema({
     region: { type: String, required: true },
     locationId: { type: String, required: true },
   },
-  startAddress: { type: String, required: true },
-  endAddress: { type: String, required: true },
+  startAddress: { type: String },
+  endAddress: { type: String },
   departureTime: { type: Date, required: true },
   estimatedArrivalTime: { type: Date, required: true },
   availableSeats: { type: Number, required: true },

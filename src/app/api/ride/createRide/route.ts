@@ -22,12 +22,15 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    console.log("body", body);
 
     // Validate required fields
     const requiredFields = [
       "vehicle",
       "startLocation",
       "endLocation",
+      "startAddress",
+      "endAddress",
 
       "departureTime",
       "estimatedArrivalTime",

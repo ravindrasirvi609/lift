@@ -8,13 +8,16 @@ interface TokenPayload extends JWTPayload {
 
 export async function verifyToken(token: string): Promise<TokenPayload> {
   try {
+    console.log("Token:", token);
+
     const secret = new TextEncoder().encode(process.env.TOKEN_SECRET);
     const { payload } = await jwtVerify(token, secret);
+    console.log("Payload:", payload);
 
     // Type assertion to ensure all required fields are present
     if (
-      !payload._id ||
-      typeof payload._id !== "string" ||
+      !payload.id ||
+      typeof payload.id !== "string" ||
       !payload.email ||
       typeof payload.email !== "string" ||
       typeof payload.isDriver !== "boolean"

@@ -1,47 +1,102 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import AutocompleteInput from "@/components/AutocompleteInput";
 import { useAuth } from "../contexts/AuthContext";
 import { useRouter } from "next/navigation";
 
+// Color constants
+const PRIMARY_COLOR = "#F9D423";
+const SECONDARY_COLOR = "#F9E795";
+
+interface Location {
+  coordinates: [number, number];
+  city: string;
+  region: string;
+  locationId: string;
+}
+
 interface TripInfo {
-  departureLocation: string;
-  destination: string;
-  departureDate: string;
+  startLocation: Location;
+  endLocation: Location;
+  startAddress: string;
+  endAddress: string;
   departureTime: string;
+  estimatedArrivalTime: string;
   availableSeats: number;
   price: number;
-  vehicleType: string;
+  vehicle: string;
   additionalInfo: string;
+}
+
+interface User {
+  id: string;
+  email: string;
+  isDriver: boolean;
+}
+
+interface AuthContextType {
+  user: User | null;
 }
 
 const CreateTrip: React.FC = () => {
   const { user } = useAuth();
+  console.log("user", user);
+
   const router = useRouter();
 
   const [tripInfo, setTripInfo] = useState<TripInfo>({
-    departureLocation: "",
-    destination: "",
-    departureDate: "",
+    startLocation: {
+      coordinates: [0, 0],
+      city: "",
+      region: "",
+      locationId: "",
+    },
+    endLocation: { coordinates: [0, 0], city: "", region: "", locationId: "" },
+    startAddress: "",
+    endAddress: "",
     departureTime: "",
+    estimatedArrivalTime: "",
     availableSeats: 1,
     price: 0,
-    vehicleType: "",
+    vehicle: "",
     additionalInfo: "",
   });
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState<boolean>(false);
+  const handleLocationChange = useCallback(
+    (field: "startLocation" | "endLocation") =>
+      (value: Location & { address: string }) => {
+        setTripInfo((prev) => ({
+          ...prev,
+          [field]: {
+            coordinates: value.coordinates,
+            city: value.city,
+            region: value.region,
+            locationId: value.locationId,
+          },
+          [`${field === "startLocation" ? "start" : "end"}Address`]:
+            value.address,
+        }));
+      },
+    [setTripInfo]
+  );
 
   useEffect(() => {
-    if (!user) {
+    if (!user || !user.isDriver) {
       router.push("/auth");
     }
   }, [user, router]);
 
-  if (!user) return null;
+  useEffect(() => {
+    if (!user || !user.isDriver) {
+      router.push("/auth");
+    }
+  }, [user, router]);
+
+  if (!user || !user.isDriver) return null;
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -52,11 +107,6 @@ const CreateTrip: React.FC = () => {
     setTripInfo((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleLocationChange =
-    (field: "departureLocation" | "destination") => (value: string) => {
-      setTripInfo((prev) => ({ ...prev, [field]: value }));
-    };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -64,29 +114,50 @@ const CreateTrip: React.FC = () => {
     setSuccess(false);
 
     try {
-      await axios.post("/api/create-trip", tripInfo);
+      await axios.post("/api/ride/createRide", tripInfo);
       setSuccess(true);
       setTripInfo({
-        departureLocation: "",
-        destination: "",
-        departureDate: "",
+        startLocation: {
+          coordinates: [0, 0],
+          city: "",
+          region: "",
+          locationId: "",
+        },
+        endLocation: {
+          coordinates: [0, 0],
+          city: "",
+          region: "",
+          locationId: "",
+        },
+        startAddress: "",
+        endAddress: "",
         departureTime: "",
+        estimatedArrivalTime: "",
         availableSeats: 1,
         price: 0,
-        vehicleType: "",
+        vehicle: "",
         additionalInfo: "",
       });
     } catch (err) {
-      setError("Failed to create trip. Please try again.");
+      if (axios.isAxiosError(err) && err.response) {
+        setError(
+          err.response.data.message ||
+            "Failed to create trip. Please try again."
+        );
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F9E795] to-[#F9D423] py-12 px-4 sm:px-6 lg:px-8">
+    <div
+      className={`min-h-screen bg-gradient-to-b from-[${SECONDARY_COLOR}] to-[${PRIMARY_COLOR}] py-12 px-4 sm:px-6 lg:px-8`}
+    >
       <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-        <div className="bg-[#F9D423] py-6 px-8">
+        <div className={`bg-[${PRIMARY_COLOR}] py-6 px-8`}>
           <h1 className="text-3xl font-bold text-center text-gray-800">
             Create Your Trip
           </h1>
@@ -134,50 +205,35 @@ const CreateTrip: React.FC = () => {
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
                 <label
-                  htmlFor="departureLocation"
+                  htmlFor="startLocation"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
                   Departure Location
                 </label>
                 <AutocompleteInput
                   placeholder="Enter departure city"
-                  value={tripInfo.departureLocation}
-                  onChange={handleLocationChange("departureLocation")}
+                  value={tripInfo.startAddress}
+                  onChange={handleLocationChange("startLocation")}
+                  aria-label="Departure Location"
                 />
               </div>
               <div>
                 <label
-                  htmlFor="destination"
+                  htmlFor="endLocation"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
                   Destination
                 </label>
                 <AutocompleteInput
                   placeholder="Enter destination city"
-                  value={tripInfo.destination}
-                  onChange={handleLocationChange("destination")}
+                  value={tripInfo.endAddress}
+                  onChange={handleLocationChange("endLocation")}
+                  aria-label="Destination"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div>
-                <label
-                  htmlFor="departureDate"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Departure Date
-                </label>
-                <input
-                  type="date"
-                  id="departureDate"
-                  name="departureDate"
-                  value={tripInfo.departureDate}
-                  onChange={handleChange}
-                  required
-                  className="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#F9D423] focus:ring focus:ring-[#F9E795] focus:ring-opacity-50"
-                />
-              </div>
               <div>
                 <label
                   htmlFor="departureTime"
@@ -186,13 +242,30 @@ const CreateTrip: React.FC = () => {
                   Departure Time
                 </label>
                 <input
-                  type="time"
+                  type="datetime-local"
                   id="departureTime"
                   name="departureTime"
                   value={tripInfo.departureTime}
                   onChange={handleChange}
                   required
-                  className="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#F9D423] focus:ring focus:ring-[#F9E795] focus:ring-opacity-50"
+                  className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="estimatedArrivalTime"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Estimated Arrival Time
+                </label>
+                <input
+                  type="datetime-local"
+                  id="estimatedArrivalTime"
+                  name="estimatedArrivalTime"
+                  value={tripInfo.estimatedArrivalTime}
+                  onChange={handleChange}
+                  required
+                  className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
                 />
               </div>
             </div>
@@ -209,11 +282,11 @@ const CreateTrip: React.FC = () => {
                   type="number"
                   id="availableSeats"
                   name="availableSeats"
-                  value={tripInfo.availableSeats}
+                  value={tripInfo.availableSeats.toString()}
                   onChange={handleChange}
                   min="1"
                   required
-                  className="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#F9D423] focus:ring focus:ring-[#F9E795] focus:ring-opacity-50"
+                  className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
                 />
               </div>
               <div>
@@ -227,30 +300,30 @@ const CreateTrip: React.FC = () => {
                   type="number"
                   id="price"
                   name="price"
-                  value={tripInfo.price}
+                  value={tripInfo.price.toString()}
                   onChange={handleChange}
                   min="0"
                   step="0.01"
                   required
-                  className="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#F9D423] focus:ring focus:ring-[#F9E795] focus:ring-opacity-50"
+                  className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
                 />
               </div>
               <div>
                 <label
-                  htmlFor="vehicleType"
+                  htmlFor="vehicle"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Vehicle Type
+                  Vehicle
                 </label>
                 <select
-                  id="vehicleType"
-                  name="vehicleType"
-                  value={tripInfo.vehicleType}
+                  id="vehicle"
+                  name="vehicle"
+                  value={tripInfo.vehicle}
                   onChange={handleChange}
                   required
-                  className="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#F9D423] focus:ring focus:ring-[#F9E795] focus:ring-opacity-50"
+                  className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
                 >
-                  <option value="">Select a vehicle type</option>
+                  <option value="">Select a vehicle</option>
                   <option value="car">Car</option>
                   <option value="suv">SUV</option>
                   <option value="van">Van</option>
@@ -272,7 +345,7 @@ const CreateTrip: React.FC = () => {
                 value={tripInfo.additionalInfo}
                 onChange={handleChange}
                 rows={3}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#F9D423] focus:ring focus:ring-[#F9E795] focus:ring-opacity-50"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
                 placeholder="Any special instructions or details about the trip..."
               ></textarea>
             </div>
@@ -281,7 +354,7 @@ const CreateTrip: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#F9D423] hover:bg-[#F9E795] hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#F9D423] transition duration-150 ease-in-out"
+                className={`w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[${PRIMARY_COLOR}] hover:bg-[${SECONDARY_COLOR}] hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[${PRIMARY_COLOR}] transition duration-150 ease-in-out`}
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center">
