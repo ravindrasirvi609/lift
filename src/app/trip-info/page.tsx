@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 const PRIMARY_COLOR = "#F9D423";
 const SECONDARY_COLOR = "#F9E795";
 
-interface Location {
+export interface LocationAdress {
   coordinates: [number, number];
   city: string;
   region: string;
@@ -17,8 +17,8 @@ interface Location {
 }
 
 interface TripInfo {
-  startLocation: Location;
-  endLocation: Location;
+  startLocation: LocationAdress;
+  endLocation: LocationAdress;
   startAddress: string;
   endAddress: string;
   departureTime: string;
@@ -69,7 +69,7 @@ const CreateTrip: React.FC = () => {
   const [success, setSuccess] = useState<boolean>(false);
   const handleLocationChange = useCallback(
     (field: "startLocation" | "endLocation") =>
-      (value: Location & { address: string }) => {
+      (value: LocationAdress & { address: string }) => {
         setTripInfo((prev) => ({
           ...prev,
           [field]: {

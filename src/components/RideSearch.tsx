@@ -2,25 +2,28 @@
 import React, { useState } from "react";
 import { FaCalendarAlt, FaUsers } from "react-icons/fa";
 import AutocompleteInput from "./AutocompleteInput";
-import { useRouter } from "next/navigation";
+import { Location, SearchParams } from "@/types/types";
 
-const RideSearch: React.FC = () => {
-  const router = useRouter();
+interface Props {
+  onSearch: (params: SearchParams) => void;
+}
 
-  const [departure, setDeparture] = useState("");
-  const [destination, setDestination] = useState("");
+const RideSearch: React.FC<Props> = ({ onSearch }) => {
+  const [departure, setDeparture] = useState<Location | null>(null);
+  const [destination, setDestination] = useState<Location | null>(null);
   const [date, setDate] = useState("");
   const [passengerCount, setPassengerCount] = useState(1);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const searchParams = new URLSearchParams({
-      departure,
-      destination,
-      date,
-      passengerCount: passengerCount.toString(),
-    });
-    router.push(`/search/${searchParams.toString()}`);
+    if (departure && destination) {
+      onSearch({
+        departure,
+        destination,
+        date,
+        passengerCount,
+      });
+    }
   };
 
   return (
@@ -36,13 +39,13 @@ const RideSearch: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <AutocompleteInput
               placeholder="Departure From"
-              value={departure}
-              onChange={setDeparture}
+              value={departure?.address || ""}
+              onChange={(location) => setDeparture(location)}
             />
             <AutocompleteInput
               placeholder="Destination"
-              value={destination}
-              onChange={setDestination}
+              value={destination?.address || ""}
+              onChange={(location) => setDestination(location)}
             />
             <div className="relative">
               <FaCalendarAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
