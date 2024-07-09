@@ -26,6 +26,16 @@ const RideSearch: React.FC<Props> = ({ onSearch }) => {
     }
   };
 
+  const handleLocationChange =
+    (field: "departure" | "destination") =>
+    (value: Location & { address: string }) => {
+      if (field === "departure") {
+        setDeparture(value);
+      } else {
+        setDestination(value);
+      }
+    };
+
   return (
     <section className="bg-gradient-to-r from-[#F9E795] to-[#F9D423] py-20 text-center">
       <div className="container mx-auto px-4">
@@ -40,12 +50,14 @@ const RideSearch: React.FC<Props> = ({ onSearch }) => {
             <AutocompleteInput
               placeholder="Departure From"
               value={departure?.address || ""}
-              onChange={(location) => setDeparture(location)}
+              onChange={handleLocationChange("departure")}
+              aria-label="Departure Location"
             />
             <AutocompleteInput
               placeholder="Destination"
               value={destination?.address || ""}
-              onChange={(location) => setDestination(location)}
+              onChange={handleLocationChange("destination")}
+              aria-label="Destination"
             />
             <div className="relative">
               <FaCalendarAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
