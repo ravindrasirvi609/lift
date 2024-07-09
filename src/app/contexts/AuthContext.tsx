@@ -2,9 +2,16 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 interface AuthContextType {
-  user: any | null;
+  user: User | null | undefined;
+  isLoading?: boolean;
   login: (userData: any) => void;
   logout: () => void;
+}
+
+interface User {
+  id: string;
+  email: string;
+  isDriver: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -12,8 +19,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
-  const [user, setUser] = useState<any | null>(null);
-
+  const [user, setUser] = useState<User | null | undefined>(undefined);
   useEffect(() => {
     // Check for user data in localStorage on initial load
     const storedUser = localStorage.getItem("user");

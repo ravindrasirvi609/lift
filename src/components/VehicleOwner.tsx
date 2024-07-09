@@ -1,14 +1,9 @@
 "use client";
 import React from "react";
 import { FaCar, FaRoute, FaMoneyBillWave } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const VehicleOwnerSection: React.FC = () => {
-  const router = useRouter();
-  const handleCreateRide = () => {
-    router.push("/trip-info");
-  };
-
   return (
     <section className="bg-[#F9E795] py-16 px-4 md:px-8 lg:px-16">
       <div className="max-w-6xl mx-auto">
@@ -36,11 +31,8 @@ const VehicleOwnerSection: React.FC = () => {
               ))}
             </ul>
 
-            <button
-              onClick={handleCreateRide}
-              className="mt-8 bg-[#F96167] hover:bg-[#F9D423] text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#F9D423] focus:ring-opacity-50"
-            >
-              Create New Ride
+            <button className="mt-8 bg-[#F96167] hover:bg-[#F9D423] text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#F9D423] focus:ring-opacity-50">
+              <Link href={"/trip-info"}>Create New Ride</Link>
             </button>
           </div>
 
