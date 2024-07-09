@@ -13,6 +13,7 @@ import {
 } from "react-icons/fa";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/contexts/AuthContext";
 
 interface SignInProps {
   userType: "user" | "vehicle-owner";
@@ -20,6 +21,8 @@ interface SignInProps {
 }
 
 const SignIn: React.FC<SignInProps> = ({ userType, onSwitch }) => {
+  const { login } = useAuth();
+
   const [isSignUp, setIsSignUp] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -54,10 +57,11 @@ const SignIn: React.FC<SignInProps> = ({ userType, onSwitch }) => {
         ...formData,
         isDriver: userType === "vehicle-owner",
       });
+      login(response.data.user);
 
-      console.log("Success:", response.data);
+      console.log("Success:", response.data.user);
       if (response.data.success) {
-        router.push("/dashboard");
+        router.push("/trip-info");
       }
     } catch (err: any) {
       setError(
