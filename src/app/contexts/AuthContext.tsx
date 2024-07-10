@@ -1,17 +1,20 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
-
-interface AuthContextType {
-  user: User | null | undefined;
-  isLoading?: boolean;
-  login: (userData: any) => void;
-  logout: () => void;
-}
+import Cookies from "js-cookie";
+import { verifyToken } from "@/utils/verifyToken";
 
 interface User {
   id: string;
   email: string;
   isDriver: boolean;
+  token: string;
+}
+
+interface AuthContextType {
+  user: User | null;
+  isLoading: boolean;
+  login: (userData: User) => void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,39 +22,42 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
-  const [user, setUser] = useState<User | null | undefined>(undefined);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for user data in localStorage on initial load
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      console.log("Found stored user:", storedUser); // Debug log
-      setUser(JSON.parse(storedUser));
+    const token = Cookies.get("token");
+    if (token) {
+      verifyToken(token)
+        .then((userData: any) => {
+          setUser(userData);
+          Cookies.set("token", userData.token, { expires: 1 });
+        })
+        .catch(() => Cookies.remove("token"))
+        .finally(() => setIsLoading(false));
+    } else {
+      setIsLoading(false);
     }
   }, []);
 
-  const login = (userData: any) => {
-    console.log("Logging in user:", userData); // Debug log
+  const login = (userData: User) => {
     setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
-    // Set authentication cookie here
+    Cookies.set("token", userData.token, { expires: 1 });
   };
 
   const logout = () => {
-    console.log("Logging out user"); // Debug log
     setUser(null);
-    localStorage.removeItem("user");
-    // Remove authentication cookie here
+    Cookies.remove("token");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");
