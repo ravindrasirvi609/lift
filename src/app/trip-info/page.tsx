@@ -4,6 +4,7 @@ import axios from "axios";
 import AutocompleteInput from "@/components/AutocompleteInput";
 import { useAuth } from "../contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import { withAuth } from "@/components/withAuth";
 
 // Color constants
 const PRIMARY_COLOR = "#F9D423";
@@ -373,7 +374,7 @@ const CreateTrip: React.FC = () => {
                 value={tripInfo.additionalInfo}
                 onChange={handleChange}
                 rows={3}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
+                className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
                 placeholder="Any special instructions or details about the trip..."
               ></textarea>
             </div>
@@ -482,4 +483,4 @@ const CreateTrip: React.FC = () => {
   );
 };
 
-export default CreateTrip;
+export default withAuth(CreateTrip);

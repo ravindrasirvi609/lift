@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import AvailableRides from "@/components/AvailableRides";
+import Loading from "./Loading";
 
 export interface Ride {
   _id: string;
@@ -72,14 +73,7 @@ const Rides: React.FC<Props> = ({ rides, loading, error }) => {
     setFilters((prev) => ({ ...prev, [name]: parseFloat(value) }));
   };
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-yellow-500">
-          Loading...
-        </div>
-      </div>
-    );
+  if (loading) return <Loading />;
 
   if (error) return <div className="text-red-600 text-center p-4">{error}</div>;
 

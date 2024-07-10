@@ -10,7 +10,7 @@ export async function verifyToken(token: string): Promise<TokenPayload> {
   try {
     console.log("Token:", token);
 
-    const secret = new TextEncoder().encode(process.env.TOKEN_SECRET);
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
     console.log("Payload:", payload);
 

@@ -1,13 +1,10 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
-import Cookies from "js-cookie";
-import { verifyToken } from "@/utils/verifyToken";
 
 interface User {
   id: string;
   email: string;
   isDriver: boolean;
-  token: string;
 }
 
 interface AuthContextType {
@@ -19,35 +16,52 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<React.PropsWithChildren> = ({
-  children,
-}) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+interface AuthProviderProps {
+  children: React.ReactNode;
+  initialSession: { user: User } | null;
+}
 
-  useEffect(() => {
-    const token = Cookies.get("token");
-    if (token) {
-      verifyToken(token)
-        .then((userData: any) => {
-          setUser(userData);
-          Cookies.set("token", userData.token, { expires: 1 });
-        })
-        .catch(() => Cookies.remove("token"))
-        .finally(() => setIsLoading(false));
-    } else {
+export const AuthProvider: React.FC<AuthProviderProps> = ({
+  children,
+  initialSession,
+}) => {
+  const [user, setUser] = useState<User | null>(initialSession?.user || null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const refreshToken = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/refresh-token", {
+        method: "POST",
+        credentials: "include",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error("Error refreshing token:", error);
+      setUser(null);
+    } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
+
+  useEffect(() => {
+    if (!user) {
+      refreshToken();
+    }
+  }, [user]);
 
   const login = (userData: User) => {
     setUser(userData);
-    Cookies.set("token", userData.token, { expires: 1 });
   };
 
-  const logout = () => {
+  const logout = async () => {
     setUser(null);
-    Cookies.remove("token");
+    await fetch("/api/logout", { method: "POST", credentials: "include" });
   };
 
   return (
