@@ -46,18 +46,26 @@ interface Filters {
 }
 
 const Rides: React.FC<Props> = ({ rides, loading, error }) => {
+  console.log("RIDES IN RIDE COMPONENT", rides);
+
   const [filters, setFilters] = useState<Filters>({
     minPrice: 0,
     maxPrice: 1000,
     minRating: 0,
   });
 
-  const filteredRides = rides.filter(
-    (ride) =>
-      ride.price >= filters.minPrice &&
-      ride.price <= filters.maxPrice &&
-      ride.driver.rating >= filters.minRating
-  );
+  // const filteredRides = Array.isArray(rides)
+  //   ? rides.filter(
+  //       (ride) =>
+  //         ride.price >= filters.minPrice &&
+  //         ride.price <= filters.maxPrice &&
+  //         ride.driver.rating >= filters.minRating
+  //     )
+  //   : [];
+
+  const filteredRides = rides;
+
+  console.log("FILTERED RIDES", filteredRides);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -67,7 +75,9 @@ const Rides: React.FC<Props> = ({ rides, loading, error }) => {
   if (loading)
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-yellow-500"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-yellow-500">
+          Loading...
+        </div>
       </div>
     );
 

@@ -20,16 +20,19 @@ const RideSearchAndResults: React.FC = () => {
   const fetchRides = async (params: SearchParams) => {
     setLoading(true);
     setError(null);
+    const payload = {
+      startLocation: params.departure,
+      endLocation: params.destination,
+      departureTime: params.date,
+      availableSeats: params.passengerCount,
+    };
     try {
-      const response = await axios.get<Ride[]>("/api/search", {
-        params: {
-          startLocation: params.departure,
-          endLocation: params.destination,
-          departureTime: params.date,
-          availableSeats: params.passengerCount,
-        },
+      const response = await axios.post("/api/ride/rideSearch", {
+        payload,
       });
-      setRides(response.data);
+      console.log("response", response.data.rides);
+
+      setRides(response.data.rides);
     } catch (err) {
       console.error("Error fetching rides:", err);
       setError("Failed to fetch rides. Please try again.");
