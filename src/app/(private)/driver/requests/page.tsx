@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { withAuth } from "@/components/withAuth";
+import Loading from "@/components/Loading";
+import { useAuth } from "@/app/contexts/AuthContext";
 
 interface BookingRequest {
   _id: string;
@@ -20,9 +23,23 @@ interface BookingRequest {
 }
 
 const DriverRequestsPage = () => {
+  const { user } = useAuth();
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+
+  useEffect(() => {
+    if (user === null) {
+      setIsAuthLoading(false);
+      router.push("/auth");
+    } else if (user && !user.isDriver) {
+      setIsAuthLoading(false);
+      router.push("/auth");
+    } else if (user && user.isDriver) {
+      setIsAuthLoading(false);
+    }
+  }, [user, router]);
 
   useEffect(() => {
     const fetchBookingRequests = async () => {
@@ -43,6 +60,12 @@ const DriverRequestsPage = () => {
 
     fetchBookingRequests();
   }, []);
+
+  if (isAuthLoading) {
+    return <Loading />;
+  }
+
+  if (!user || !user.isDriver) return null;
 
   const handleRequestAction = async (
     bookingId: string,
@@ -123,4 +146,4 @@ const DriverRequestsPage = () => {
   );
 };
 
-export default DriverRequestsPage;
+export default withAuth(DriverRequestsPage);

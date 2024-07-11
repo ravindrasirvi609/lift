@@ -1,29 +1,30 @@
-// app/book/[rideId]/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-
-interface Ride {
-  _id: string;
-  driver: {
-    name: string;
-    rating: number;
-  };
-  vehicle: string;
-  startLocation: string;
-  endLocation: string;
-  departureTime: string;
-  availableSeats: number;
-  price: number;
-}
+import { withAuth } from "@/components/withAuth";
+import { useAuth } from "@/app/contexts/AuthContext";
+import Loading from "@/components/Loading";
+import { Ride } from "@/types/types";
 
 const BookRidePage = () => {
+  const { user } = useAuth();
+
   const params = useParams();
   const router = useRouter();
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+
   const [ride, setRide] = useState<Ride | null>(null);
   const [numberOfSeats, setNumberOfSeats] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  useEffect(() => {
+    if (user === null) {
+      setIsAuthLoading(false);
+      router.push("/auth");
+    } else if (user) {
+      setIsAuthLoading(false);
+    }
+  }, [user, router]);
 
   useEffect(() => {
     const fetchRide = async () => {
@@ -45,6 +46,9 @@ const BookRidePage = () => {
     }
   }, [params.rideId]);
 
+  if (isAuthLoading) {
+    return <Loading />;
+  }
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -78,7 +82,11 @@ const BookRidePage = () => {
   };
 
   if (!ride) {
-    return <div>Loading...</div>;
+    return (
+      <div>
+        <Loading />
+      </div>
+    );
   }
 
   return (
@@ -90,8 +98,8 @@ const BookRidePage = () => {
           Driver: {ride.driver.name} (Rating: {ride.driver.rating})
         </p>
         <p>Vehicle: {ride.vehicle}</p>
-        <p>From: {ride.startLocation}</p>
-        <p>To: {ride.endLocation}</p>
+        <p>From: {ride.startLocation.city}</p>
+        <p>To: {ride.endLocation.city}</p>
         <p>Departure: {new Date(ride.departureTime).toLocaleString()}</p>
         <p>Available Seats: {ride.availableSeats}</p>
         <p>Price per seat: ${ride.price}</p>
@@ -124,4 +132,4 @@ const BookRidePage = () => {
   );
 };
 
-export default BookRidePage;
+export default withAuth(BookRidePage);
