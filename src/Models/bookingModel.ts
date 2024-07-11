@@ -7,6 +7,8 @@ const bookingSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  driver: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+
   numberOfSeats: { type: Number, required: true, default: 1 },
   status: {
     type: String,

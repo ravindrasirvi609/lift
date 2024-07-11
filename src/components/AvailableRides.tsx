@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import { Ride } from "./Ride";
+import Link from "next/link";
 
 interface Props {
   rides: Ride[];
@@ -36,9 +37,11 @@ const AvailableRides: React.FC<Props> = ({ rides }) => {
           </p>
           <p>Available Seats: {ride.availableSeats}</p>
           <p className="font-bold mt-2">Price: {ride.price}</p>
-          <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
-            Book Now
-          </button>
+          <Link href={`/book/${ride._id}`}>
+            <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
+              Book Now
+            </button>
+          </Link>
         </div>
       ))}
     </div>

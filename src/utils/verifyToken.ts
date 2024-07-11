@@ -20,7 +20,9 @@ export async function verifyToken(token: string): Promise<TokenPayload> {
       typeof payload.id !== "string" ||
       !payload.email ||
       typeof payload.email !== "string" ||
-      typeof payload.isDriver !== "boolean"
+      typeof payload.isDriver !== "boolean" ||
+      !payload.phoneNumber ||
+      typeof payload.phoneNumber !== "string"
     ) {
       throw new Error("Invalid token payload");
     }
