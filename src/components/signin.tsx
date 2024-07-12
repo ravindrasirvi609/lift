@@ -242,6 +242,15 @@ const SignIn: React.FC<SignInProps> = ({ userType, onSwitch }) => {
               )}
             </button>
           </div>
+          <div className="text-sm text-center mt-4">
+            <button
+              type="button"
+              onClick={() => router.push("/forgotPassword")}
+              className="font-medium text-[#F96167] hover:text-[#F9D423] transition-colors duration-300"
+            >
+              Forgot your password?
+            </button>
+          </div>
         </form>
 
         <div className="text-sm text-center">

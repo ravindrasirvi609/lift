@@ -13,6 +13,7 @@ interface AuthContextType {
   login: (userData: User) => void;
   logout: () => void;
   isAuthenticated: boolean;
+  isInitialized: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,12 +28,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   initialSession,
 }) => {
   const [user, setUser] = useState<User | null>(initialSession?.user || null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const refreshToken = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/refresh-token", {
+      const response = await fetch("/api/auth/refresh-token", {
         method: "POST",
         credentials: "include",
       });
@@ -47,14 +49,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       setUser(null);
     } finally {
       setIsLoading(false);
+      setIsInitialized(true);
     }
   };
 
   useEffect(() => {
-    if (!user) {
+    if (!isInitialized) {
       refreshToken();
     }
-  }, [user]);
+  }, [isInitialized]);
 
   const login = (userData: User) => {
     setUser(userData);
@@ -67,7 +70,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, login, logout, isAuthenticated: !!user }}
+      value={{
+        user,
+        isLoading,
+        login,
+        logout,
+        isAuthenticated: !!user,
+        isInitialized,
+      }}
     >
       {children}
     </AuthContext.Provider>

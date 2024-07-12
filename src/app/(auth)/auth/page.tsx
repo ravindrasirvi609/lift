@@ -7,22 +7,17 @@ import React, { useEffect, useState } from "react";
 
 const AuthPage: React.FC = () => {
   const [userType, setUserType] = useState<"user" | "vehicle-owner">("user");
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isInitialized } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (user && !isLoading) {
-      router.push("/");
+    if (isInitialized && user) {
+      router.replace("/");
     }
-  }, [user, isLoading, router]);
+  }, [user, isInitialized, router]);
 
-  if (isLoading) {
-    return (
-      <div>
-        {" "}
-        <Loading />{" "}
-      </div>
-    );
+  if (isLoading || !isInitialized) {
+    return <Loading />;
   }
 
   if (user) {

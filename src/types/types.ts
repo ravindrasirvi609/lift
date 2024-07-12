@@ -1,5 +1,3 @@
-// src/types/types.ts
-
 // Location interface
 export interface Location {
   coordinates: [number, number];
