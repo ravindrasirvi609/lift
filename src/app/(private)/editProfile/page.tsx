@@ -1,84 +1,75 @@
 "use client";
-import React, { useState } from "react";
-import Image from "next/image";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { User } from "@/types/types";
 import { formatDate } from "@/utils/utils";
 
-// Mock user data (replace this with actual data fetching logic)
-const user: User = {
-  firstName: "John",
-  lastName: "Doe",
-  email: "john.doe@example.com",
-  phoneNumber: "+1234567890",
-  profilePicture:
-    "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D",
-  dateOfBirth: new Date("1990-1-1"),
-  gender: "Male",
-  isVerified: true,
-  isAdmin: false,
-  passengerRating: 4.5,
-  totalRidesAsTakenPassenger: 25,
-  isDriver: true,
-  driverVerificationStatus: "Approved",
-  driverLicense: "DL12345678",
-  vehicleInfo: "Toyota Camry 2022",
-  driverRating: 4.8,
-  totalRidesAsDriver: 100,
-  driverAvailabilityStatus: "Available",
-  earnings: 5000,
-  bankAccountInfo: {
-    accountNumber: "**** **** 1234",
-    bankName: "Example Bank",
-    accountHolderName: "John Doe",
-    ifscCode: "EXBK0000123",
-  },
-  preferredLanguage: "English",
-  notificationPreferences: {
-    email: true,
-    sms: true,
-    push: false,
-  },
-};
-
 export default function EditProfilePage() {
-  const [formData, setFormData] = useState({
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    phoneNumber: user.phoneNumber,
-    dateOfBirth: formatDate(user.dateOfBirth),
-    gender: user.gender,
-    preferredLanguage: user.preferredLanguage,
-    notificationPreferences: {
-      email: user?.notificationPreferences?.email,
-      sms: user?.notificationPreferences?.sms,
-      push: user?.notificationPreferences?.push,
-    },
-  });
+  const [formData, setFormData] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await axios.get("/api/profile/profileDetails");
+      const userData = response.data.user;
+      console.log("User data:", userData);
+
+      setFormData({
+        ...userData,
+        dateOfBirth: formatDate(new Date(userData.dateOfBirth)),
+      });
+      setLoading(false);
+    } catch (err) {
+      setError("Failed to fetch user data");
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => (prev ? { ...prev, [name]: value } : null));
   };
 
   const handleNotificationChange = (type: "email" | "sms" | "push") => {
-    setFormData((prev) => ({
-      ...prev,
-      notificationPreferences: {
-        ...prev.notificationPreferences,
-        [type]: !prev.notificationPreferences[type],
-      },
-    }));
+    setFormData((prev) =>
+      prev
+        ? {
+            ...prev,
+            notificationPreferences: {
+              ...(prev.notificationPreferences || {}), // Ensure it's an object
+              [type]: !prev.notificationPreferences?.[type],
+            },
+          }
+        : null
+    );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the formData to your backend
-    console.log("Form submitted with data:", formData);
-    // Redirect to profile page or show success message
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.put("/api/profile/profileDetails", formData);
+      console.log("Profile updated successfully:", response.data);
+      // Optionally, you can show a success message or redirect the user
+    } catch (err) {
+      setError("Failed to update profile");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!formData) return <div>No user data available</div>;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F9E795] to-[#F9D423]">
@@ -121,7 +112,7 @@ export default function EditProfilePage() {
                 label="Date of Birth"
                 name="dateOfBirth"
                 type="date"
-                value={formData.dateOfBirth}
+                value={formData.dateOfBirth.toString()}
                 onChange={handleInputChange}
               />
               <SelectField
@@ -149,7 +140,6 @@ export default function EditProfilePage() {
                   { value: "English", label: "English" },
                   { value: "Spanish", label: "Spanish" },
                   { value: "French", label: "French" },
-                  // Add more language options as needed
                 ]}
               />
               <div>
@@ -159,17 +149,17 @@ export default function EditProfilePage() {
                 <div className="space-y-2">
                   <NotificationToggle
                     label="Email Notifications"
-                    checked={formData.notificationPreferences.email}
+                    checked={formData?.notificationPreferences?.email}
                     onChange={() => handleNotificationChange("email")}
                   />
                   <NotificationToggle
                     label="SMS Notifications"
-                    checked={formData.notificationPreferences.sms}
+                    checked={formData?.notificationPreferences?.sms}
                     onChange={() => handleNotificationChange("sms")}
                   />
                   <NotificationToggle
                     label="Push Notifications"
-                    checked={formData.notificationPreferences.push}
+                    checked={formData?.notificationPreferences?.push}
                     onChange={() => handleNotificationChange("push")}
                   />
                 </div>
@@ -190,8 +180,9 @@ export default function EditProfilePage() {
             <button
               type="submit"
               className="px-6 py-2 bg-[#F96167] text-white rounded-full hover:bg-opacity-90 transition duration-300"
+              disabled={loading}
             >
-              Save Changes
+              {loading ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </form>

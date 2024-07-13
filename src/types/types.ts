@@ -65,7 +65,7 @@ export interface User {
   email: string;
   phoneNumber: string;
   profilePicture: string;
-  dateOfBirth: Date;
+  dateOfBirth: Date | string;
   gender: string;
   isVerified: boolean;
   isAdmin: boolean;
