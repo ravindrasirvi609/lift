@@ -8,6 +8,8 @@ export async function GET(
   { params }: { params: { rideId: string } }
 ) {
   try {
+    console.log("params", params);
+
     const { rideId } = params;
 
     const ride = await Ride.findById(rideId).populate(

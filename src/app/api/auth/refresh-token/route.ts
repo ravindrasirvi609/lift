@@ -4,7 +4,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
-  console.log("token", token);
 
   if (!token) {
     return NextResponse.json({ message: "No token provided" }, { status: 401 });

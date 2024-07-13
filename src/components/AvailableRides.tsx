@@ -2,6 +2,14 @@ import React from "react";
 import Image from "next/image";
 import { Ride } from "./Ride";
 import Link from "next/link";
+import {
+  FaStar,
+  FaCar,
+  FaMapMarkerAlt,
+  FaClock,
+  FaUsers,
+  FaDollarSign,
+} from "react-icons/fa";
 
 interface Props {
   rides: Ride[];
@@ -9,39 +17,75 @@ interface Props {
 
 const AvailableRides: React.FC<Props> = ({ rides }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="space-y-6">
       {rides.map((ride) => (
-        <div key={ride._id} className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center mb-4">
-            <Image
-              src={ride.driver.image}
-              alt={ride.driver.name}
-              className="w-12 h-12 rounded-full mr-4"
-              width={48}
-              height={48}
-            />
-            <div>
-              <h3 className="font-semibold">{ride.driver.name}</h3>
-              <p className="text-sm text-gray-600">
-                Rating: {ride.driver.rating}
-              </p>
+        <div
+          key={ride._id}
+          className="bg-white rounded-lg shadow-lg overflow-hidden"
+        >
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <Image
+                  src={ride.driver.image}
+                  alt={ride.driver.name}
+                  className="w-16 h-16 rounded-full mr-4 border-2 border-[#F9D423]"
+                  width={64}
+                  height={64}
+                />
+                <div>
+                  <h3 className="font-semibold text-lg">{ride.driver.name}</h3>
+                  <div className="flex items-center">
+                    <FaStar className="text-[#F9D423] mr-1" />
+                    <span>{ride?.driver?.rating?.toFixed(1)}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-[#F96167]">
+                  ${ride.price.toFixed(2)}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {ride.availableSeats} seats left
+                </p>
+              </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="flex items-center">
+                <FaCar className="text-[#F96167] mr-2" />
+                <span>{ride.vehicle}</span>
+              </div>
+              <div className="flex items-center">
+                <FaUsers className="text-[#F96167] mr-2" />
+                <span>{ride.availableSeats} available seats</span>
+              </div>
+              <div className="flex items-center">
+                <FaMapMarkerAlt className="text-[#F96167] mr-2" />
+                <span>{ride.startLocation.city}</span>
+              </div>
+              <div className="flex items-center">
+                <FaMapMarkerAlt className="text-[#F96167] mr-2" />
+                <span>{ride.endLocation.city}</span>
+              </div>
+              <div className="flex items-center">
+                <FaClock className="text-[#F96167] mr-2" />
+                <span>{new Date(ride.departureTime).toLocaleString()}</span>
+              </div>
+              <div className="flex items-center">
+                <FaClock className="text-[#F96167] mr-2" />
+                <span>
+                  {new Date(ride.estimatedArrivalTime).toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            <Link href={`/book/${ride._id}`}>
+              <button className="w-full bg-[#F96167] text-white py-3 rounded-lg font-semibold transition duration-300 hover:bg-[#F9D423] hover:text-[#F96167]">
+                Book This Ride
+              </button>
+            </Link>
           </div>
-          <p>Vehicle: {ride.vehicle}</p>
-          <p>From: {ride.startLocation.city}</p>
-          <p>To: {ride.endLocation.city}</p>
-          <p>Departure: {new Date(ride.departureTime).toLocaleString()}</p>
-          <p>
-            Estimated Arrival:{" "}
-            {new Date(ride.estimatedArrivalTime).toLocaleString()}
-          </p>
-          <p>Available Seats: {ride.availableSeats}</p>
-          <p className="font-bold mt-2">Price: {ride.price}</p>
-          <Link href={`/book/${ride._id}`}>
-            <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
-              Book Now
-            </button>
-          </Link>
         </div>
       ))}
     </div>

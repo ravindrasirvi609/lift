@@ -6,17 +6,28 @@ import { withAuth } from "@/components/withAuth";
 import { useAuth } from "@/app/contexts/AuthContext";
 import Loading from "@/components/Loading";
 import { Ride } from "@/types/types";
+import {
+  FaUser,
+  FaCar,
+  FaMapMarkerAlt,
+  FaClock,
+  FaUsers,
+  FaDollarSign,
+  FaStar,
+} from "react-icons/fa";
+import Image from "next/image";
 
 const BookRidePage = () => {
   const { user } = useAuth();
-
   const params = useParams();
+  const { RideId } = params;
+
   const router = useRouter();
   const [isAuthLoading, setIsAuthLoading] = useState(true);
-
   const [ride, setRide] = useState<Ride | null>(null);
   const [numberOfSeats, setNumberOfSeats] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     if (user === null) {
       setIsAuthLoading(false);
@@ -29,7 +40,7 @@ const BookRidePage = () => {
   useEffect(() => {
     const fetchRide = async () => {
       try {
-        const response = await fetch(`/api/rides/${params.rideId}`);
+        const response = await fetch(`/api/ride/${RideId}`);
         if (response.ok) {
           const data = await response.json();
           setRide(data);
@@ -41,26 +52,23 @@ const BookRidePage = () => {
       }
     };
 
-    if (params.rideId) {
+    if (RideId) {
       fetchRide();
     }
-  }, [params.rideId]);
+  }, [RideId]);
 
-  if (isAuthLoading) {
-    return <Loading />;
-  }
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/bookings", {
+      const response = await fetch("/api/ride/bookingRide", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          rideId: { RideId: params.rideId },
+          rideId: { RideId: RideId },
           numberOfSeats,
         }),
       });
@@ -81,32 +89,73 @@ const BookRidePage = () => {
     }
   };
 
-  if (!ride) {
-    return (
-      <div>
-        <Loading />
-      </div>
-    );
+  if (isAuthLoading || !ride) {
+    return <Loading />;
   }
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-xl">
-      <h1 className="text-2xl font-bold mb-6">Book Your Ride</h1>
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">Ride Details</h2>
-        <p>
-          Driver: {ride.driver.name} (Rating: {ride.driver.rating})
-        </p>
-        <p>Vehicle: {ride.vehicle}</p>
-        <p>From: {ride.startLocation.city}</p>
-        <p>To: {ride.endLocation.city}</p>
-        <p>Departure: {new Date(ride.departureTime).toLocaleString()}</p>
-        <p>Available Seats: {ride.availableSeats}</p>
-        <p>Price per seat: ${ride.price}</p>
+    <div className="max-w-2xl mx-auto mt-10 p-6 bg-[#F9E795] rounded-lg shadow-xl">
+      <h1 className="text-3xl font-bold mb-6 text-[#F96167] text-center">
+        Book Your Ride
+      </h1>
+
+      <div className="bg-white rounded-lg p-6 mb-6 shadow-md">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center">
+            <Image
+              src={ride.driver.image}
+              alt={ride.driver.name}
+              width={64}
+              height={64}
+              className="w-16 h-16 rounded-full mr-4 border-2 border-[#F9D423]"
+            />
+            <div>
+              <h2 className="text-xl font-semibold">{ride.driver.name}</h2>
+              <div className="flex items-center">
+                <FaStar className="text-[#F9D423] mr-1" />
+                <span>{ride.driver?.rating?.toFixed(1)}</span>
+              </div>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-bold text-[#F96167]">${ride.price}</p>
+            <p className="text-sm text-gray-600">per seat</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="flex items-center">
+            <FaCar className="text-[#F96167] mr-2" />
+            <span>{ride.vehicle}</span>
+          </div>
+          <div className="flex items-center">
+            <FaUsers className="text-[#F96167] mr-2" />
+            <span>{ride.availableSeats} available seats</span>
+          </div>
+          <div className="flex items-center">
+            <FaMapMarkerAlt className="text-[#F96167] mr-2" />
+            <span>{ride.startLocation.city}</span>
+          </div>
+          <div className="flex items-center">
+            <FaMapMarkerAlt className="text-[#F96167] mr-2" />
+            <span>{ride.endLocation.city}</span>
+          </div>
+          <div className="flex items-center">
+            <FaClock className="text-[#F96167] mr-2" />
+            <span>{new Date(ride.departureTime).toLocaleString()}</span>
+          </div>
+        </div>
       </div>
-      <form onSubmit={handleBooking}>
+
+      <form
+        onSubmit={handleBooking}
+        className="bg-white rounded-lg p-6 shadow-md"
+      >
         <div className="mb-4">
-          <label htmlFor="seats" className="block mb-2">
+          <label
+            htmlFor="seats"
+            className="block mb-2 font-semibold text-[#F96167]"
+          >
             Number of Seats
           </label>
           <input
@@ -117,15 +166,23 @@ const BookRidePage = () => {
             min="1"
             max={ride.availableSeats}
             required
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#F9D423]"
           />
+        </div>
+        <div className="mb-4 text-right">
+          <p className="text-lg font-semibold">
+            Total:{" "}
+            <span className="text-[#F96167]">
+              ${(numberOfSeats * ride.price).toFixed(2)}
+            </span>
+          </p>
         </div>
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+          className="w-full bg-[#F96167] text-white px-4 py-3 rounded-lg font-semibold transition-colors hover:bg-[#F9D423] hover:text-[#F96167]"
           disabled={isLoading}
         >
-          {isLoading ? "Sending Request..." : "Send Booking Request"}
+          {isLoading ? "Sending Request..." : "Confirm Booking"}
         </button>
       </form>
     </div>
