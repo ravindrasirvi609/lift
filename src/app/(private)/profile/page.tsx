@@ -1,47 +1,65 @@
 "use client";
-import React, { useMemo } from "react";
+"use client";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { User } from "@/types/types";
 import { formatDate } from "@/utils/utils";
 
-// Mock user data (replace this with actual data fetching logic)
-const user: User = {
-  firstName: "John",
-  lastName: "Doe",
-  email: "john.doe@example.com",
-  phoneNumber: "+1234567890",
-  profilePicture:
-    "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D",
-  dateOfBirth: new Date("1990-1-1"),
-  gender: "Male",
-  isVerified: true,
-  isAdmin: false,
-  passengerRating: 4.5,
-  totalRidesAsTakenPassenger: 25,
-  isDriver: true,
-  driverVerificationStatus: "Approved",
-  driverLicense: "DL12345678",
-  vehicleInfo: "Toyota Camry 2022",
-  driverRating: 4.8,
-  totalRidesAsDriver: 100,
-  driverAvailabilityStatus: "Available",
-  earnings: 5000,
-  bankAccountInfo: {
-    accountNumber: "**** **** 1234",
-    bankName: "Example Bank",
-    accountHolderName: "John Doe",
-    ifscCode: "EXBK0000123",
-  },
-  preferredLanguage: "English",
-  notificationPreferences: {
-    email: true,
-    sms: true,
-    push: false,
-  },
-};
-
 export default function ProfilePage() {
-  const formattedDateOfBirth = useMemo(() => formatDate(user.dateOfBirth), []);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProfileDetails = async () => {
+      try {
+        const response = await fetch("/api/profile/profileDetails");
+        if (!response.ok) {
+          throw new Error("Failed to fetch profile details");
+        }
+        const data = await response.json();
+        console.log(data);
+
+        setUser(data.user);
+      } catch (err) {
+        setError("Error fetching profile details. Please try again later.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileDetails();
+  }, []);
+
+  const formattedDateOfBirth = useMemo(
+    () => (user ? formatDate(new Date(user.dateOfBirth)) : ""),
+    [user]
+  );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-600">
+        {error}
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        No user data available
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F9E795] to-[#F9D423]">
@@ -154,7 +172,7 @@ export default function ProfilePage() {
             <ProfileSection title="Passenger Statistics">
               <div className="text-center">
                 <div className="text-6xl font-bold text-[#F96167] mb-2">
-                  {user.passengerRating.toFixed(1)}
+                  {user?.passengerRating?.toFixed(1)}
                 </div>
                 <div className="text-xl font-medium mb-6">Passenger Rating</div>
                 <div className="text-4xl font-bold text-[#F96167] mb-2">
@@ -177,15 +195,15 @@ export default function ProfilePage() {
                   <div className="space-y-2">
                     <NotificationToggle
                       label="Email"
-                      checked={user.notificationPreferences.email}
+                      checked={user?.notificationPreferences?.email}
                     />
                     <NotificationToggle
                       label="SMS"
-                      checked={user.notificationPreferences.sms}
+                      checked={user?.notificationPreferences?.sms}
                     />
                     <NotificationToggle
                       label="Push Notifications"
-                      checked={user.notificationPreferences.push}
+                      checked={user?.notificationPreferences?.push}
                     />
                   </div>
                 </div>
@@ -195,11 +213,13 @@ export default function ProfilePage() {
             {user.isDriver && (
               <ProfileSection title="Bank Account">
                 <div className="space-y-2">
-                  <p className="font-medium">{user.bankAccountInfo.bankName}</p>
-                  <p>{user.bankAccountInfo.accountNumber}</p>
-                  <p>{user.bankAccountInfo.accountHolderName}</p>
+                  <p className="font-medium">
+                    {user?.bankAccountInfo?.bankName}
+                  </p>
+                  <p>{user?.bankAccountInfo?.accountNumber}</p>
+                  <p>{user?.bankAccountInfo?.accountHolderName}</p>
                   <p className="text-sm text-gray-600">
-                    IFSC: {user.bankAccountInfo.ifscCode}
+                    IFSC: {user?.bankAccountInfo?.ifscCode}
                   </p>
                 </div>
               </ProfileSection>
