@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
     // Ensure rideId is a string
     const rideIdString =
       typeof rideId === "object" && rideId.RideId ? rideId.RideId : rideId;
+    console.log("Ride ID:", rideIdString);
 
     // Validate that rideIdString is a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(rideIdString)) {
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest) {
       driver: ride.driver,
       numberOfSeats,
       price: totalPrice,
-      status: "pending",
+      status: "Pending",
     });
 
     await newBooking.save();

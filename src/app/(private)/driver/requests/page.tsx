@@ -19,7 +19,7 @@ interface BookingRequest {
   };
   numberOfSeats: number;
   price: number;
-  status: "pending" | "accepted" | "rejected";
+  status: "Pending" | "accepted" | "rejected";
 }
 
 const DriverRequestsPage = () => {
@@ -44,7 +44,7 @@ const DriverRequestsPage = () => {
   useEffect(() => {
     const fetchBookingRequests = async () => {
       try {
-        const response = await fetch("/api/bookings?status=pending");
+        const response = await fetch("/api/bookings?status=Pending");
         if (response.ok) {
           const data = await response.json();
           setBookingRequests(data);
@@ -119,7 +119,7 @@ const DriverRequestsPage = () => {
               </p>
               <p>Seats Requested: {request.numberOfSeats}</p>
               <p>Total Price: ${request.price}</p>
-              {request.status === "pending" && (
+              {request.status === "Pending" && (
                 <div className="mt-4">
                   <button
                     onClick={() => handleRequestAction(request._id, "accepted")}
@@ -135,7 +135,7 @@ const DriverRequestsPage = () => {
                   </button>
                 </div>
               )}
-              {request.status !== "pending" && (
+              {request.status !== "Pending" && (
                 <p className="mt-4 font-semibold">Status: {request.status}</p>
               )}
             </li>

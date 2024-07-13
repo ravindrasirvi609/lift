@@ -10,7 +10,7 @@ export async function sendSMS(to: string, body: string) {
     const message = await client.messages.create({
       body,
       from: process.env.TWILIO_PHONE_NUMBER,
-      to,
+      to: "+918107199052",
     });
     console.log("SMS sent:", message.sid);
     return message;
@@ -25,7 +25,7 @@ export async function sendWhatsApp(to: string, body: string) {
     const message = await client.messages.create({
       body,
       from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
-      to: `whatsapp:${to}`,
+      to: `whatsapp:${"+918107199052"}`,
     });
     console.log("WhatsApp message sent:", message.sid);
     return message;
