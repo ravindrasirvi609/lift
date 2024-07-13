@@ -5,21 +5,49 @@ import { useRouter } from "next/navigation";
 import { withAuth } from "@/components/withAuth";
 import Loading from "@/components/Loading";
 import { useAuth } from "@/app/contexts/AuthContext";
+import {
+  FaUser,
+  FaMapMarkerAlt,
+  FaClock,
+  FaUsers,
+  FaDollarSign,
+  FaCheck,
+  FaTimes,
+  FaCar,
+} from "react-icons/fa";
+
+interface Location {
+  type: string;
+  coordinates: [number, number];
+  city: string;
+  region: string;
+  locationId: string;
+}
+
+interface Ride {
+  startLocation: Location;
+  endLocation: Location;
+  _id: string;
+  driver: string;
+  vehicle: string;
+  departureTime: string;
+  estimatedArrivalTime: string;
+  availableSeats: number;
+  price: number;
+  status: string;
+}
 
 interface BookingRequest {
   _id: string;
-  ride: {
-    _id: string;
-    startLocation: string;
-    endLocation: string;
-    departureTime: string;
-  };
-  passenger: {
-    name: string;
-  };
+  ride: Ride;
+  passenger: string;
+  driver: string;
   numberOfSeats: number;
+  status: "Pending" | "Confirmed" | "Cancelled";
   price: number;
-  status: "Pending" | "accepted" | "rejected";
+  paymentStatus: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const DriverRequestsPage = () => {
@@ -44,7 +72,7 @@ const DriverRequestsPage = () => {
   useEffect(() => {
     const fetchBookingRequests = async () => {
       try {
-        const response = await fetch("/api/bookings?status=Pending");
+        const response = await fetch("/api/ride/bookingRide?status=Pending");
         if (response.ok) {
           const data = await response.json();
           setBookingRequests(data);
@@ -61,7 +89,7 @@ const DriverRequestsPage = () => {
     fetchBookingRequests();
   }, []);
 
-  if (isAuthLoading) {
+  if (isAuthLoading || isLoading) {
     return <Loading />;
   }
 
@@ -69,10 +97,10 @@ const DriverRequestsPage = () => {
 
   const handleRequestAction = async (
     bookingId: string,
-    action: "accepted" | "rejected"
+    action: "Confirmed" | "Cancelled"
   ) => {
     try {
-      const response = await fetch(`/api/bookings/${bookingId}`, {
+      const response = await fetch(`/api/ride/bookingRide/${bookingId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -97,46 +125,101 @@ const DriverRequestsPage = () => {
     }
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-xl">
-      <h1 className="text-2xl font-bold mb-6">Booking Requests</h1>
+    <div className="max-w-4xl mx-auto mt-10 p-6 bg-[#F9E795] rounded-lg shadow-xl">
+      <h1 className="text-3xl font-bold mb-6 text-[#F96167] text-center">
+        Booking Requests
+      </h1>
       {bookingRequests.length === 0 ? (
-        <p>No pending booking requests.</p>
+        <p className="text-center text-lg text-gray-600">
+          No pending booking requests.
+        </p>
       ) : (
-        <ul>
+        <ul className="space-y-6">
           {bookingRequests.map((request) => (
-            <li key={request._id} className="mb-6 p-4 border rounded">
-              <p>Passenger: {request.passenger.name}</p>
-              <p>From: {request.ride.startLocation}</p>
-              <p>To: {request.ride.endLocation}</p>
-              <p>
-                Departure:{" "}
-                {new Date(request.ride.departureTime).toLocaleString()}
-              </p>
-              <p>Seats Requested: {request.numberOfSeats}</p>
-              <p>Total Price: ${request.price}</p>
+            <li
+              key={request._id}
+              className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+            >
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="flex items-center">
+                  <FaUser className="text-[#F96167] mr-2" />
+                  <span className="font-semibold">
+                    Passenger ID: {request.passenger}
+                  </span>
+                </div>
+                <div className="flex items-center justify-end">
+                  <FaDollarSign className="text-[#F96167] mr-2" />
+                  <span className="font-bold text-lg">${request.price}</span>
+                </div>
+                <div className="flex items-center">
+                  <FaMapMarkerAlt className="text-[#F96167] mr-2" />
+                  <span>
+                    {request.ride.startLocation.city},{" "}
+                    {request.ride.startLocation.region}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <FaMapMarkerAlt className="text-[#F96167] mr-2" />
+                  <span>
+                    {request.ride.endLocation.city},{" "}
+                    {request.ride.endLocation.region}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <FaClock className="text-[#F96167] mr-2" />
+                  <span>
+                    {new Date(request.ride.departureTime).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <FaUsers className="text-[#F96167] mr-2" />
+                  <span>{request.numberOfSeats} seats</span>
+                </div>
+                <div className="flex items-center">
+                  <FaCar className="text-[#F96167] mr-2" />
+                  <span>{request.ride.vehicle}</span>
+                </div>
+                <div className="flex items-center">
+                  <FaDollarSign className="text-[#F96167] mr-2" />
+                  <span>Payment: {request.paymentStatus}</span>
+                </div>
+              </div>
               {request.status === "Pending" && (
-                <div className="mt-4">
+                <div className="flex justify-end space-x-4 mt-4">
                   <button
-                    onClick={() => handleRequestAction(request._id, "accepted")}
-                    className="bg-green-500 text-white px-4 py-2 rounded mr-2 hover:bg-green-600 transition-colors"
+                    onClick={() =>
+                      handleRequestAction(request._id, "Confirmed")
+                    }
+                    className="flex items-center bg-[#F9D423] text-[#F96167] px-4 py-2 rounded-full font-semibold transition-colors hover:bg-[#F96167] hover:text-white"
                   >
+                    <FaCheck className="mr-2" />
                     Accept
                   </button>
                   <button
-                    onClick={() => handleRequestAction(request._id, "rejected")}
-                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+                    onClick={() =>
+                      handleRequestAction(request._id, "Cancelled")
+                    }
+                    className="flex items-center bg-red-500 text-white px-4 py-2 rounded-full font-semibold transition-colors hover:bg-red-600"
                   >
+                    <FaTimes className="mr-2" />
                     Reject
                   </button>
                 </div>
               )}
               {request.status !== "Pending" && (
-                <p className="mt-4 font-semibold">Status: {request.status}</p>
+                <p className="mt-4 font-semibold text-right">
+                  Status:{" "}
+                  <span
+                    className={`capitalize ${
+                      request.status === "Confirmed"
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {request.status}
+                  </span>
+                </p>
               )}
             </li>
           ))}

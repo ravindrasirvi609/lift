@@ -22,7 +22,7 @@ export async function PUT(
     const body = await req.json();
     const { status } = body;
 
-    if (!status || !["accepted", "rejected"].includes(status)) {
+    if (!status || !["Confirmed", "Cancelled"].includes(status)) {
       return NextResponse.json({ error: "Invalid status" }, { status: 400 });
     }
 
@@ -40,7 +40,7 @@ export async function PUT(
     booking.status = status;
     await booking.save();
 
-    if (status === "accepted") {
+    if (status === "Confirmed") {
       const ride = await Ride.findById(booking.ride);
       ride.availableSeats -= booking.numberOfSeats;
       await ride.save();
@@ -48,9 +48,9 @@ export async function PUT(
 
     // Notify the passenger about the booking status
     const message =
-      status === "accepted"
-        ? `Your booking (ID: ${booking._id}) has been accepted by the driver.`
-        : `Your booking (ID: ${booking._id}) has been rejected by the driver.`;
+      status === "Confirmed"
+        ? `Your booking (ID: ${booking._id}) has been Confirmed by the driver.`
+        : `Your booking (ID: ${booking._id}) has been Cancelled by the driver.`;
 
     await sendSMS(booking.passenger.phoneNumber, message);
     await sendWhatsApp(
