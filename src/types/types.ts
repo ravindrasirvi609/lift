@@ -58,3 +58,37 @@ export interface RidesProps {
   loading: boolean;
   error: string | null;
 }
+
+export interface User {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  profilePicture: string;
+  dateOfBirth: Date;
+  gender: string;
+  isVerified: boolean;
+  isAdmin: boolean;
+  passengerRating: number;
+  totalRidesAsTakenPassenger: number;
+  isDriver: boolean;
+  driverVerificationStatus: string;
+  driverLicense: string;
+  vehicleInfo: string;
+  driverRating: number;
+  totalRidesAsDriver: number;
+  driverAvailabilityStatus: string;
+  earnings: number;
+  bankAccountInfo: {
+    accountNumber: string;
+    bankName: string;
+    accountHolderName: string;
+    ifscCode: string;
+  };
+  preferredLanguage: string;
+  notificationPreferences: {
+    email: boolean;
+    sms: boolean;
+    push: boolean;
+  };
+}
