@@ -52,7 +52,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   const fetchLocations = async (prefix: string): Promise<Location[]> => {
     try {
       const response = await fetch(
-        `http://geodb-free-service.wirefreethought.com/v1/geo/cities?namePrefix=${prefix}&limit=5&offset=0&countryIds=IN`
+        `https://geodb-free-service.wirefreethought.com/v1/geo/cities?namePrefix=${prefix}&limit=5&offset=0&countryIds=IN`
       );
       const data = await response.json();
       return data.data.map((city: any) => ({
