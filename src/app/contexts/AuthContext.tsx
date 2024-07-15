@@ -65,7 +65,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
   const logout = async () => {
     setUser(null);
-    await fetch("/api/logout", { method: "POST", credentials: "include" });
+    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+    window.location.href = "/";
   };
 
   return (

@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
       id: user._id,
       email: user.email,
       isDriver: user.isDriver,
+      phoneNumber: user.phoneNumber,
     };
 
     // Create token
