@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { User } from "@/types/types";
 import { formatDate } from "@/utils/utils";
+import Link from "next/link";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -84,9 +85,11 @@ export default function ProfilePage() {
               </p>
             </div>
           </div>
-          <button className="bg-[#F9D423] text-[#F96167] px-6 py-2 rounded-full font-bold hover:bg-[#F9E795] transition duration-300">
-            Edit Profile
-          </button>
+          <Link href={"/editProfile"}>
+            <button className="bg-[#F9D423] text-[#F96167] px-6 py-2 rounded-full font-bold hover:bg-[#F9E795] transition duration-300">
+              Edit Profile
+            </button>
+          </Link>
         </div>
       </header>
 
