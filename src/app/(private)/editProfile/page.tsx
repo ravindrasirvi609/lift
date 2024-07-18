@@ -3,10 +3,12 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { User } from "@/types/types";
 import { formatDate } from "@/utils/utils";
+import Image from "next/image";
 
 export default function EditProfilePage() {
   const [formData, setFormData] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -35,6 +37,12 @@ export default function EditProfilePage() {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => (prev ? { ...prev, [name]: value } : null));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setProfilePicture(e.target.files[0]);
+    }
   };
 
   const handleNotificationChange = (type: "email" | "sms" | "push") => {
@@ -81,6 +89,12 @@ export default function EditProfilePage() {
 
       <main className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <form onSubmit={handleSubmit} className="space-y-8">
+          <ProfileSection title="Profile Picture">
+            <ProfilePictureUploader
+              currentPicture={formData.profilePicture}
+              onChange={handleFileChange}
+            />
+          </ProfileSection>
           <ProfileSection title="Basic Information">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <InputField
@@ -284,4 +298,36 @@ const NotificationToggle: React.FC<{
     </div>
     <span className="ml-3 text-gray-700">{label}</span>
   </label>
+);
+
+const ProfilePictureUploader: React.FC<{
+  currentPicture: string | null;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}> = ({ currentPicture, onChange }) => (
+  <div className="flex items-center space-x-6">
+    <div className="shrink-0">
+      <Image
+        className="h-16 w-16 object-cover rounded-full"
+        src={currentPicture || "/dummy-user.png"}
+        alt="Current profile picture"
+        width={64}
+        height={64}
+      />
+    </div>
+    <label className="block">
+      <span className="sr-only">Choose profile photo</span>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={onChange}
+        className="block w-full text-sm text-slate-500
+          file:mr-4 file:py-2 file:px-4
+          file:rounded-full file:border-0
+          file:text-sm file:font-semibold
+          file:bg-violet-50 file:text-violet-700
+          hover:file:bg-violet-100
+        "
+      />
+    </label>
+  </div>
 );

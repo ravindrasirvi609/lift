@@ -69,7 +69,7 @@ export default function ProfilePage() {
           <div className="flex items-center">
             <div className="relative w-24 h-24 mr-6">
               <Image
-                src={user.profilePicture}
+                src={user.profilePicture || "/dummy-user.png"}
                 alt={`${user.firstName} ${user.lastName}`}
                 layout="fill"
                 objectFit="cover"
