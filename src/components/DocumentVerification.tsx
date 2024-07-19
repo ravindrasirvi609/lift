@@ -249,7 +249,12 @@ const DocumentVerification: React.FC<DocumentVerificationProps> = ({
         </button>
       </form>
 
-      <button onClick={handleCheckVerification}>Check Verification</button>
+      <button
+        onClick={handleCheckVerification}
+        className="w-full bg-[#F9D423] text-white my-3 py-3 px-6 rounded-lg text-lg font-semibold hover:bg-[#F96167] transition duration-300"
+      >
+        Check Verification
+      </button>
     </div>
   );
 };

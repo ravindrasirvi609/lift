@@ -7,9 +7,8 @@ connect();
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, driverLicense, vehicleInfo } = await request.json();
+    const { driverLicense, vehicleInfo } = await request.json();
 
-    // Get user data from the database
     const token = request.cookies.get("token")?.value;
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -17,7 +16,6 @@ export async function POST(request: NextRequest) {
 
     const decodedToken = await verifyToken(token);
 
-    // Fetch the user's profile
     const user = await User.findById(decodedToken.id).select(
       "-password -verifyToken -verifyTokenExpiry -forgotPasswordToken -forgotPasswordTokenExpiry"
     );
@@ -26,27 +24,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Format date of birth to "yyyy-mm-dd"
     const dateOfBirth = formatDate(user.dateOfBirth);
 
-    // Verify the license
-    const requestId = await findrequestId(driverLicense.number, dateOfBirth);
-    console.log("Request ID:", requestId);
+    const requestId = await findRequestId(driverLicense.number, dateOfBirth);
+    if ("error" in requestId) {
+      return NextResponse.json(requestId, { status: 400 });
+    }
 
-    const verificationResult = await verifyLience(requestId.request_id);
+    const verificationResult = await verifyLicense(requestId.request_id);
+    if ("error" in verificationResult) {
+      return NextResponse.json(verificationResult, { status: 400 });
+    }
 
-    console.log("Verification result:", verificationResult);
-
-    // Update user model with new information
     user.driverLicense = {
       ...driverLicense,
       verificationStatus: verificationResult.status,
+      requestId: requestId.request_id,
     };
     user.vehicleInfo = vehicleInfo;
     user.isDriver = true;
-    user.driverVerificationStatus = verificationResult.status;
+    user.driverVerificationStatus =
+      verificationResult.result[0]?.result?.source_output?.status || "Unknown";
+    user.verificationResult =
+      verificationResult.result[0]?.result?.source_output || {};
 
-    // Save updated user data
     await user.save();
 
     return NextResponse.json({
@@ -57,6 +58,7 @@ export async function POST(request: NextRequest) {
         vehicleInfo: user.vehicleInfo,
         isDriver: user.isDriver,
         driverVerificationStatus: user.driverVerificationStatus,
+        verificationResult: user.verificationResult,
       },
     });
   } catch (error) {
@@ -72,7 +74,7 @@ function formatDate(date: Date): string {
   return date.toISOString().split("T")[0];
 }
 
-async function findrequestId(id_number: string, date_of_birth: string) {
+async function findRequestId(id_number: string, date_of_birth: string) {
   const apiUrl =
     "https://eve.idfy.com/v3/tasks/async/verify_with_source/ind_driving_license";
   const accountId = process.env.IDFY_ACCOUNT_ID;
@@ -102,8 +104,8 @@ async function findrequestId(id_number: string, date_of_birth: string) {
       body: JSON.stringify(requestBody),
     });
 
-    https: if (!response.ok) {
-      throw new Error("API request failed");
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
     }
 
     return await response.json();
@@ -113,7 +115,7 @@ async function findrequestId(id_number: string, date_of_birth: string) {
   }
 }
 
-export async function verifyLience(requestId: string) {
+async function verifyLicense(requestId: string) {
   const apiUrl = `https://eve.idfy.com/v3/tasks?request_id=${requestId}`;
   const accountId = process.env.IDFY_ACCOUNT_ID;
   const apiKey = process.env.IDFY_API_KEY;
@@ -128,8 +130,8 @@ export async function verifyLience(requestId: string) {
       },
     });
 
-    https: if (!response.ok) {
-      throw new Error("API request failed");
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
     }
 
     return await response.json();
@@ -141,8 +143,8 @@ export async function verifyLience(requestId: string) {
 
 function generateUUID() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-    var r = (Math.random() * 16) | 0,
-      v = c == "x" ? r : (r & 0x3) | 0x8;
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }

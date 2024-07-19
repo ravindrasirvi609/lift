@@ -38,6 +38,7 @@ const userSchema = new mongoose.Schema(
       default: "Not Applied",
     },
     driverLicense: {
+      requestId: { type: String },
       number: { type: String },
       expirationDate: { type: Date },
       state: { type: String },
@@ -49,6 +50,7 @@ const userSchema = new mongoose.Schema(
       year: { type: Number },
       color: { type: String },
       licensePlate: { type: String },
+      verificationResult: { type: Object },
     },
     driverRating: { type: Number, default: 0 },
     totalRidesAsDriver: { type: Number, default: 0 },

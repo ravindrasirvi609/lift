@@ -5,6 +5,7 @@ import Image from "next/image";
 import { User } from "@/types/types";
 import { formatDate } from "@/utils/utils";
 import Link from "next/link";
+import Loading from "@/components/Loading";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -41,7 +42,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        Loading...
+        <Loading />
       </div>
     );
   }
@@ -138,11 +139,11 @@ export default function ProfilePage() {
             {user.isDriver && (
               <ProfileSection title="Driver Information">
                 <InfoGrid>
-                  <InfoItem
+                  {/* <InfoItem
                     icon="🚗"
                     label="Vehicle"
                     value={user.vehicleInfo}
-                  />
+                  /> */}
                   <InfoItem
                     icon="📊"
                     label="Driver Rating"

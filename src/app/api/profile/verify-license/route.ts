@@ -5,9 +5,23 @@ import { verifyToken } from "@/utils/verifyToken";
 
 connect();
 
+const accountId = process.env.IDFY_ACCOUNT_ID;
+const apiKey = process.env.IDFY_API_KEY;
+
+if (!accountId || !apiKey) {
+  throw new Error("IDFY_ACCOUNT_ID or IDFY_API_KEY is not set");
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { requestId } = await request.json();
+
+    if (!requestId) {
+      return NextResponse.json(
+        { error: "RequestId is required" },
+        { status: 400 }
+      );
+    }
 
     // Get user data from the database
     const token = request.cookies.get("token")?.value;
@@ -26,30 +40,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Format date of birth to "yyyy-mm-dd"
-
     // Verify the license
-    console.log("Request ID:", requestId);
+    const id = user.driverLicense?.requestId || requestId;
 
-    const id = "e2efa5ec-fdb3-4f31-a63f-699da5d7f335";
+    const verificationResult = await verifyLicense(id);
 
-    const verificationResult = await verifyLience(id);
-
-    console.log("Verification result:", verificationResult);
-
-    // Update user model with new information
-    // user.driverLicense = {
-    //   ...driverLicense,
-    //   verificationStatus: verificationResult.status,
-    // };
-    // user.vehicleInfo = vehicleInfo;
-    // user.isDriver = true;
-    // user.driverVerificationStatus = verificationResult.status;
+    user.driverVerificationStatus =
+      verificationResult.result?.[0]?.result?.source_output?.status ||
+      "Unknown";
+    user.verificationResult =
+      verificationResult.result?.[0]?.result?.source_output || {};
 
     // Save updated user data
     await user.save();
 
     return NextResponse.json({
+      result: verificationResult,
       status: verificationResult.status,
       message: verificationResult.message,
       updatedUser: {
@@ -61,6 +67,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("License verification error:", error);
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -68,28 +77,33 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function verifyLience(requestId: string) {
-  const apiUrl = `https://eve.idfy.com/v3/tasks?request_id=${requestId}`;
-  const accountId = process.env.IDFY_ACCOUNT_ID;
-  const apiKey = process.env.IDFY_API_KEY;
+async function verifyLicense(requestId: string) {
+  console.log("Request ID:", requestId);
+
+  const apiUrl = `https://eve.idfy.com/v3/tasks?request_id=${encodeURIComponent(
+    requestId
+  )}`;
 
   try {
     const response = await fetch(apiUrl, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "account-id": accountId!,
-        "api-key": apiKey!,
-      },
+        "account-id": accountId,
+        "api-key": apiKey,
+      } as HeadersInit,
     });
 
-    https: if (!response.ok) {
-      throw new Error("API request failed");
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
     }
 
     return await response.json();
   } catch (error) {
     console.error("License verification failed:", error);
+    if (error instanceof Error) {
+      return { error: error.message, status: "Failed" };
+    }
     return { error: "License verification failed", status: "Failed" };
   }
 }
