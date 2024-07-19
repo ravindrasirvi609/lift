@@ -38,9 +38,18 @@ const userSchema = new mongoose.Schema(
       default: "Not Applied",
     },
     driverLicense: {
-      type: String,
+      number: { type: String },
+      expirationDate: { type: Date },
+      state: { type: String },
+      documentUrl: { type: String }, // URL to the uploaded document
     },
-    vehicleInfo: { type: String },
+    vehicleInfo: {
+      make: { type: String },
+      model: { type: String },
+      year: { type: Number },
+      color: { type: String },
+      licensePlate: { type: String },
+    },
     driverRating: { type: Number, default: 0 },
     totalRidesAsDriver: { type: Number, default: 0 },
     driverAvailabilityStatus: {
@@ -53,7 +62,7 @@ const userSchema = new mongoose.Schema(
       accountNumber: String,
       bankName: String,
       accountHolderName: String,
-      ifscCode: String, // or equivalent based on your country
+      ifscCode: String,
     },
 
     // Preferences

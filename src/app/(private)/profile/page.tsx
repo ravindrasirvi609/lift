@@ -227,6 +227,14 @@ export default function ProfilePage() {
                 </div>
               </ProfileSection>
             )}
+            <button>
+              <Link
+                href="/driver/verify"
+                className="bg-[#F96167] text-white px-4 py-2 rounded-full hover:bg-opacity-90 transition duration-300"
+              >
+                Verify Driver License
+              </Link>
+            </button>
           </div>
         </div>
       </main>
