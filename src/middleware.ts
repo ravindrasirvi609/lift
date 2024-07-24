@@ -6,7 +6,10 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const isAuthPath = path === "/auth";
   const isPublicPath =
-    path === "/" || path.startsWith("/api") || path.startsWith("/_next");
+    path === "/" ||
+    path.startsWith("/api") ||
+    path.startsWith("/_next") ||
+    path.startsWith("/verifyemail");
   const token = request.cookies.get("token")?.value;
 
   if (isAuthPath) {

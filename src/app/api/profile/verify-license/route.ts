@@ -40,17 +40,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    if (requestId) {
+      user.driverVerificationStatus = "Pending";
+    }
+
     // Verify the license
     const id = user.driverLicense?.requestId || requestId;
 
     const verificationResult = await verifyLicense(id);
 
-    user.driverVerificationStatus =
-      verificationResult.result?.[0]?.result?.source_output?.status ||
-      "Unknown";
-    user.verificationResult =
-      verificationResult.result?.[0]?.result?.source_output || {};
-
+    if (verificationResult.status === "success") {
+      const verificationStatus =
+        verificationResult.result?.[0]?.result?.source_output?.status ||
+        "Unknown";
+      user.driverVerificationStatus =
+        verificationStatus === "Approved" ? "Approved" : "Rejected";
+    } else {
+      user.driverVerificationStatus = "Rejected";
+    }
     // Save updated user data
     await user.save();
 

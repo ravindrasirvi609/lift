@@ -52,11 +52,11 @@ export async function PUT(
         ? `Your booking (ID: ${booking._id}) has been Confirmed by the driver.`
         : `Your booking (ID: ${booking._id}) has been Cancelled by the driver.`;
 
-    await sendSMS(booking.passenger.phoneNumber, message);
-    await sendWhatsApp(
-      booking.passenger.phoneNumber,
-      `${message} Tap for details: http://localhost:3000/bookings/${booking._id}`
-    );
+    //await sendSMS(booking.passenger.phoneNumber, message);
+    // await sendWhatsApp(
+    //   booking.passenger.phoneNumber,
+    //   `${message} Tap for details: http://localhost:3000/bookings/${booking._id}`
+    // );
 
     return NextResponse.json(
       { message: `Booking ${status} successfully`, booking },
