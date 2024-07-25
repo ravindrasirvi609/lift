@@ -132,7 +132,9 @@ export async function POST(request: NextRequest) {
       SALT_ROUNDS
     );
     savedUser.verifyToken = verifyToken;
-    savedUser.verifyTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    savedUser.verifyTokenExpiry = new Date(
+      Date.now() + 7 * 24 * 60 * 60 * 1000
+    ); // 24 hours
     await savedUser.save();
 
     // Send verification email

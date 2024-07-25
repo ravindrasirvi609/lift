@@ -1,46 +1,46 @@
 import mongoose from "mongoose";
 
 const rideSchema = new mongoose.Schema({
-  driver: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  driver: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   vehicle: {
-    type: { type: String, required: true },
-    make: { type: String, required: true },
-    model: { type: String, required: true },
-    year: { type: Number, required: true },
-    color: { type: String, required: true },
-    licensePlate: { type: String, required: true },
+    type: { type: String },
+    make: { type: String },
+    model: { type: String },
+    year: { type: Number },
+    color: { type: String },
+    licensePlate: { type: String },
   },
   startLocation: {
     type: { type: String, enum: ["Point"], default: "Point" },
-    coordinates: { type: [Number], required: true }, // [longitude, latitude]
-    city: { type: String, required: true },
-    region: { type: String, required: true },
-    locationId: { type: String, required: true },
-    address: { type: String, required: true },
+    coordinates: { type: [Number] }, // [longitude, latitude]
+    city: { type: String },
+    region: { type: String },
+    locationId: { type: String },
+    address: { type: String },
   },
   endLocation: {
     type: { type: String, enum: ["Point"], default: "Point" },
-    coordinates: { type: [Number], required: true }, // [longitude, latitude]
-    city: { type: String, required: true },
-    region: { type: String, required: true },
-    locationId: { type: String, required: true },
-    address: { type: String, required: true },
+    coordinates: { type: [Number] }, // [longitude, latitude]
+    city: { type: String },
+    region: { type: String },
+    locationId: { type: String },
+    address: { type: String },
   },
   waypoints: [
     {
       type: { type: String, enum: ["Point"], default: "Point" },
-      coordinates: { type: [Number], required: true },
+      coordinates: { type: [Number] },
       address: { type: String },
     },
   ],
-  departureTime: { type: Date, required: true },
-  estimatedArrivalTime: { type: Date, required: true },
+  departureTime: { type: Date },
+  estimatedArrivalTime: { type: Date },
   actualDepartureTime: { type: Date },
   actualArrivalTime: { type: Date },
-  totalSeats: { type: Number, required: true },
-  availableSeats: { type: Number, required: true },
-  price: { type: Number, required: true },
-  pricePerSeat: { type: Number, required: true },
+  totalSeats: { type: Number },
+  availableSeats: { type: Number },
+  price: { type: Number },
+  pricePerSeat: { type: Number },
   status: {
     type: String,
     enum: ["Scheduled", "In Progress", "Completed", "Cancelled"],

@@ -1,20 +1,20 @@
 import mongoose from "mongoose";
 
 const bookingSchema = new mongoose.Schema({
-  ride: { type: mongoose.Schema.Types.ObjectId, ref: "Ride", required: true },
+  ride: { type: mongoose.Schema.Types.ObjectId, ref: "Ride" },
   passenger: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
-  driver: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  numberOfSeats: { type: Number, required: true, default: 1 },
+  driver: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  numberOfSeats: { type: Number, default: 1 },
   status: {
     type: String,
     enum: ["Pending", "Confirmed", "In Progress", "Completed", "Cancelled"],
     default: "Pending",
   },
-  price: { type: Number, required: true },
+  price: { type: Number },
   paymentStatus: {
     type: String,
     enum: ["Pending", "Paid", "Refunded", "Failed"],
@@ -26,12 +26,12 @@ const bookingSchema = new mongoose.Schema({
   },
   pickupLocation: {
     type: { type: String, enum: ["Point"], default: "Point" },
-    coordinates: { type: [Number], required: true },
+    coordinates: { type: [Number] },
     address: { type: String },
   },
   dropoffLocation: {
     type: { type: String, enum: ["Point"], default: "Point" },
-    coordinates: { type: [Number], required: true },
+    coordinates: { type: [Number] },
     address: { type: String },
   },
   actualPickupTime: { type: Date },
