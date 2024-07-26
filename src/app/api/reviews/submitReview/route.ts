@@ -15,9 +15,11 @@ export async function POST(req: NextRequest) {
     }
 
     const decodedToken = await verifyToken(token);
+    console.log("Decoded token:", decodedToken);
+    const reviewerId = decodedToken.id;
 
     const body = await req.json();
-    const { reviewerId, reviewedId, rideId, rating, comment } = body;
+    const { reviewedId, rideId, rating, comment } = body;
 
     // Validate input
     if (!reviewerId || !reviewedId || !rideId || !rating) {
@@ -28,11 +30,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if user and ride exist
-    const [reviewer, reviewed, ride] = await Promise.all([
-      User.findById(reviewerId),
-      User.findById(reviewedId),
-      Ride.findById(rideId),
-    ]);
+    const reviewer = await User.findById(reviewerId);
+    const reviewed = await User.findById(reviewedId);
+    const ride = await Ride.findById(rideId);
 
     if (!reviewer || !reviewed || !ride) {
       return NextResponse.json(

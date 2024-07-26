@@ -15,7 +15,9 @@ export default function RideCompletePage() {
     const fetchRideDetails = async () => {
       try {
         const response = await axios.get(`/api/ride/${rideId}`);
-        setDriverId(response.data.driverId);
+        console.log("Ride details:", response.data);
+
+        setDriverId(response.data.driver._id);
         setLoading(false);
       } catch (err) {
         setError("Failed to load ride details");

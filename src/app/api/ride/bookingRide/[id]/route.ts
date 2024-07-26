@@ -1,16 +1,22 @@
-import { connect } from "@/dbConfig/dbConfig";
 import Booking from "@/Models/bookingModel";
 import Ride from "@/Models/rideModel";
 import { verifyToken } from "@/utils/verifyToken";
 import { NextRequest, NextResponse } from "next/server";
 import { sendSMS, sendWhatsApp } from "@/utils/messaging";
+import { connect } from "@/dbConfig/dbConfig";
+import User from "@/Models/userModel";
+import mongoose from "mongoose";
 
-connect();
+mongoose.model("User", User.schema);
+mongoose.model("Booking", Booking.schema);
+mongoose.model("Ride", Ride.schema);
 
 export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  await connect();
+
   try {
     const token = req.cookies.get("token")?.value;
     if (!token) {
@@ -38,12 +44,14 @@ export async function PUT(
     }
 
     booking.status = status;
+    console.log("Updating booking:", JSON.stringify(booking, null, 2));
+
     await booking.save();
 
     if (status === "Confirmed") {
-      const ride = await Ride.findById(booking.ride);
-      ride.availableSeats -= booking.numberOfSeats;
-      await ride.save();
+      await Ride.findByIdAndUpdate(booking.ride, {
+        $inc: { availableSeats: -booking.numberOfSeats },
+      });
     }
 
     // Notify the passenger about the booking status
@@ -52,7 +60,7 @@ export async function PUT(
         ? `Your booking (ID: ${booking._id}) has been Confirmed by the driver.`
         : `Your booking (ID: ${booking._id}) has been Cancelled by the driver.`;
 
-    //await sendSMS(booking.passenger.phoneNumber, message);
+    // await sendSMS(booking.passenger.phoneNumber, message);
     // await sendWhatsApp(
     //   booking.passenger.phoneNumber,
     //   `${message} Tap for details: http://localhost:3000/bookings/${booking._id}`
@@ -62,8 +70,9 @@ export async function PUT(
       { message: `Booking ${status} successfully`, booking },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating booking:", error);
+    console.error("Error stack:", error.stack);
     if (error instanceof Error) {
       return NextResponse.json(
         { error: `Internal server error: ${error.message}` },

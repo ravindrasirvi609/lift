@@ -155,34 +155,34 @@ const DriverRequestsPage = () => {
                 <div className="flex items-center">
                   <FaMapMarkerAlt className="text-[#F96167] mr-2" />
                   <span>
-                    {request.ride.startLocation.city},{" "}
-                    {request.ride.startLocation.region}
+                    {request?.ride?.startLocation?.city},{" "}
+                    {request?.ride?.startLocation?.region}
                   </span>
                 </div>
                 <div className="flex items-center">
                   <FaMapMarkerAlt className="text-[#F96167] mr-2" />
                   <span>
-                    {request.ride.endLocation.city},{" "}
-                    {request.ride.endLocation.region}
+                    {request?.ride?.endLocation?.city},{" "}
+                    {request?.ride?.endLocation?.region}
                   </span>
                 </div>
                 <div className="flex items-center">
                   <FaClock className="text-[#F96167] mr-2" />
                   <span>
-                    {new Date(request.ride.departureTime).toLocaleString()}
+                    {new Date(request?.ride?.departureTime).toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center">
                   <FaUsers className="text-[#F96167] mr-2" />
-                  <span>{request.numberOfSeats} seats</span>
+                  <span>{request?.numberOfSeats} seats</span>
                 </div>
                 <div className="flex items-center">
                   <FaCar className="text-[#F96167] mr-2" />
-                  <span>{request.ride.vehicle}</span>
+                  <span>{request?.ride?.vehicle}</span>
                 </div>
                 <div className="flex items-center">
                   <FaDollarSign className="text-[#F96167] mr-2" />
-                  <span>Payment: {request.paymentStatus}</span>
+                  <span>Payment: {request?.paymentStatus}</span>
                 </div>
               </div>
               {request.status === "Pending" && (

@@ -26,12 +26,12 @@ const bookingSchema = new mongoose.Schema({
   },
   pickupLocation: {
     type: { type: String, enum: ["Point"], default: "Point" },
-    coordinates: { type: [Number] },
+    coordinates: { type: [Number], required: true },
     address: { type: String },
   },
   dropoffLocation: {
     type: { type: String, enum: ["Point"], default: "Point" },
-    coordinates: { type: [Number] },
+    coordinates: { type: [Number], required: true },
     address: { type: String },
   },
   actualPickupTime: { type: Date },

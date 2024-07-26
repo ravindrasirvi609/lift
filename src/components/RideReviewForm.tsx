@@ -1,5 +1,3 @@
-// app/components/RideReviewForm.tsx
-
 "use client";
 
 import { useState, FormEvent } from "react";
@@ -30,8 +28,11 @@ export default function RideReviewForm({
     setError("");
 
     try {
-      const response = await axios.post("/api/reviews", reviewData);
-      router.push("/review-success"); // Redirect to a success page
+      const response = await axios.post(
+        "/api/reviews/submitReview",
+        reviewData
+      );
+      router.push("/review-success");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     }
