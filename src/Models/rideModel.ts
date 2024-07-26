@@ -60,6 +60,17 @@ const rideSchema = new mongoose.Schema({
   totalEarnings: { type: Number, default: 0 },
   cancellationReason: { type: String },
   notes: { type: String },
+  currentLocation: {
+    type: { type: String, enum: ["Point"], default: "Point" },
+    coordinates: { type: [Number] }, // [longitude, latitude]
+  },
+  messages: [
+    {
+      sender: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      content: String,
+      timestamp: { type: Date, default: Date.now },
+    },
+  ],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

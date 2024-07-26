@@ -114,6 +114,18 @@ const userSchema = new mongoose.Schema(
       enum: ["Bronze", "Silver", "Gold", "Platinum"],
       default: "Bronze",
     },
+    currentLocation: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number],
+        default: [0, 0],
+      },
+    },
+    activeRideId: { type: mongoose.Schema.Types.ObjectId, ref: "Ride" },
 
     // Timestamps
     createdAt: { type: Date, default: Date.now },

@@ -16,3 +16,26 @@ body {
   margin: 0 auto;
   padding: 0 20px;
 }
+
+/* styles/globals.css */
+
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+:root {
+  --color-primary: #F96167;
+  --color-secondary: #F9D423;
+}
+
+body {
+  @apply bg-gray-100;
+}
+
+.btn-primary {
+  @apply bg-[var(--color-primary)] text-white font-bold py-2 px-4 rounded;
+}
+
+.btn-secondary {
+  @apply bg-[var(--color-secondary)] text-gray-800 font-bold py-2 px-4 rounded;
+}
