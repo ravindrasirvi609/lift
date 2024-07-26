@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
 import Ride from "@/Models/rideModel";
 import { verifyToken } from "@/utils/verifyToken";
+import User from "@/Models/userModel";
+import mongoose from "mongoose";
+mongoose.model("User", User.schema);
 
 connect();
 

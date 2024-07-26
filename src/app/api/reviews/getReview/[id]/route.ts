@@ -1,5 +1,3 @@
-// api/reviews/getReview/[id]/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
 import Review from "@/Models/reviewModel";

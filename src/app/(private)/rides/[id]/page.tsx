@@ -6,11 +6,11 @@ import RideTracker from "@/components/RideTracker";
 interface DataType {
   _id: string;
   startLocation: {
-    address: string;
+    city: string;
     coordinates: [number, number];
   };
   endLocation: {
-    address: string;
+    city: string;
     coordinates: [number, number];
   };
   driver: {
@@ -47,10 +47,10 @@ const RidePage = () => {
       <h1 className="text-2xl font-bold mb-4">Ride Details</h1>
       <div className="bg-white rounded-lg shadow-lg p-4 mb-4">
         <p>
-          <strong>From:</strong> {rideData.startLocation.address}
+          <strong>From:</strong> {rideData.startLocation.city}
         </p>
         <p>
-          <strong>To:</strong> {rideData.endLocation.address}
+          <strong>To:</strong> {rideData.endLocation.city}
         </p>
         <p>
           <strong>Driver:</strong> {rideData.driver.fullName}
