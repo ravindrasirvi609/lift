@@ -15,16 +15,26 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await verifyToken(token);
+    const user = await verifyToken(token);
 
-    const ride = await Ride.findById(params.id).populate(
+    const newRide = await Ride.findById(params.id).populate(
       "driver",
       "firstName lastName"
     );
 
-    if (!ride) {
+    if (!newRide) {
       return NextResponse.json({ error: "Ride not found" }, { status: 404 });
     }
+
+    const ride = {
+      ...newRide.toObject(),
+      driver: {
+        fullName: `${newRide.driver.firstName} ${newRide.driver.lastName}`,
+      },
+      passenger: {
+        _id: user.id,
+      },
+    };
 
     return NextResponse.json(ride);
   } catch (error) {

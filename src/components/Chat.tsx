@@ -1,7 +1,6 @@
-// app/components/Chat.tsx
-
+"use client";
+import { useSocket } from "@/app/hooks/useSocket";
 import { useState, useEffect, useRef } from "react";
-import io, { Socket } from "socket.io-client";
 
 interface Message {
   sender: string;
@@ -15,32 +14,26 @@ interface ChatProps {
 }
 
 const Chat: React.FC<ChatProps> = ({ rideId, userId }) => {
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const { socket, isConnected } = useSocket();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const socketInitializer = async () => {
-      await fetch("/api/socket");
-      const newSocket = io();
-      setSocket(newSocket);
+    if (socket && isConnected) {
+      socket.emit("join-ride", rideId);
 
-      newSocket.emit("join-ride", rideId);
-
-      newSocket.on("new-message", (message: Message) => {
+      socket.on("new-message", (message: Message) => {
         setMessages((prevMessages) => [...prevMessages, message]);
       });
-    };
-
-    socketInitializer();
+    }
 
     return () => {
       if (socket) {
-        socket.disconnect();
+        socket.off("new-message");
       }
     };
-  }, [rideId, socket]);
+  }, [socket, isConnected, rideId]);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -50,7 +43,7 @@ const Chat: React.FC<ChatProps> = ({ rideId, userId }) => {
   }, [messages]);
 
   const sendMessage = () => {
-    if (inputMessage.trim() && socket) {
+    if (inputMessage.trim() && socket && isConnected) {
       const messageData = {
         sender: userId,
         content: inputMessage,

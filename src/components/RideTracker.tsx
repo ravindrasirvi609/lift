@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import io, { Socket } from "socket.io-client";
 import Map from "./Map";
 import Chat from "./Chat";
+import { useSocket } from "@/app/hooks/useSocket";
 
 interface RideTrackerProps {
   rideId: string;
@@ -17,30 +17,24 @@ const RideTracker: React.FC<RideTrackerProps> = ({
   initialLocation,
   destination,
 }) => {
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const { socket, isConnected } = useSocket();
   const [currentLocation, setCurrentLocation] = useState(initialLocation);
 
   useEffect(() => {
-    const socketInitializer = async () => {
-      await fetch("/api/socket");
-      const newSocket = io();
-      setSocket(newSocket);
+    if (socket && isConnected) {
+      socket.emit("join-ride", rideId);
 
-      newSocket.emit("join-ride", rideId);
-
-      newSocket.on("location-updated", ({ location }) => {
+      socket.on("location-updated", ({ location }) => {
         setCurrentLocation(location);
       });
-    };
-
-    socketInitializer();
+    }
 
     return () => {
       if (socket) {
-        socket.disconnect();
+        socket.off("location-updated");
       }
     };
-  }, [rideId, socket]);
+  }, [socket, isConnected, rideId]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

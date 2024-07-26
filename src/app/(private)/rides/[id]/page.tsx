@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { useParams } from "next/navigation";
 import RideTracker from "@/components/RideTracker";
 
 interface DataType {
@@ -25,14 +25,14 @@ interface DataType {
 }
 
 const RidePage = () => {
-  const router = useRouter();
-  const { id } = router.query;
+  const params = useParams();
+  const id = params.id as string;
   const [rideData, setRideData] = useState<null | DataType>(null);
 
   useEffect(() => {
     if (id) {
       // Fetch ride data from your API
-      fetch(`/api/rides/${id}`)
+      fetch(`/api/ride/${id}`)
         .then((res) => res.json())
         .then((data) => setRideData(data));
     }
@@ -60,7 +60,7 @@ const RidePage = () => {
         </p>
       </div>
       <RideTracker
-        rideId={id as string}
+        rideId={id}
         userId={rideData.passenger._id}
         initialLocation={rideData.startLocation.coordinates}
         destination={rideData.endLocation.coordinates}
