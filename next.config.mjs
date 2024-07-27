@@ -4,9 +4,8 @@ const nextConfig = {
     domains: ['placehold.co', 'res.cloudinary.com', 'plus.unsplash.com', 'images.unsplash.com'],
   },
 
-  experimental: {
-    appDir: true,
-  },
+  reactStrictMode: true,
+  swcMinify: true,
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.externals = [...config.externals, 'socket.io-client'];
