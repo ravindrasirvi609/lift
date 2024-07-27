@@ -1,6 +1,7 @@
 import { Server as SocketIOServer } from "socket.io";
 import { NextRequest, NextResponse } from "next/server";
 import { NextApiResponseServerIO } from "@/types/next";
+import Ride from "@/Models/rideModel";
 
 export const dynamic = "force-dynamic";
 
@@ -28,8 +29,9 @@ export async function GET(req: NextRequest, res: NextApiResponseServerIO) {
         io.to(rideId).emit("location-updated", { rideId, location });
       });
 
-      socket.on("send-message", ({ rideId, message }) => {
+      socket.on("send-message", async ({ rideId, message }) => {
         console.log(`New message in ride ${rideId}:`, message);
+        await addMessageToRide(rideId, message);
         io.to(rideId).emit("new-message", { rideId, message });
       });
 
@@ -61,6 +63,8 @@ export async function POST(req: Request) {
       io.to(rideId).emit("location-updated", { rideId, location: data });
       break;
     case "send-message":
+      await addMessageToRide(rideId, data);
+
       io.to(rideId).emit("new-message", { rideId, message: data });
       break;
     default:
@@ -71,4 +75,21 @@ export async function POST(req: Request) {
   }
 
   return NextResponse.json({ success: true, message: "Action processed" });
+}
+
+async function addMessageToRide(rideId: string, message: any) {
+  try {
+    await Ride.findByIdAndUpdate(rideId, {
+      $push: {
+        messages: {
+          sender: message.sender,
+          content: message.content,
+          timestamp: message.timestamp,
+        },
+      },
+    });
+    console.log(`Message added to ride ${rideId}`);
+  } catch (error) {
+    console.error(`Error adding message to ride ${rideId}:`, error);
+  }
 }
