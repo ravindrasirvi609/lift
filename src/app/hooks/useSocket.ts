@@ -8,8 +8,9 @@ export const useSocket = () => {
 
   useEffect(() => {
     if (!socket) {
-      socket = io({
+      socket = io("", {
         path: "/api/socket",
+        addTrailingSlash: false,
       });
     }
 

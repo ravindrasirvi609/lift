@@ -4,15 +4,12 @@ const nextConfig = {
     domains: ['placehold.co', 'res.cloudinary.com', 'plus.unsplash.com', 'images.unsplash.com'],
   },
 
-  reactStrictMode: true,
+  experimental: {
+    appDir: true,
+  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        net: false,
-        os: false,
-        tls: false,
-      };
+      config.externals = [...config.externals, 'socket.io-client'];
     }
     return config;
   },
