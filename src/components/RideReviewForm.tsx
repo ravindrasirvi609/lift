@@ -7,12 +7,14 @@ interface RideReviewFormProps {
   rideId: string;
   revieweeId: string;
   reviewerRole: "passenger" | "driver";
+  onReviewSubmit?: (revieweeId: string) => void; // Add this line
 }
 
 export default function RideReviewForm({
   rideId,
   revieweeId,
   reviewerRole,
+  onReviewSubmit, // Add this line
 }: RideReviewFormProps) {
   const router = useRouter();
   const [reviewData, setReviewData] = useState({
@@ -36,6 +38,9 @@ export default function RideReviewForm({
         "/api/reviews/submitReview",
         reviewData
       );
+      if (onReviewSubmit) {
+        onReviewSubmit(revieweeId); // Call the onReviewSubmit function if it exists
+      }
       router.push("/review-success");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
