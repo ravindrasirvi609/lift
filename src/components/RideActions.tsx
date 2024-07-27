@@ -1,6 +1,6 @@
 import { useRideActions } from "@/app/hooks/useRideActions";
 import React from "react";
-import { FaPlay, FaStop, FaClock } from "react-icons/fa";
+import { FaPlay, FaStop, FaClock, FaCheckCircle } from "react-icons/fa";
 
 interface RideActionsProps {
   rideId: string;
@@ -34,14 +34,16 @@ export function RideActions({
   };
 
   return (
-    <div className="mt-6">
-      <h3 className="text-xl font-semibold mb-4 text-gray-700">Ride Actions</h3>
-      <div className="flex items-center space-x-4">
+    <div className="mt-8">
+      <h3 className="text-2xl font-semibold mb-4 text-[#F96167]">
+        Ride Actions
+      </h3>
+      <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
         {status === "Scheduled" && (
           <button
             onClick={handleStartRide}
             disabled={isLoading}
-            className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 disabled:opacity-50"
+            className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-[#F9D423] text-gray-800 rounded-lg hover:bg-[#f7c800] transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#F9D423] focus:ring-opacity-50 disabled:opacity-50 shadow-md"
           >
             {isLoading ? (
               <span className="flex items-center">
@@ -60,7 +62,7 @@ export function RideActions({
           <button
             onClick={handleEndRide}
             disabled={isLoading}
-            className="flex items-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 disabled:opacity-50"
+            className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-[#F96167] text-white rounded-lg hover:bg-[#f84b52] transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#F96167] focus:ring-opacity-50 disabled:opacity-50 shadow-md"
           >
             {isLoading ? (
               <span className="flex items-center">
@@ -76,16 +78,17 @@ export function RideActions({
           </button>
         )}
         {status === "Completed" && (
-          <div className="flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg">
-            <FaStop className="mr-2" />
+          <div className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-green-500 text-white rounded-lg shadow-md">
+            <FaCheckCircle className="mr-2" />
             Ride Completed
           </div>
         )}
       </div>
       {error && (
-        <p className="mt-2 text-red-500 bg-red-100 border border-red-400 rounded-lg p-2">
-          {error}
-        </p>
+        <div className="mt-4 p-3 bg-red-100 border border-red-400 rounded-lg text-red-700 flex items-center">
+          <FaStop className="mr-2 text-red-500" />
+          <p>{error}</p>
+        </div>
       )}
     </div>
   );

@@ -5,7 +5,14 @@ import RideTracker from "@/components/RideTracker";
 import { RideActions } from "@/components/RideActions";
 import RideReviewForm from "@/components/RideReviewForm";
 import { useRideActions } from "@/app/hooks/useRideActions";
-import { FaMapMarkerAlt, FaUser, FaCar, FaInfoCircle } from "react-icons/fa";
+import {
+  FaMapMarkerAlt,
+  FaUser,
+  FaCar,
+  FaInfoCircle,
+  FaClock,
+  FaDollarSign,
+} from "react-icons/fa";
 import { useAuth } from "@/app/contexts/AuthContext";
 
 interface DataType {
@@ -74,93 +81,117 @@ const RidePage = () => {
 
   if (!rideData) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+      <div className="flex justify-center items-center h-screen bg-gray-100">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#F96167]"></div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 bg-gray-100 min-h-screen">
-      <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">
-        Ride Details
-      </h1>
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h2 className="text-2xl font-semibold mb-4 text-gray-700">
-              Trip Information
-            </h2>
-            <div className="space-y-3">
-              <p className="flex items-center text-gray-600">
-                <FaMapMarkerAlt className="mr-2 text-green-500" />
-                <strong>From:</strong> {rideData.startLocation?.city}
-              </p>
-              <p className="flex items-center text-gray-600">
-                <FaMapMarkerAlt className="mr-2 text-red-500" />
-                <strong>To:</strong> {rideData.endLocation?.city}
-              </p>
-              <p className="flex items-center text-gray-600">
-                <FaCar className="mr-2 text-blue-500" />
-                <strong>Driver:</strong> {rideData.driver.fullName}
-              </p>
-              <p className="flex items-center text-gray-600">
-                <FaUser className="mr-2 text-purple-500" />
-                <strong>Passenger:</strong> {rideData.passenger?.fullName}
-              </p>
-              <p className="flex items-center text-gray-600">
-                <FaInfoCircle className="mr-2 text-yellow-500" />
-                <strong>Status:</strong>{" "}
-                <span
-                  className={`ml-2 px-2 py-1 rounded-full text-white ${
-                    rideData.status === "Completed"
-                      ? "bg-green-500"
-                      : rideData.status === "In Progress"
-                      ? "bg-blue-500"
-                      : "bg-yellow-500"
-                  }`}
-                >
-                  {rideData.status}
-                </span>
-              </p>
+    <div className="min-h-screen bg-gradient-to-b from-[#F9D423] to-white">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-4xl font-bold mb-8 text-center text-[#F96167]">
+          Ride Details
+        </h1>
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8 transition-all duration-300 hover:shadow-xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <h2 className="text-2xl font-semibold mb-4 text-[#F96167]">
+                Trip Information
+              </h2>
+              <InfoItem
+                icon={FaMapMarkerAlt}
+                label="From"
+                value={rideData.startLocation?.city}
+                iconColor="text-green-500"
+              />
+              <InfoItem
+                icon={FaMapMarkerAlt}
+                label="To"
+                value={rideData.endLocation?.city}
+                iconColor="text-[#F96167]"
+              />
+              <InfoItem
+                icon={FaCar}
+                label="Driver"
+                value={rideData.driver.fullName}
+                iconColor="text-blue-500"
+              />
+              <InfoItem
+                icon={FaUser}
+                label="Passenger"
+                value={rideData.passenger?.fullName}
+                iconColor="text-purple-500"
+              />
+              <StatusBadge status={rideData.status} />
+            </div>
+            <div className="space-y-4">
+              <h2 className="text-2xl font-semibold mb-4 text-[#F96167]">
+                Ride Details
+              </h2>
+              <InfoItem
+                icon={FaClock}
+                label="Departure"
+                value={new Date(rideData.departureTime).toLocaleString()}
+                iconColor="text-[#F9D423]"
+              />
+              <InfoItem
+                icon={FaClock}
+                label="Estimated Arrival"
+                value={new Date(rideData.estimatedArrivalTime).toLocaleString()}
+                iconColor="text-[#F9D423]"
+              />
+              <InfoItem
+                icon={FaDollarSign}
+                label="Price"
+                value={`$${rideData.price.toFixed(2)}`}
+                iconColor="text-green-500"
+              />
             </div>
           </div>
-          <div>
-            <h2 className="text-2xl font-semibold mb-4 text-gray-700">
-              Ride Details
-            </h2>
-            <div className="space-y-3">
-              <p className="text-gray-600">
-                <strong>Departure:</strong>{" "}
-                {new Date(rideData.departureTime).toLocaleString()}
-              </p>
-              <p className="text-gray-600">
-                <strong>Estimated Arrival:</strong>{" "}
-                {new Date(rideData.estimatedArrivalTime).toLocaleString()}
-              </p>
-              <p className="text-gray-600">
-                <strong>Price:</strong> ${rideData.price.toFixed(2)}
-              </p>
-            </div>
+          <div className="mt-6">
+            <RideActions
+              rideId={id}
+              status={rideData.status}
+              onRideUpdate={handleRideUpdate}
+            />
+            {error && <p className="text-[#F96167] mt-2">{error}</p>}
           </div>
         </div>
-        <div className="mt-6">
-          <RideActions
-            rideId={id}
-            status={rideData.status}
-            onRideUpdate={handleRideUpdate}
-          />
-          {error && <p className="text-red-500 mt-2">{error}</p>}
-        </div>
+        <RideTracker
+          rideId={id}
+          userId={userId}
+          initialLocation={rideData.startLocation.coordinates}
+          destination={rideData.endLocation.coordinates}
+        />
       </div>
-      <RideTracker
-        rideId={id}
-        userId={userId}
-        initialLocation={rideData.startLocation.coordinates}
-        destination={rideData.endLocation.coordinates}
-      />
     </div>
   );
 };
+
+const InfoItem = ({ icon: Icon, label, value, iconColor }: any) => (
+  <p className="flex items-center text-gray-700">
+    <Icon className={`mr-2 ${iconColor}`} />
+    <strong className="mr-2">{label}:</strong> {value}
+  </p>
+);
+
+const StatusBadge = ({ status }: any) => (
+  <div className="flex items-center">
+    <FaInfoCircle className="mr-2 text-[#F9D423]" />
+    <strong className="mr-2">Status:</strong>
+    <span
+      className={`px-3 py-1 rounded-full text-white ${
+        status === "Completed"
+          ? "bg-green-500"
+          : status === "In Progress"
+          ? "bg-blue-500"
+          : "bg-[#F9D423]"
+      }`}
+    >
+      {status}
+    </span>
+  </div>
+);
 
 export default RidePage;

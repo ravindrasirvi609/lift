@@ -1,24 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   MapContainer,
   TileLayer,
   Marker,
   Popup,
   Polyline,
+  useMap,
 } from "react-leaflet";
-import { Icon } from "leaflet";
+import { Icon, LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { FaMapMarkerAlt, FaFlag, FaCrosshairs } from "react-icons/fa";
 
 interface DynamicMapProps {
-  currentLocation: [number, number];
+  rideId: string;
+  initialLocation: [number, number];
   destination: [number, number];
+  currentLocation: [number, number];
 }
 
 const DynamicMap: React.FC<DynamicMapProps> = ({
-  currentLocation,
+  rideId,
+  initialLocation,
   destination,
+  currentLocation,
 }) => {
-  const [mapCenter, setMapCenter] = useState(currentLocation);
+  const [mapCenter, setMapCenter] = useState<LatLngExpression>(initialLocation);
+  const [zoomLevel, setZoomLevel] = useState(13);
 
   const currentLocationIcon = new Icon({
     iconUrl:
@@ -36,12 +43,21 @@ const DynamicMap: React.FC<DynamicMapProps> = ({
     popupAnchor: [1, -34],
   });
 
+  const MapUpdater = () => {
+    const map = useMap();
+    useEffect(() => {
+      map.setView(mapCenter, zoomLevel);
+    }, [mapCenter, zoomLevel]);
+    return null;
+  };
+
   return (
-    <div className="map-container">
+    <div className="map-container bg-white rounded-lg shadow-lg overflow-hidden">
       <MapContainer
         center={mapCenter}
-        zoom={13}
-        style={{ height: "500px", width: "100%", borderRadius: "10px" }}
+        zoom={zoomLevel}
+        style={{ height: "500px", width: "100%" }}
+        className="rounded-t-lg"
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -53,13 +69,47 @@ const DynamicMap: React.FC<DynamicMapProps> = ({
         <Marker position={destination} icon={destinationIcon}>
           <Popup>Destination</Popup>
         </Marker>
-        <Polyline positions={[currentLocation, destination]} color="blue" />
+        <Polyline
+          positions={[currentLocation, destination]}
+          color="#F96167"
+          weight={4}
+        />
+        <MapUpdater />
       </MapContainer>
-      <div className="map-controls">
-        <button onClick={() => setMapCenter(currentLocation)}>
-          Current Location
+      <div className="map-controls p-4 bg-gray-100 flex justify-between items-center">
+        <div className="flex space-x-2">
+          <button
+            onClick={() => {
+              setMapCenter(currentLocation);
+              setZoomLevel(15);
+            }}
+            className="flex items-center px-4 py-2 bg-[#F9D423] text-gray-800 rounded-lg hover:bg-[#f7c800] transition duration-300"
+          >
+            <FaMapMarkerAlt className="mr-2" /> Current
+          </button>
+          <button
+            onClick={() => {
+              setMapCenter(destination);
+              setZoomLevel(15);
+            }}
+            className="flex items-center px-4 py-2 bg-[#F96167] text-white rounded-lg hover:bg-[#f84b52] transition duration-300"
+          >
+            <FaFlag className="mr-2" /> Destination
+          </button>
+        </div>
+        <button
+          onClick={() => {
+            const bounds = [currentLocation, destination];
+            setMapCenter([
+              (bounds[0][0] + bounds[1][0]) / 2,
+              (bounds[0][1] + bounds[1][1]) / 2,
+            ]);
+            setZoomLevel(12);
+          }}
+          className="flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-300"
+        >
+          <FaCrosshairs className="mr-2" /> View All
         </button>
-        <button onClick={() => setMapCenter(destination)}>Destination</button>
       </div>
     </div>
   );
