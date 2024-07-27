@@ -32,14 +32,14 @@ const Header: React.FC = () => {
   return (
     <header
       className={`fixed w-full z-50 transition-all duration-300 ${
-        scrolled ? "bg-[#F9D423] shadow-md" : "bg-transparent"
+        scrolled ? "bg-[#F9D423] shadow-md" : "bg-[#F9D423]"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center">
             <Link href="/" className="text-[#F96167] text-2xl font-bold">
-              RideShare
+              LIFT
             </Link>
           </div>
 

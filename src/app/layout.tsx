@@ -3,6 +3,7 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import { AuthProvider } from "./contexts/AuthContext";
 import { getServerSession } from "@/utils/getServerSession";
+import Header from "@/components/Headers";
 
 export const metadata: Metadata = {
   title: "RideShare Connect",
@@ -29,7 +30,14 @@ export default async function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <AuthProvider initialSession={session}>{children}</AuthProvider>
+        <AuthProvider initialSession={session}>
+          <div>
+            <Header />
+          </div>
+          <div className="pt-16">
+            <main>{children}</main>
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );

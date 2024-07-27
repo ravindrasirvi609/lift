@@ -25,8 +25,6 @@ const Home: React.FC = () => {
 
   return (
     <div>
-      {user && <Header />}
-
       <Hero />
       <RideSearchAndResults />
       <VehicleOwnerSection />

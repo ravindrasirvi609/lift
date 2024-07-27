@@ -26,7 +26,6 @@ const Layout: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
 
   return (
     <div>
-      <Header />
       <main>{children}</main>
     </div>
   );
