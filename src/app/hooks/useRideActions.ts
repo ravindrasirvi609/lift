@@ -1,20 +1,21 @@
 import { useState } from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 export function useRideActions() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const startRide = async (rideId: string) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/ride/${rideId}/start`, {
-        method: "POST",
-      });
-      if (!response.ok) {
+      const response = await axios.post(`/api/ride/${rideId}/start`);
+      if (response.status !== 200) {
         throw new Error("Failed to start ride");
       }
-      return await response.json();
+      return response.data;
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
       throw err;
@@ -27,13 +28,12 @@ export function useRideActions() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/ride/${rideId}/end`, {
-        method: "POST",
-      });
-      if (!response.ok) {
+      const response = await axios.post(`/api/ride/${rideId}/end`);
+      if (response.status !== 200) {
         throw new Error("Failed to end ride");
       }
-      return await response.json();
+      router.push(`/ride-complete/${rideId}`);
+      return response.data;
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
       throw err;

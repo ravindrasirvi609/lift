@@ -1,15 +1,16 @@
 import { connect } from "@/dbConfig/dbConfig";
 import Ride from "@/Models/rideModel";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
-  request: Request,
-  { params }: { params: { rideId: string } }
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   await connect();
+  console.log("started ride", params);
 
   try {
-    const ride = await Ride.findById(params.rideId);
+    const ride = await Ride.findById(params.id);
     if (!ride) {
       return NextResponse.json({ error: "Ride not found" }, { status: 404 });
     }

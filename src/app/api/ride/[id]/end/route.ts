@@ -4,12 +4,12 @@ import { NextResponse } from "next/server";
 
 export async function POST(
   request: Request,
-  { params }: { params: { rideId: string } }
+  { params }: { params: { id: string } }
 ) {
   await connect();
 
   try {
-    const ride = await Ride.findById(params.rideId);
+    const ride = await Ride.findById(params.id);
     if (!ride) {
       return NextResponse.json({ error: "Ride not found" }, { status: 404 });
     }
@@ -17,9 +17,9 @@ export async function POST(
     ride.status = "Completed";
     ride.actualArrivalTime = new Date();
     // Calculate total earnings if not already set
-    if (!ride.totalEarnings) {
-      ride.totalEarnings = ride.price * (ride.totalSeats - ride.availableSeats);
-    }
+    // if (!ride.totalEarnings) {
+    //   ride.totalEarnings = ride.price * (ride.totalSeats - ride.availableSeats);
+    // }
     await ride.save();
 
     // TODO: Send notification to passengers

@@ -39,3 +39,29 @@ body {
 .btn-secondary {
   @apply bg-[var(--color-secondary)] text-gray-800 font-bold py-2 px-4 rounded;
 }
+
+.map-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.map-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.map-controls button {
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.map-controls button:hover {
+  background-color: #45a049;
+}
