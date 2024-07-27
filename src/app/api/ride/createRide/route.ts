@@ -29,11 +29,9 @@ export async function POST(request: NextRequest) {
       "vehicle",
       "startLocation",
       "endLocation",
-      "startAddress",
-      "endAddress",
-
       "departureTime",
       "estimatedArrivalTime",
+      "totalSeats",
       "availableSeats",
       "price",
     ];
@@ -50,13 +48,21 @@ export async function POST(request: NextRequest) {
     // Create new ride
     const newRide = new Ride({
       driver: decodedToken.id,
-      vehicle: body.vehicle,
+      vehicle: {
+        type: body.vehicle.type,
+        make: body.vehicle.make,
+        model: body.vehicle.model,
+        year: body.vehicle.year,
+        color: body.vehicle.color,
+        licensePlate: body.vehicle.licensePlate,
+      },
       startLocation: {
         type: "Point",
         coordinates: body.startLocation.coordinates,
         city: body.startLocation.city,
         region: body.startLocation.region,
         locationId: body.startLocation.locationId,
+        address: body.startLocation.address,
       },
       endLocation: {
         type: "Point",
@@ -64,12 +70,28 @@ export async function POST(request: NextRequest) {
         city: body.endLocation.city,
         region: body.endLocation.region,
         locationId: body.endLocation.locationId,
+        address: body.endLocation.address,
       },
-
+      waypoints: body.waypoints || [],
       departureTime: new Date(body.departureTime),
       estimatedArrivalTime: new Date(body.estimatedArrivalTime),
+      totalSeats: body.totalSeats,
       availableSeats: body.availableSeats,
       price: body.price,
+      pricePerSeat: body.pricePerSeat,
+      status: "Scheduled",
+      distance: body.distance,
+      duration: body.duration,
+      recurrence: {
+        isRecurring: body.recurrence.isRecurring,
+        frequency: body.recurrence.frequency,
+        endDate: body.recurrence.endDate
+          ? new Date(body.recurrence.endDate)
+          : undefined,
+      },
+      allowedLuggage: body.allowedLuggage,
+      amenities: body.amenities,
+      notes: body.notes,
     });
 
     await newRide.save();

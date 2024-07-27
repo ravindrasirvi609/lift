@@ -7,40 +7,48 @@ import { withAuth } from "@/components/withAuth";
 import { useAuth } from "@/app/contexts/AuthContext";
 import Loading from "@/components/Loading";
 
-// Color constants
 const PRIMARY_COLOR = "#F9D423";
 const SECONDARY_COLOR = "#F9E795";
 
-export interface LocationAdress {
+export interface LocationAddress {
   coordinates: [number, number];
   city: string;
   region: string;
   locationId: string;
+  address: string;
 }
 
 interface TripInfo {
-  startLocation: LocationAdress;
-  endLocation: LocationAdress;
-  startAddress: string;
-  endAddress: string;
+  startLocation: LocationAddress;
+  endLocation: LocationAddress;
+  waypoints: { coordinates: [number, number]; address: string }[];
   departureTime: string;
   estimatedArrivalTime: string;
+  totalSeats: number;
   availableSeats: number;
   price: number;
-  vehicle: string;
-  additionalInfo: string;
-}
-
-interface User {
-  id: string;
-  email: string;
-  isDriver: boolean;
+  vehicle: {
+    type: string;
+    make: string;
+    model: string;
+    year: number;
+    color: string;
+    licensePlate: string;
+  };
+  distance: number;
+  duration: number;
+  recurrence: {
+    isRecurring: boolean;
+    frequency: "Daily" | "Weekly" | "Monthly" | "";
+    endDate: string;
+  };
+  allowedLuggage: string;
+  amenities: string[];
+  notes: string;
 }
 
 const CreateTrip: React.FC = () => {
   const { user } = useAuth();
-  console.log("user", user);
-
   const router = useRouter();
 
   const [tripInfo, setTripInfo] = useState<TripInfo>({
@@ -49,37 +57,50 @@ const CreateTrip: React.FC = () => {
       city: "",
       region: "",
       locationId: "",
+      address: "",
     },
-    endLocation: { coordinates: [0, 0], city: "", region: "", locationId: "" },
-    startAddress: "",
-    endAddress: "",
+    endLocation: {
+      coordinates: [0, 0],
+      city: "",
+      region: "",
+      locationId: "",
+      address: "",
+    },
+    waypoints: [],
     departureTime: "",
     estimatedArrivalTime: "",
+    totalSeats: 1,
     availableSeats: 1,
     price: 0,
-    vehicle: "",
-    additionalInfo: "",
+    vehicle: {
+      type: "",
+      make: "",
+      model: "",
+      year: 0,
+      color: "",
+      licensePlate: "",
+    },
+    distance: 0,
+    duration: 0,
+    recurrence: { isRecurring: false, frequency: "", endDate: "" },
+    allowedLuggage: "",
+    amenities: [],
+    notes: "",
   });
+
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
+
   const handleLocationChange = useCallback(
-    (field: "startLocation" | "endLocation") =>
-      (value: LocationAdress & { address: string }) => {
-        setTripInfo((prev) => ({
-          ...prev,
-          [field]: {
-            coordinates: value.coordinates,
-            city: value.city,
-            region: value.region,
-            locationId: value.locationId,
-          },
-          [`${field === "startLocation" ? "start" : "end"}Address`]:
-            value.address,
-        }));
-      },
-    [setTripInfo]
+    (field: "startLocation" | "endLocation") => (value: LocationAddress) => {
+      setTripInfo((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    },
+    []
   );
 
   useEffect(() => {
@@ -109,6 +130,26 @@ const CreateTrip: React.FC = () => {
     setTripInfo((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleVehicleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setTripInfo((prev) => ({
+      ...prev,
+      vehicle: { ...prev.vehicle, [name]: value },
+    }));
+  };
+
+  const handleAmenitiesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value, checked } = e.target;
+    setTripInfo((prev) => ({
+      ...prev,
+      amenities: checked
+        ? [...prev.amenities, value]
+        : prev.amenities.filter((a) => a !== value),
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -124,21 +165,35 @@ const CreateTrip: React.FC = () => {
           city: "",
           region: "",
           locationId: "",
+          address: "",
         },
         endLocation: {
           coordinates: [0, 0],
           city: "",
           region: "",
           locationId: "",
+          address: "",
         },
-        startAddress: "",
-        endAddress: "",
+        waypoints: [],
         departureTime: "",
         estimatedArrivalTime: "",
+        totalSeats: 1,
         availableSeats: 1,
         price: 0,
-        vehicle: "",
-        additionalInfo: "",
+        vehicle: {
+          type: "",
+          make: "",
+          model: "",
+          year: 0,
+          color: "",
+          licensePlate: "",
+        },
+        distance: 0,
+        duration: 0,
+        recurrence: { isRecurring: false, frequency: "", endDate: "" },
+        allowedLuggage: "",
+        amenities: [],
+        notes: "",
       });
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
@@ -204,6 +259,7 @@ const CreateTrip: React.FC = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Location inputs */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
                 <label
@@ -214,7 +270,7 @@ const CreateTrip: React.FC = () => {
                 </label>
                 <AutocompleteInput
                   placeholder="Enter departure city"
-                  value={tripInfo.startAddress}
+                  value={tripInfo.startLocation.address}
                   onChange={handleLocationChange("startLocation")}
                   aria-label="Departure Location"
                 />
@@ -228,13 +284,14 @@ const CreateTrip: React.FC = () => {
                 </label>
                 <AutocompleteInput
                   placeholder="Enter destination city"
-                  value={tripInfo.endAddress}
+                  value={tripInfo.endLocation.address}
                   onChange={handleLocationChange("endLocation")}
                   aria-label="Destination"
                 />
               </div>
             </div>
 
+            {/* Time inputs */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
                 <label
@@ -272,7 +329,26 @@ const CreateTrip: React.FC = () => {
               </div>
             </div>
 
+            {/* Seat and price inputs */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+              <div>
+                <label
+                  htmlFor="totalSeats"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Total Seats
+                </label>
+                <input
+                  type="number"
+                  id="totalSeats"
+                  name="totalSeats"
+                  value={tripInfo.totalSeats}
+                  onChange={handleChange}
+                  min="1"
+                  required
+                  className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
+                />
+              </div>
               <div>
                 <label
                   htmlFor="availableSeats"
@@ -284,9 +360,10 @@ const CreateTrip: React.FC = () => {
                   type="number"
                   id="availableSeats"
                   name="availableSeats"
-                  value={tripInfo.availableSeats.toString()}
+                  value={tripInfo.availableSeats}
                   onChange={handleChange}
                   min="1"
+                  max={tripInfo.totalSeats}
                   required
                   className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
                 />
@@ -302,7 +379,7 @@ const CreateTrip: React.FC = () => {
                   type="number"
                   id="price"
                   name="price"
-                  value={tripInfo.price.toString()}
+                  value={tripInfo.price}
                   onChange={handleChange}
                   min="0"
                   step="0.01"
@@ -310,45 +387,312 @@ const CreateTrip: React.FC = () => {
                   className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
                 />
               </div>
+            </div>
+
+            {/* Vehicle information */}
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
               <div>
                 <label
-                  htmlFor="vehicle"
+                  htmlFor="vehicleType"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Vehicle
+                  Vehicle Type
                 </label>
                 <select
-                  id="vehicle"
-                  name="vehicle"
-                  value={tripInfo.vehicle}
-                  onChange={handleChange}
+                  id="vehicleType"
+                  name="type"
+                  value={tripInfo.vehicle.type}
+                  onChange={handleVehicleChange}
                   required
                   className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
                 >
-                  <option value="">Select a vehicle</option>
+                  <option value="">Select a vehicle type</option>
                   <option value="car">Car</option>
                   <option value="suv">SUV</option>
                   <option value="van">Van</option>
                   <option value="bus">Bus</option>
                 </select>
               </div>
+              <div>
+                <label
+                  htmlFor="vehicleMake"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Vehicle Make
+                </label>
+                <input
+                  type="text"
+                  id="vehicleMake"
+                  name="make"
+                  value={tripInfo.vehicle.make}
+                  onChange={handleVehicleChange}
+                  required
+                  className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="vehicleModel"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Vehicle Model
+                </label>
+                <input
+                  type="text"
+                  id="vehicleModel"
+                  name="model"
+                  value={tripInfo.vehicle.model}
+                  onChange={handleVehicleChange}
+                  required
+                  className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+              <div>
+                <label
+                  htmlFor="vehicleYear"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Vehicle Year
+                </label>
+                <input
+                  type="number"
+                  id="vehicleYear"
+                  name="year"
+                  value={tripInfo.vehicle.year}
+                  onChange={handleVehicleChange}
+                  required
+                  min="1900"
+                  max={new Date().getFullYear() + 1}
+                  className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="vehicleColor"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Vehicle Color
+                </label>
+                <input
+                  type="text"
+                  id="vehicleColor"
+                  name="color"
+                  value={tripInfo.vehicle.color}
+                  onChange={handleVehicleChange}
+                  required
+                  className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="licensePlate"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  License Plate
+                </label>
+                <input
+                  type="text"
+                  id="licensePlate"
+                  name="licensePlate"
+                  value={tripInfo.vehicle.licensePlate}
+                  onChange={handleVehicleChange}
+                  required
+                  className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div>
+                <label
+                  htmlFor="distance"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Distance (km)
+                </label>
+                <input
+                  type="number"
+                  id="distance"
+                  name="distance"
+                  value={tripInfo.distance}
+                  onChange={handleChange}
+                  min="0"
+                  step="0.1"
+                  required
+                  className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="duration"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Duration (minutes)
+                </label>
+                <input
+                  type="number"
+                  id="duration"
+                  name="duration"
+                  value={tripInfo.duration}
+                  onChange={handleChange}
+                  min="0"
+                  required
+                  className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
+                />
+              </div>
             </div>
 
             <div>
               <label
-                htmlFor="additionalInfo"
+                htmlFor="recurrence"
                 className="block text-sm font-medium text-gray-700"
               >
-                Additional Information
+                Recurrence
+              </label>
+              <div className="mt-2">
+                <label className="inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    name="isRecurring"
+                    checked={tripInfo.recurrence.isRecurring}
+                    onChange={(e) =>
+                      setTripInfo((prev) => ({
+                        ...prev,
+                        recurrence: {
+                          ...prev.recurrence,
+                          isRecurring: e.target.checked,
+                        },
+                      }))
+                    }
+                    className="form-checkbox h-5 w-5 text-[${PRIMARY_COLOR}]"
+                  />
+                  <span className="ml-2">Is this a recurring trip?</span>
+                </label>
+              </div>
+              {tripInfo.recurrence.isRecurring && (
+                <div className="mt-2 grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <div>
+                    <label
+                      htmlFor="frequency"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Frequency
+                    </label>
+                    <select
+                      id="frequency"
+                      name="frequency"
+                      value={tripInfo.recurrence.frequency}
+                      onChange={(e) =>
+                        setTripInfo((prev) => ({
+                          ...prev,
+                          recurrence: {
+                            ...prev.recurrence,
+                            frequency: e.target.value as
+                              | "Daily"
+                              | "Weekly"
+                              | "Monthly",
+                          },
+                        }))
+                      }
+                      required={tripInfo.recurrence.isRecurring}
+                      className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
+                    >
+                      <option value="">Select frequency</option>
+                      <option value="Daily">Daily</option>
+                      <option value="Weekly">Weekly</option>
+                      <option value="Monthly">Monthly</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="endDate"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      End Date
+                    </label>
+                    <input
+                      type="date"
+                      id="endDate"
+                      name="endDate"
+                      value={tripInfo.recurrence.endDate}
+                      onChange={(e) =>
+                        setTripInfo((prev) => ({
+                          ...prev,
+                          recurrence: {
+                            ...prev.recurrence,
+                            endDate: e.target.value,
+                          },
+                        }))
+                      }
+                      required={tripInfo.recurrence.isRecurring}
+                      className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="allowedLuggage"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Allowed Luggage
+              </label>
+              <input
+                type="text"
+                id="allowedLuggage"
+                name="allowedLuggage"
+                value={tripInfo.allowedLuggage}
+                onChange={handleChange}
+                placeholder="e.g., 1 suitcase, 1 carry-on"
+                className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Amenities
+              </label>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {[
+                  "WiFi",
+                  "Air Conditioning",
+                  "Pet Friendly",
+                  "Smoking Allowed",
+                ].map((amenity) => (
+                  <label key={amenity} className="inline-flex items-center">
+                    <input
+                      type="checkbox"
+                      value={amenity}
+                      checked={tripInfo.amenities.includes(amenity)}
+                      onChange={handleAmenitiesChange}
+                      className="form-checkbox h-5 w-5 text-[${PRIMARY_COLOR}]"
+                    />
+                    <span className="ml-2">{amenity}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="notes"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Additional Notes
               </label>
               <textarea
-                id="additionalInfo"
-                name="additionalInfo"
-                value={tripInfo.additionalInfo}
+                id="notes"
+                name="notes"
+                value={tripInfo.notes}
                 onChange={handleChange}
                 rows={3}
                 className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
-                placeholder="Any special instructions or details about the trip..."
+                placeholder="Any additional information or special instructions..."
               ></textarea>
             </div>
 
@@ -388,68 +732,6 @@ const CreateTrip: React.FC = () => {
               </button>
             </div>
           </form>
-
-          <div className="mt-8 border-t border-gray-200 pt-6">
-            <h3 className="text-lg font-medium text-gray-900">
-              Why share your trip?
-            </h3>
-            <ul className="mt-4 space-y-2">
-              <li className="flex items-start">
-                <svg
-                  className="flex-shrink-0 h-6 w-6 text-green-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                <p className="ml-3 text-sm text-gray-700">
-                  Save on travel costs by sharing expenses
-                </p>
-              </li>
-              <li className="flex items-start">
-                <svg
-                  className="flex-shrink-0 h-6 w-6 text-green-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                <p className="ml-3 text-sm text-gray-700">
-                  Reduce your carbon footprint
-                </p>
-              </li>
-              <li className="flex items-start">
-                <svg
-                  className="flex-shrink-0 h-6 w-6 text-green-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                <p className="ml-3 text-sm text-gray-700">
-                  Meet new people and make connections
-                </p>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
     </div>
