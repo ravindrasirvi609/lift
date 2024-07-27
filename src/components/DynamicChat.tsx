@@ -3,9 +3,11 @@ import { useSocket } from "@/app/hooks/useSocket";
 import { useState, useEffect, useRef } from "react";
 
 interface Message {
-  sender: string;
-  content: string;
-  timestamp: Date;
+  message: {
+    sender: string;
+    content: string;
+    timestamp: Date;
+  };
 }
 
 interface DynamicChatProps {
@@ -64,21 +66,27 @@ const DynamicChat: React.FC<DynamicChatProps> = ({ rideId, userId }) => {
   return (
     <div className="bg-white rounded-lg shadow-lg p-4">
       <div ref={chatContainerRef} className="h-64 overflow-y-auto mb-4">
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`mb-2 p-2 rounded ${
-              msg.sender === userId
-                ? "bg-[var(--color-primary)] text-white self-end"
-                : "bg-gray-200 self-start"
-            }`}
-          >
-            <p>{msg.content}</p>
-            <small className="text-xs text-gray-500">
-              {new Date(msg.timestamp).toLocaleTimeString()}
-            </small>
-          </div>
-        ))}
+        {messages.map(
+          (msg, index) => (
+            console.log("Message:", msg),
+            console.log("Message index:", index),
+            (
+              <div
+                key={index}
+                className={`mb-2 p-2 rounded ${
+                  msg.message.sender === userId
+                    ? "bg-[var(--color-primary)] text-black self-end"
+                    : "bg-gray-200 self-start"
+                }`}
+              >
+                <p>{msg.message.content}</p>
+                <small className="text-xs text-gray-500">
+                  {new Date(msg.message.timestamp).toLocaleTimeString()}
+                </small>{" "}
+              </div>
+            )
+          )
+        )}
       </div>
       <div className="flex">
         <input
