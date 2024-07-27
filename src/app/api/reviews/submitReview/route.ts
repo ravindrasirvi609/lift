@@ -19,10 +19,19 @@ export async function POST(req: NextRequest) {
     const reviewerId = decodedToken.id;
 
     const body = await req.json();
-    const { reviewedId, rideId, rating, comment } = body;
+    const {
+      reviewedId,
+      rideId,
+      rating,
+      driverRating,
+      vehicleRating,
+      punctualityRating,
+      comment,
+      reviewerRole,
+    } = body;
 
     // Validate input
-    if (!reviewerId || !reviewedId || !rideId || !rating) {
+    if (!reviewerId || !reviewedId || !rideId || !rating || !reviewerRole) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -41,13 +50,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Verify that the reviewer is part of the ride
+    if (
+      reviewerRole === "passenger" &&
+      ride.passengerId.toString() !== reviewerId
+    ) {
+      return NextResponse.json(
+        { error: "You are not authorized to review this ride as a passenger" },
+        { status: 403 }
+      );
+    }
+
+    if (reviewerRole === "driver" && ride.driverId.toString() !== reviewerId) {
+      return NextResponse.json(
+        { error: "You are not authorized to review this ride as a driver" },
+        { status: 403 }
+      );
+    }
+
     // Create new review
     const newReview = new Review({
       reviewer: reviewerId,
       reviewed: reviewedId,
       ride: rideId,
       rating,
+      driverRating: reviewerRole === "passenger" ? driverRating : undefined,
+      vehicleRating: reviewerRole === "passenger" ? vehicleRating : undefined,
+      punctualityRating:
+        reviewerRole === "passenger" ? punctualityRating : undefined,
       comment,
+      reviewerRole,
     });
 
     await newReview.save();

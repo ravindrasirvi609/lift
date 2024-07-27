@@ -51,6 +51,7 @@ export async function PUT(
     if (status === "Confirmed") {
       await Ride.findByIdAndUpdate(booking.ride, {
         $inc: { availableSeats: -booking.numberOfSeats },
+        $push: { bookings: booking._id },
       });
     }
 

@@ -17,6 +17,11 @@ const reviewSchema = new mongoose.Schema({
   vehicleRating: { type: Number, min: 1, max: 5 },
   punctualityRating: { type: Number, min: 1, max: 5 },
   comment: { type: String },
+  reviewerRole: {
+    type: String,
+    enum: ["passenger", "driver"],
+    required: true,
+  },
   status: {
     type: String,
     enum: ["pending", "approved", "rejected"],
