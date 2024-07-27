@@ -9,7 +9,6 @@ import VehicleOwnerSection from "@/components/VehicleOwner";
 import RideSearchAndResults from "@/components/RideSearchAndResults";
 import { useAuth } from "./contexts/AuthContext";
 import Loading from "@/components/Loading";
-import Header from "@/components/Headers";
 import { useSocket } from "./hooks/useSocket";
 
 const Home: React.FC = () => {

@@ -1,6 +1,7 @@
 // src/components/DynamicChat.tsx
 import { useSocket } from "@/app/hooks/useSocket";
-import { useState, useEffect, useRef } from "react";
+import axios from "axios";
+import { useState, useEffect, useRef, use } from "react";
 import { FaPaperPlane, FaSpinner } from "react-icons/fa";
 
 interface Message {
@@ -36,6 +37,15 @@ const DynamicChat: React.FC<DynamicChatProps> = ({ rideId, userId }) => {
       };
     }
   }, [socket, isConnected, rideId]);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      const response = await axios.post(`/api/ride/messages`, { rideId });
+      console.log("response", response);
+    };
+
+    fetchMessages();
+  }, [rideId]);
 
   useEffect(() => {
     if (chatContainerRef.current) {

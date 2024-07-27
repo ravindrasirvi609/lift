@@ -4,11 +4,12 @@ import { NextRequest, NextResponse } from "next/server";
 
 connect();
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const rideId = searchParams.get("rideId");
+export async function POST(req: NextRequest) {
+  const rideId = await req.json();
+  const id = rideId.rideId;
+  console.log("rideId", id);
 
-  if (!rideId) {
+  if (!id) {
     return NextResponse.json(
       { success: false, message: "Ride ID is required" },
       { status: 400 }
@@ -16,7 +17,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const ride = await Ride.findById(rideId).select("messages");
+    const ride = await Ride.findById(id).select("messages");
     if (!ride) {
       return NextResponse.json(
         { success: false, message: "Ride not found" },
@@ -25,7 +26,7 @@ export async function GET(req: NextRequest) {
     }
     return NextResponse.json({ success: true, messages: ride.messages });
   } catch (error) {
-    console.error(`Error fetching messages for ride ${rideId}:`, error);
+    console.error(`Error fetching messages for ride ${id}:`, error);
     return NextResponse.json(
       { success: false, message: "Error fetching messages" },
       { status: 500 }

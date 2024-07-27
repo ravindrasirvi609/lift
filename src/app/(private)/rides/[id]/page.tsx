@@ -6,6 +6,7 @@ import { RideActions } from "@/components/RideActions";
 import RideReviewForm from "@/components/RideReviewForm";
 import { useRideActions } from "@/app/hooks/useRideActions";
 import { FaMapMarkerAlt, FaUser, FaCar, FaInfoCircle } from "react-icons/fa";
+import { useAuth } from "@/app/contexts/AuthContext";
 
 interface DataType {
   _id: string;
@@ -33,6 +34,7 @@ interface DataType {
 
 const RidePage = () => {
   const params = useParams();
+  const userId = useAuth().user?.id ?? "";
   const id = params.id as string;
   const [rideData, setRideData] = useState<null | DataType>(null);
   const { startRide, endRide, isLoading, error } = useRideActions();
@@ -47,11 +49,15 @@ const RidePage = () => {
     try {
       const response = await fetch(`/api/ride/${id}`);
       const data = await response.json();
+      console.log("data", data);
+
       setRideData(data);
     } catch (error) {
       console.error("Failed to fetch ride data:", error);
     }
   };
+
+  console.log("userId", userId);
 
   const handleRideUpdate = async (action: "start" | "end") => {
     try {
@@ -88,11 +94,11 @@ const RidePage = () => {
             <div className="space-y-3">
               <p className="flex items-center text-gray-600">
                 <FaMapMarkerAlt className="mr-2 text-green-500" />
-                <strong>From:</strong> {rideData.startLocation.city}
+                <strong>From:</strong> {rideData.startLocation?.city}
               </p>
               <p className="flex items-center text-gray-600">
                 <FaMapMarkerAlt className="mr-2 text-red-500" />
-                <strong>To:</strong> {rideData.endLocation.city}
+                <strong>To:</strong> {rideData.endLocation?.city}
               </p>
               <p className="flex items-center text-gray-600">
                 <FaCar className="mr-2 text-blue-500" />
@@ -100,7 +106,7 @@ const RidePage = () => {
               </p>
               <p className="flex items-center text-gray-600">
                 <FaUser className="mr-2 text-purple-500" />
-                <strong>Passenger:</strong> {rideData.passenger.fullName}
+                <strong>Passenger:</strong> {rideData.passenger?.fullName}
               </p>
               <p className="flex items-center text-gray-600">
                 <FaInfoCircle className="mr-2 text-yellow-500" />
@@ -149,18 +155,10 @@ const RidePage = () => {
       </div>
       <RideTracker
         rideId={id}
-        userId={rideData.passenger._id}
+        userId={userId}
         initialLocation={rideData.startLocation.coordinates}
         destination={rideData.endLocation.coordinates}
       />
-      {rideData.status === "Completed" && (
-        <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-bold mb-4 text-gray-700">
-            Rate Your Ride
-          </h2>
-          <RideReviewForm rideId={id} driverId={rideData.driver._id} />
-        </div>
-      )}
     </div>
   );
 };

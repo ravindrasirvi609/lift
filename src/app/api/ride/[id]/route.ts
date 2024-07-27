@@ -1,8 +1,12 @@
 import { connect } from "@/dbConfig/dbConfig";
 import Booking from "@/Models/bookingModel";
 import Ride from "@/Models/rideModel";
+import User from "@/Models/userModel";
 import { verifyToken } from "@/utils/verifyToken";
+import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
+
+mongoose.model("User", User.schema);
 
 connect();
 export async function GET(

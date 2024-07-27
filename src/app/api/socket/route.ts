@@ -2,12 +2,14 @@ import { Server as SocketIOServer } from "socket.io";
 import { NextRequest, NextResponse } from "next/server";
 import { NextApiResponseServerIO } from "@/types/next";
 import Ride from "@/Models/rideModel";
+import { connect } from "@/dbConfig/dbConfig";
 
 export const dynamic = "force-dynamic";
 
 let io: SocketIOServer;
 console.log("Initializing Socket.IO server...");
 
+connect();
 export async function GET(req: NextRequest, res: NextApiResponseServerIO) {
   if (!io) {
     console.log("Initializing Socket.IO server...");
@@ -30,7 +32,7 @@ export async function GET(req: NextRequest, res: NextApiResponseServerIO) {
       });
 
       socket.on("send-message", async ({ rideId, message }) => {
-        console.log(`New message in ride ${rideId}:`, message);
+        console.log(`New message in riderer ${rideId}:`, message);
         await addMessageToRide(rideId, message);
         io.to(rideId).emit("new-message", { rideId, message });
       });
@@ -77,8 +79,10 @@ export async function POST(req: Request) {
   return NextResponse.json({ success: true, message: "Action processed" });
 }
 
-async function addMessageToRide(rideId: string, message: any) {
+export async function addMessageToRide(rideId: string, message: any) {
   try {
+    console.log("Adding message to ride", message);
+
     await Ride.findByIdAndUpdate(rideId, {
       $push: {
         messages: {

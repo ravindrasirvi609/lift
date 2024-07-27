@@ -35,6 +35,7 @@ app.prepare().then(() => {
 
     socket.on('send-message', ({ rideId, message }) => {
       console.log(`New message in ride ${rideId}:`, message);
+      
       io.to(rideId).emit('new-message', { rideId, message });
     });
 
