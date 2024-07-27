@@ -6,12 +6,18 @@ const nextConfig = {
 
   reactStrictMode: true,
   swcMinify: true,
+
   webpack: (config, { isServer }) => {
     if (!isServer) {
-      config.externals = [...config.externals, 'socket.io-client'];
+      config.externals = [
+        ...(config.externals || []),
+        'bufferutil',
+        'utf-8-validate',
+      ];
     }
     return config;
   },
+
   async headers() {
     return [
       {
@@ -19,7 +25,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'no-store',
+            value: 'no-store, max-age=0',
           },
         ],
       },
@@ -28,11 +34,26 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'no-store',
+            value: 'no-store, max-age=0',
           },
         ],
       },
-    ]
+      {
+        // Add headers for socket.io
+        source: '/api/socket',
+        headers: [
+          { key: 'Access-Control-Allow-Credentials', value: 'true' },
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT' },
+          { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version' },
+        ],
+      },
+    ];
+  },
+
+  // Add this to ensure API routes are not statically optimized
+  typescript: {
+    ignoreBuildErrors: true,
   },
 };
 

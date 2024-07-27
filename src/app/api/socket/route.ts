@@ -1,18 +1,20 @@
-import { NextApiRequest } from "next";
 import { Server as SocketIOServer } from "socket.io";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { NextApiResponseServerIO } from "@/types/next";
 
 export const dynamic = "force-dynamic";
 
 let io: SocketIOServer;
+console.log("Initializing Socket.IO server...");
 
-export async function GET(req: NextApiRequest, res: NextApiResponseServerIO) {
+export async function GET(req: NextRequest, res: NextApiResponseServerIO) {
   if (!io) {
     console.log("Initializing Socket.IO server...");
     // @ts-ignore
-    io = new SocketIOServer(res.socket.server);
-
+    io = new SocketIOServer(res.socket.server, {
+      path: "/api/socket",
+      addTrailingSlash: false,
+    });
     io.on("connection", (socket) => {
       console.log("New client connected");
 

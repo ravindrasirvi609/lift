@@ -20,19 +20,24 @@ const DynamicChat: React.FC<DynamicChatProps> = ({ rideId, userId }) => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    console.log("Socket:", socket);
+    console.log("Is connected:", isConnected);
+
     if (socket && isConnected) {
+      console.log("Joining ride:", rideId);
       socket.emit("join-ride", rideId);
 
       socket.on("new-message", (message: Message) => {
+        console.log("New message received:", message);
         setMessages((prevMessages) => [...prevMessages, message]);
       });
 
       return () => {
+        console.log("Cleaning up socket listeners");
         socket.off("new-message");
       };
     }
   }, [socket, isConnected, rideId]);
-
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop =

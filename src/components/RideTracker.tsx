@@ -26,18 +26,25 @@ const RideTracker: React.FC<RideTrackerProps> = ({
     if (socket && isConnected) {
       socket.emit("join-ride", rideId);
 
+      // Simulating location updates (replace with real location updates)
+      const interval = setInterval(() => {
+        const newLocation: [number, number] = [
+          currentLocation[0] + (Math.random() - 0.5) * 0.01,
+          currentLocation[1] + (Math.random() - 0.5) * 0.01,
+        ];
+        socket.emit("location-update", { rideId, location: newLocation });
+      }, 5000);
+
       socket.on("location-updated", ({ location }) => {
         setCurrentLocation(location);
       });
-    }
 
-    return () => {
-      if (socket) {
+      return () => {
+        clearInterval(interval);
         socket.off("location-updated");
-      }
-    };
-  }, [socket, isConnected, rideId]);
-
+      };
+    }
+  }, [socket, isConnected, rideId, currentLocation]);
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="flex justify-center mb-4">

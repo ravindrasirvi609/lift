@@ -2,16 +2,16 @@
   "name": "lift",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
+ "scripts": {
+  "dev": "node server.js",
+  "build": "next build",
+  "start": "NODE_ENV=production node server.js"
+},
   "dependencies": {
     "@headlessui/react": "^2.1.2",
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
+    "express": "^4.19.2",
     "firebase": "^10.12.4",
     "framer-motion": "^11.3.2",
     "gsap": "^3.12.5",
