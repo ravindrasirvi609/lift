@@ -38,13 +38,7 @@ const Hero: React.FC = () => {
           ref={logoRef}
           className="relative w-[200px] h-[200px] mx-auto mb-8"
         >
-          <Image
-            src="/logo.png"
-            alt="Platform Logo"
-            fill
-            style={{ objectFit: "contain" }}
-            sizes="200px"
-          />
+          <Image src="/logo.png" alt="Platform Logo" width={200} height={200} />
         </div>
         <div ref={textRef}>
           <h1 className="text-5xl font-bold mb-4">Welcome to lift</h1>
