@@ -1,7 +1,18 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import AvailableRides from "@/components/AvailableRides";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { gsap } from "gsap";
+import {
+  Engine,
+  Render,
+  World,
+  Bodies,
+  Mouse,
+  MouseConstraint,
+} from "matter-js";
+import Loading from "./Loading";
+import { useGSAP } from "@gsap/react";
 
 export interface Ride {
   _id: string;
@@ -62,6 +73,56 @@ const Slider = ({ value, onChange, min, max, step }: any) => {
 const Rides: React.FC<Props> = ({ rides, loading, error }) => {
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [rating, setRating] = useState(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (canvasRef.current) {
+      const engine = Engine.create();
+      const render = Render.create({
+        canvas: canvasRef.current,
+        engine: engine,
+        options: {
+          width: 300,
+          height: 300,
+          wireframes: false,
+          background: "transparent",
+        },
+      });
+
+      const ball = Bodies.circle(150, 150, 10, {
+        restitution: 0.9,
+        render: { fillStyle: "#F96167" },
+      });
+      const ground = Bodies.rectangle(150, 300, 300, 20, {
+        isStatic: true,
+        render: { fillStyle: "#F9D423" },
+      });
+
+      World.add(engine.world, [ball, ground]);
+
+      const mouse = Mouse.create(render.canvas);
+      const mouseConstraint = MouseConstraint.create(engine, {
+        mouse: mouse,
+        constraint: {
+          stiffness: 0.2,
+          render: {
+            visible: false,
+          },
+        },
+      });
+
+      World.add(engine.world, mouseConstraint);
+
+      Engine.run(engine);
+      Render.run(render);
+
+      return () => {
+        Render.stop(render);
+        World.clear(engine.world, true);
+        Engine.clear(engine);
+      };
+    }
+  }, []);
 
   // const filteredRides = rides.filter(
   //   (ride) =>
@@ -72,9 +133,20 @@ const Rides: React.FC<Props> = ({ rides, loading, error }) => {
 
   const filteredRides = rides;
 
+  useGSAP(() => {
+    gsap.from(".filter-item", {
+      opacity: 0,
+      y: 20,
+      stagger: 0.1,
+      duration: 0.5,
+      ease: "power3.out",
+    });
+  }, []);
+
   if (loading) return <Loading />;
 
-  if (error) return <ErrorMessage message={error} />;
+  if (error)
+    return <p className="text-center text-[#F96167] text-lg">{error}</p>;
 
   return (
     <div className="bg-[#F9E795] min-h-screen p-6">
@@ -95,7 +167,7 @@ const Rides: React.FC<Props> = ({ rides, loading, error }) => {
       >
         <h2 className="text-2xl font-semibold mb-4 text-[#F96167]">Filters</h2>
         <div className="space-y-6">
-          <div>
+          <div className="filter-item">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Price Range: ${priceRange[0]} - ${priceRange[1]}
             </label>
@@ -116,7 +188,7 @@ const Rides: React.FC<Props> = ({ rides, loading, error }) => {
               />
             </div>
           </div>
-          <div>
+          <div className="filter-item">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Minimum Rating: {rating.toFixed(1)}
             </label>
@@ -131,41 +203,35 @@ const Rides: React.FC<Props> = ({ rides, loading, error }) => {
         </div>
       </motion.div>
 
-      {filteredRides.length > 0 ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
-          <AvailableRides rides={filteredRides} />
-        </motion.div>
-      ) : (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="text-center text-[#F96167] text-lg bg-[#F9E795] p-4 rounded-lg shadow"
-        >
-          No rides available matching your criteria. Try adjusting your filters!
-        </motion.p>
-      )}
+      <div className="flex justify-center mb-8">
+        <canvas ref={canvasRef} width={300} height={300} />
+      </div>
+
+      <AnimatePresence>
+        {filteredRides.length > 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <AvailableRides rides={filteredRides} />
+          </motion.div>
+        ) : (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-center text-[#F96167] text-lg bg-[#F9E795] p-4 rounded-lg shadow"
+          >
+            No rides available matching your criteria. Try adjusting your
+            filters!
+          </motion.p>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
-
-const Loading = () => (
-  <div className="flex justify-center items-center h-screen bg-[#F9E795]">
-    <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-[#F96167]"></div>
-  </div>
-);
-
-const ErrorMessage = ({ message }: { message: string }) => (
-  <div className="flex justify-center items-center h-screen bg-[#F9E795]">
-    <div className="bg-[#F96167] text-white p-4 rounded-lg shadow">
-      <h2 className="text-xl font-bold mb-2">Error</h2>
-      <p>{message}</p>
-    </div>
-  </div>
-);
 
 export default Rides;

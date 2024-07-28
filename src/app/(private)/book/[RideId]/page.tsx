@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { withAuth } from "@/components/withAuth";
 import { useAuth } from "@/app/contexts/AuthContext";
@@ -16,6 +16,10 @@ import {
   FaStar,
 } from "react-icons/fa";
 import Image from "next/image";
+import { gsap } from "gsap";
+import { motion, AnimatePresence } from "framer-motion";
+import Matter from "matter-js";
+import { useGSAP } from "@gsap/react";
 
 const BookRidePage = () => {
   const { user } = useAuth();
@@ -27,6 +31,80 @@ const BookRidePage = () => {
   const [ride, setRide] = useState<Ride | null>(null);
   const [numberOfSeats, setNumberOfSeats] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const pageRef = useRef(null);
+  const canvasRef = useRef(null);
+
+  useGSAP(() => {
+    // GSAP animation for page entrance
+    gsap.from(pageRef.current, {
+      opacity: 0,
+      y: 50,
+      duration: 1,
+      ease: "power3.out",
+    });
+  }, []);
+
+  useEffect(() => {
+    // Matter.js background animation
+    const Engine = Matter.Engine;
+    const Render = Matter.Render;
+    const World = Matter.World;
+    const Bodies = Matter.Bodies;
+
+    const engine = Engine.create();
+    const render = Render.create({
+      element: canvasRef.current || undefined,
+      engine: engine,
+      options: {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        wireframes: false,
+        background: "transparent",
+      },
+    });
+
+    const circle = Bodies.circle(150, 200, 30, {
+      restitution: 0.9,
+      render: { fillStyle: "#F9D423" },
+    });
+
+    World.add(engine.world, [
+      Bodies.rectangle(window.innerWidth / 2, -10, window.innerWidth, 20, {
+        isStatic: true,
+      }),
+      Bodies.rectangle(-10, window.innerHeight / 2, 20, window.innerHeight, {
+        isStatic: true,
+      }),
+      Bodies.rectangle(
+        window.innerWidth / 2,
+        window.innerHeight + 10,
+        window.innerWidth,
+        20,
+        { isStatic: true }
+      ),
+      Bodies.rectangle(
+        window.innerWidth + 10,
+        window.innerHeight / 2,
+        20,
+        window.innerHeight,
+        { isStatic: true }
+      ),
+      circle,
+    ]);
+
+    Engine.run(engine);
+    Render.run(render);
+
+    return () => {
+      Render.stop(render);
+      World.clear(engine.world, false);
+      Engine.clear(engine);
+      render.canvas.remove();
+      render.canvas;
+      render.context;
+      render.textures = {};
+    };
+  }, []);
 
   useEffect(() => {
     if (user === null) {
@@ -126,7 +204,7 @@ const BookRidePage = () => {
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="flex items-center">
             <FaCar className="text-[#F96167] mr-2" />
-            <span>{ride.vehicle}</span>
+            {/* <span>{ride.vehicle}</span> */}
           </div>
           <div className="flex items-center">
             <FaUsers className="text-[#F96167] mr-2" />
