@@ -62,6 +62,7 @@ const RideSearchAndResults: React.FC = () => {
     <div
       ref={componentRef}
       className="min-h-screen bg-gradient-to-br from-[#F9E795] to-[#F9D423]"
+      id="rideSearch"
     >
       <motion.div
         initial={{ opacity: 0, y: -20 }}

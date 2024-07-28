@@ -4,6 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion } from "framer-motion";
 import { FaSearch, FaCarSide, FaCheckCircle } from "react-icons/fa";
 import { useGSAP } from "@gsap/react";
+import Link from "next/link";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -71,13 +72,15 @@ const HowItWorks: React.FC = () => {
           ))}
         </div>
         <div className="mt-16 text-center">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-[#F96167] hover:bg-[#F9D423] text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg transition duration-300"
-          >
-            Find a Ride Now
-          </motion.button>
+          <Link href={"/#rideSearch"}>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-[#F96167] hover:bg-[#F9D423] text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg transition duration-300"
+            >
+              Find a Ride Now
+            </motion.button>
+          </Link>
         </div>
       </div>
     </section>

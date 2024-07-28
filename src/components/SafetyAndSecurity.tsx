@@ -4,6 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion } from "framer-motion";
 import { FaShieldAlt, FaUserCheck, FaLock } from "react-icons/fa";
 import { useGSAP } from "@gsap/react";
+import Link from "next/link";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -77,13 +78,15 @@ const SafetyAndSecurity: React.FC = () => {
             secure payment options to ensure a trustworthy experience for all
             our users.
           </p>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-[#F96167] hover:bg-white hover:text-[#F96167] text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg transition duration-300"
-          >
-            Learn More About Our Safety Measures
-          </motion.button>
+          <Link href={"/about"}>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-[#F96167] hover:bg-white hover:text-[#F96167] text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg transition duration-300"
+            >
+              Learn More About Our Safety Measures
+            </motion.button>
+          </Link>
         </div>
       </div>
     </section>

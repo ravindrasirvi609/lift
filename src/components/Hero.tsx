@@ -3,6 +3,7 @@ import React, { useRef } from "react";
 import { gsap } from "gsap";
 import { motion } from "framer-motion";
 import { useGSAP } from "@gsap/react";
+import Link from "next/link";
 
 const Hero: React.FC = () => {
   const logoRef = useRef<HTMLDivElement>(null);
@@ -34,16 +35,13 @@ const Hero: React.FC = () => {
   return (
     <section className="bg-gradient-to-b from-[#F96167] to-[#F9D423] text-white py-20 text-center relative overflow-hidden">
       <div className="container mx-auto relative z-10">
-        <div
-          ref={logoRef}
-          className="relative w-[200px] h-[200px] mx-auto mb-8"
-        >
+        <div ref={logoRef} className=" w-[200px] h-[200px] mx-auto mb-8">
           <Image
             src="/logo.png"
             alt="Lift team"
             width={500}
             height={300}
-            className="rounded-lg shadow-lg"
+            className="rounded-lg"
           />{" "}
         </div>
         <div ref={textRef}>
@@ -51,13 +49,15 @@ const Hero: React.FC = () => {
           <p className="text-xl mb-8">
             Your reliable platform to find and book rides easily.
           </p>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-white text-[#F96167] font-bold py-3 px-8 rounded-full text-lg shadow-lg"
-          >
-            Get Started
-          </motion.button>
+          <Link href={"/#rideSearch"}>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-white text-[#F96167] font-bold py-3 px-8 rounded-full text-lg shadow-lg"
+            >
+              Get Started
+            </motion.button>
+          </Link>
         </div>
       </div>
       <div className="absolute bottom-0 left-0 w-full">
