@@ -13,37 +13,7 @@ import {
 } from "matter-js";
 import Loading from "./Loading";
 import { useGSAP } from "@gsap/react";
-
-export interface Ride {
-  _id: string;
-  driver: {
-    _id: string;
-    name: string;
-    image: string;
-    isVerified: boolean;
-    rating: number;
-  };
-  vehicle: string;
-  startLocation: {
-    coordinates: [number, number];
-    city: string;
-    region: string;
-    locationId: string;
-  };
-  endLocation: {
-    coordinates: [number, number];
-    city: string;
-    region: string;
-    locationId: string;
-  };
-  startAddress: string;
-  endAddress: string;
-  departureTime: string;
-  estimatedArrivalTime: string;
-  availableSeats: number;
-  price: number;
-  status: "Scheduled" | "In Progress" | "Completed" | "Cancelled";
-}
+import { Ride } from "@/types/types";
 
 interface Props {
   rides: Ride[];

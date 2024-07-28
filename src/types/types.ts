@@ -25,20 +25,6 @@ export interface Driver {
 }
 
 // Ride interface
-export interface Ride {
-  _id: string;
-  driver: Driver;
-  vehicle: string;
-  startLocation: Location;
-  endLocation: Location;
-  startAddress: string;
-  endAddress: string;
-  departureTime: string;
-  estimatedArrivalTime: string;
-  availableSeats: number;
-  price: number;
-  status: "Scheduled" | "In Progress" | "Completed" | "Cancelled";
-}
 
 // AutocompleteInputProps interface
 export interface AutocompleteInputProps {
@@ -59,25 +45,33 @@ export interface RidesProps {
   error: string | null;
 }
 
+// types.ts
 export interface User {
+  _id: string;
   firstName: string;
   lastName: string;
   email: string;
   phoneNumber: string;
   profilePicture: string;
-  dateOfBirth: Date | string;
+  dateOfBirth: Date;
   gender: string;
   isVerified: boolean;
   isAdmin: boolean;
-  passengerRating: number;
-  totalRidesAsTakenPassenger: number;
   isDriver: boolean;
+  totalRidesAsTakenPassenger: number;
+  totalDistanceTraveled: number;
   driverVerificationStatus: string;
-  driverLicense: string;
-  vehicleInfo: string;
-  driverRating: number;
+  vehicleInfo: {
+    make: string;
+    model: string;
+    year: number;
+    color: string;
+    licensePlate: string;
+  };
   totalRidesAsDriver: number;
   driverAvailabilityStatus: string;
+  passengerRating: number;
+  driverRating: number;
   earnings: number;
   bankAccountInfo: {
     accountNumber: string;
@@ -91,4 +85,48 @@ export interface User {
     sms: boolean;
     push: boolean;
   };
+}
+
+export interface Review {
+  _id: string;
+  reviewer: User;
+  reviewed: User;
+  ride: Ride;
+  rating: number;
+  driverRating?: number;
+  vehicleRating?: number;
+  punctualityRating?: number;
+  comment: string;
+  reviewerRole: "passenger" | "driver";
+  status: "pending" | "approved" | "rejected";
+  createdAt: Date;
+}
+
+export interface Ride {
+  _id: string;
+  driver: User;
+  vehicle: {
+    type: string;
+    make: string;
+    model: string;
+    year: number;
+    color: string;
+    licensePlate: string;
+  };
+  startLocation: {
+    coordinates: [number, number];
+    city: string;
+    address: string;
+  };
+  endLocation: {
+    coordinates: [number, number];
+    city: string;
+    address: string;
+  };
+  departureTime: Date;
+  actualArrivalTime?: Date;
+  price: number;
+  status: "Scheduled" | "In Progress" | "Completed" | "Cancelled";
+  distance: number;
+  duration: number;
 }
