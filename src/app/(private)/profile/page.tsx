@@ -9,7 +9,9 @@ import Preferences from "@/components/profile/Preferences";
 import { ReviewsList } from "@/components/profile/ReviewsList";
 import { RideHistory } from "@/components/profile/RideHistory";
 import { Review, Ride, User } from "@/types/types";
+import Link from "next/link";
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 
 const ProfilePage: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -56,10 +58,29 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F9E795] to-[#F9D423]">
-      <header className="bg-[#F96167] text-white p-6">
-        <h1 className="text-3xl font-bold">
-          {user.firstName} {user.lastName}&apos;s Profile
-        </h1>
+      <header className="bg-[#F96167] text-white p-6 flex items-center justify-between">
+        <div>
+          <Image
+            src={user.profilePicture}
+            alt="Profile Picture"
+            width={100}
+            height={100}
+            className="rounded-full"
+          />
+        </div>
+        <div className="text-left ml-4">
+          <h1 className="text-3xl font-bold">
+            {user.firstName} {user.lastName}&apos;s Profile
+          </h1>
+          <p className="text-sm mt-2">
+            {user.isDriver ? "Driver" : "Passenger"} Profile
+          </p>
+        </div>
+        <Link href="/editProfile" className="text-white">
+          <button className="bg-white text-[#F96167] px-4 py-2 rounded-lg shadow-md hover:shadow-lg">
+            Edit Profile
+          </button>
+        </Link>
       </header>
 
       <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">

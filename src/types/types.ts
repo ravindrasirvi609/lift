@@ -85,6 +85,7 @@ export interface User {
     sms: boolean;
     push: boolean;
   };
+  [key: string]: any;
 }
 
 export interface Review {

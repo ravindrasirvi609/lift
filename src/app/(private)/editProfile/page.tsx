@@ -1,15 +1,23 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { User } from "@/types/types";
 import { formatDate } from "@/utils/utils";
-import Image from "next/image";
+
+import Loading from "@/components/Loading";
+import {
+  InputField,
+  NotificationToggle,
+  ProfileSection,
+  SelectField,
+} from "@/components/ProfileEditComponents";
+import { User } from "@/types/types";
+import toast, { Toaster } from "react-hot-toast";
+import ProfilePictureUpload from "@/components/ProfilePictureUpload";
 
 export default function EditProfilePage() {
   const [formData, setFormData] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [profilePicture, setProfilePicture] = useState<File | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchUserData();
@@ -19,30 +27,45 @@ export default function EditProfilePage() {
     try {
       const response = await axios.get("/api/profile/profileDetails");
       const userData = response.data.user;
-      console.log("User data:", userData);
-
       setFormData({
         ...userData,
         dateOfBirth: formatDate(new Date(userData.dateOfBirth)),
       });
-      setLoading(false);
     } catch (err) {
-      setError("Failed to fetch user data");
+      toast.error("Failed to fetch user data");
+    } finally {
       setLoading(false);
     }
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => (prev ? { ...prev, [name]: value } : null));
+    setFormData((prev) => (prev ? { ...prev, [name]: value } : null) as User);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setProfilePicture(e.target.files[0]);
-    }
+  const handleNestedInputChange = (
+    section: string,
+    field: string,
+    value: any
+  ) => {
+    setFormData((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [field]: value,
+        },
+      };
+    });
+  };
+
+  const handleProfilePictureChange = (url: string) => {
+    setFormData((prev) => (prev ? { ...prev, profilePicture: url } : null));
   };
 
   const handleNotificationChange = (type: "email" | "sms" | "push") => {
@@ -51,7 +74,7 @@ export default function EditProfilePage() {
         ? {
             ...prev,
             notificationPreferences: {
-              ...(prev.notificationPreferences || {}), // Ensure it's an object
+              ...(prev.notificationPreferences || {}),
               [type]: !prev.notificationPreferences?.[type],
             },
           }
@@ -61,42 +84,44 @@ export default function EditProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
+    setSaving(true);
 
     try {
       const response = await axios.put("/api/profile/profileDetails", formData);
-      console.log("Profile updated successfully:", response.data);
-      // Optionally, you can show a success message or redirect the user
+      toast.success("Profile updated successfully");
     } catch (err) {
-      setError("Failed to update profile");
+      toast.error("Failed to update profile");
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!formData) return <div>No user data available</div>;
+  if (loading) return <Loading />;
+  if (!formData)
+    return <div className="text-center mt-8">No user data available</div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F9E795] to-[#F9D423]">
-      <header className="bg-[#F96167] text-white shadow-lg">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold">Edit Profile</h1>
+    <div className="min-h-screen bg-gray-100">
+      <Toaster position="top-right" />
+
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+          <h1 className="text-2xl font-semibold text-gray-900">Edit Profile</h1>
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <form onSubmit={handleSubmit} className="space-y-8">
+      <main className="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <ProfileSection title="Profile Picture">
-            <ProfilePictureUploader
-              currentPicture={formData.profilePicture}
-              onChange={handleFileChange}
+            <ProfilePictureUpload
+              userId={formData.id}
+              currentPictureUrl={formData.profilePicture}
+              onPictureChange={handleProfilePictureChange}
             />
           </ProfileSection>
+
           <ProfileSection title="Basic Information">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
                 label="First Name"
                 name="firstName"
@@ -122,11 +147,14 @@ export default function EditProfilePage() {
                 value={formData.phoneNumber}
                 onChange={handleInputChange}
               />
-              <InputField
-                label="Date of Birth"
+              <input
                 name="dateOfBirth"
                 type="date"
-                value={formData.dateOfBirth.toString()}
+                value={
+                  formData.dateOfBirth instanceof Date
+                    ? formData.dateOfBirth.toISOString().split("T")[0]
+                    : new Date(formData.dateOfBirth).toISOString().split("T")[0]
+                }
                 onChange={handleInputChange}
               />
               <SelectField
@@ -152,8 +180,13 @@ export default function EditProfilePage() {
                 onChange={handleInputChange}
                 options={[
                   { value: "English", label: "English" },
-                  { value: "Spanish", label: "Spanish" },
-                  { value: "French", label: "French" },
+                  { value: "Hindi", label: "Hindi" },
+                  { value: "Gujrati", label: "Gujrati" },
+                  { value: "Marathi", label: "Marathi" },
+                  { value: "Punjabi", label: "Punjabi" },
+                  { value: "Tamil", label: "Tamil" },
+                  { value: "Telugu", label: "Telugu" },
+                  { value: "Other", label: "Other" },
                 ]}
               />
               <div>
@@ -181,10 +214,80 @@ export default function EditProfilePage() {
             </div>
           </ProfileSection>
 
+          {formData.isDriver && (
+            <>
+              <ProfileSection title="Vehicle Information">
+                <div className="space-y-4">
+                  <InputField
+                    label="Make"
+                    name="vehicleMake"
+                    value={formData.vehicleInfo?.make || ""}
+                    onChange={(e) =>
+                      handleNestedInputChange(
+                        "vehicleInfo",
+                        "make",
+                        e.target.value
+                      )
+                    }
+                  />
+                  <InputField
+                    label="Model"
+                    name="vehicleModel"
+                    value={formData.vehicleInfo?.model || ""}
+                    onChange={(e) =>
+                      handleNestedInputChange(
+                        "vehicleInfo",
+                        "model",
+                        e.target.value
+                      )
+                    }
+                  />
+                  <InputField
+                    label="Year"
+                    name="vehicleYear"
+                    type="number"
+                    value={formData.vehicleInfo?.year?.toString() || ""}
+                    onChange={(e) =>
+                      handleNestedInputChange(
+                        "vehicleInfo",
+                        "year",
+                        e.target.value
+                      )
+                    }
+                  />
+                  <InputField
+                    label="Color"
+                    name="vehicleColor"
+                    value={formData.vehicleInfo?.color || ""}
+                    onChange={(e) =>
+                      handleNestedInputChange(
+                        "vehicleInfo",
+                        "color",
+                        e.target.value
+                      )
+                    }
+                  />
+                  <InputField
+                    label="License Plate"
+                    name="vehicleLicensePlate"
+                    value={formData.vehicleInfo?.licensePlate || ""}
+                    onChange={(e) =>
+                      handleNestedInputChange(
+                        "vehicleInfo",
+                        "licensePlate",
+                        e.target.value
+                      )
+                    }
+                  />
+                </div>
+              </ProfileSection>
+            </>
+          )}
+
           <div className="flex justify-end space-x-4">
             <button
               type="button"
-              className="px-6 py-2 border border-[#F96167] text-[#F96167] rounded-full hover:bg-[#F96167] hover:text-white transition duration-300"
+              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               onClick={() => {
                 /* Implement cancel logic */
               }}
@@ -193,10 +296,10 @@ export default function EditProfilePage() {
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-[#F96167] text-white rounded-full hover:bg-opacity-90 transition duration-300"
-              disabled={loading}
+              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              disabled={saving}
             >
-              {loading ? "Saving..." : "Save Changes"}
+              {saving ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </form>
@@ -204,130 +307,3 @@ export default function EditProfilePage() {
     </div>
   );
 }
-
-const ProfileSection: React.FC<{
-  title: string;
-  children: React.ReactNode;
-}> = ({ title, children }) => (
-  <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-    <div className="bg-[#F96167] text-white py-3 px-6">
-      <h2 className="text-xl font-semibold">{title}</h2>
-    </div>
-    <div className="p-6">{children}</div>
-  </div>
-);
-
-const InputField: React.FC<{
-  label: string;
-  name: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  type?: string;
-}> = ({ label, name, value, onChange, type = "text" }) => (
-  <div>
-    <label
-      htmlFor={name}
-      className="block text-sm font-medium text-gray-700 mb-1"
-    >
-      {label}
-    </label>
-    <input
-      type={type}
-      name={name}
-      id={name}
-      value={value}
-      onChange={onChange}
-      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F96167] focus:border-transparent"
-    />
-  </div>
-);
-
-const SelectField: React.FC<{
-  label: string;
-  name: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  options: { value: string; label: string }[];
-}> = ({ label, name, value, onChange, options }) => (
-  <div>
-    <label
-      htmlFor={name}
-      className="block text-sm font-medium text-gray-700 mb-1"
-    >
-      {label}
-    </label>
-    <select
-      name={name}
-      id={name}
-      value={value}
-      onChange={onChange}
-      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F96167] focus:border-transparent"
-    >
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
-  </div>
-);
-
-const NotificationToggle: React.FC<{
-  label: string;
-  checked: boolean;
-  onChange: () => void;
-}> = ({ label, checked, onChange }) => (
-  <label className="flex items-center cursor-pointer">
-    <div className="relative">
-      <input
-        type="checkbox"
-        className="sr-only"
-        checked={checked}
-        onChange={onChange}
-      />
-      <div
-        className={`block w-14 h-8 rounded-full ${
-          checked ? "bg-[#F96167]" : "bg-gray-300"
-        }`}
-      ></div>
-      <div
-        className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform duration-300 ease-in-out ${
-          checked ? "transform translate-x-6" : ""
-        }`}
-      ></div>
-    </div>
-    <span className="ml-3 text-gray-700">{label}</span>
-  </label>
-);
-
-const ProfilePictureUploader: React.FC<{
-  currentPicture: string | null;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}> = ({ currentPicture, onChange }) => (
-  <div className="flex items-center space-x-6">
-    <div className="shrink-0">
-      <Image
-        className="h-16 w-16 object-cover rounded-full"
-        src={currentPicture || "/dummy-user.png"}
-        alt="Current profile picture"
-        width={64}
-        height={64}
-      />
-    </div>
-    <label className="block">
-      <span className="sr-only">Choose profile photo</span>
-      <input
-        type="file"
-        accept="image/*"
-        onChange={onChange}
-        className="block w-full text-sm text-slate-500
-          file:mr-4 file:py-2 file:px-4
-          file:rounded-full file:border-0
-          file:text-sm file:font-semibold
-          file:bg-violet-50 file:text-violet-700
-          hover:file:bg-violet-100
-        "
-      />
-    </label>
-  </div>
-);
