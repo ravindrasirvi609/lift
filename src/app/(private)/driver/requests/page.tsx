@@ -150,7 +150,7 @@ const DriverRequestsPage = () => {
                 </div>
                 <div className="flex items-center justify-end">
                   <FaDollarSign className="text-[#F96167] mr-2" />
-                  <span className="font-bold text-lg">${request.price}</span>
+                  <span className="font-bold text-lg">₹{request.price}</span>
                 </div>
                 <div className="flex items-center">
                   <FaMapMarkerAlt className="text-[#F96167] mr-2" />

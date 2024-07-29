@@ -1,20 +1,18 @@
 import React from "react";
 import Image from "next/image";
-import { Ride } from "./Ride";
 import Link from "next/link";
 import {
   FaStar,
-  FaCar,
   FaMapMarkerAlt,
   FaClock,
   FaUsers,
-  FaDollarSign,
   FaRoute,
 } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { Ride } from "@/types/types";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -91,7 +89,7 @@ const AvailableRides: React.FC<Props> = ({ rides }) => {
               </div>
               <div className="text-right">
                 <p className="text-3xl font-bold text-[#F96167]">
-                  ${ride.price.toFixed(2)}
+                  ₹{ride.price.toFixed(2)}
                 </p>
                 <p className="text-sm text-gray-600 mt-1">
                   <FaUsers className="inline mr-1" />
@@ -120,7 +118,7 @@ const AvailableRides: React.FC<Props> = ({ rides }) => {
               />
               <RideInfoItem
                 icon={FaClock}
-                text={new Date(ride.estimatedArrivalTime).toLocaleString()}
+                text={new Date(ride?.estimatedArrivalTime).toLocaleString()}
               />
             </div>
 

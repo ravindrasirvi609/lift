@@ -5,15 +5,17 @@ import { FaPlay, FaStop, FaClock, FaCheckCircle } from "react-icons/fa";
 interface RideActionsProps {
   rideId: string;
   status: string;
-  onRideUpdate: (action: "start" | "end") => Promise<void>;
+  onRideUpdate: (action: "start" | "end" | "cancel") => Promise<void>;
+  isDriver: boolean;
 }
 
 export function RideActions({
   rideId,
   status,
   onRideUpdate,
+  isDriver,
 }: RideActionsProps) {
-  const { startRide, endRide, isLoading, error } = useRideActions();
+  const { startRide, endRide, cancelRide, isLoading, error } = useRideActions();
 
   const handleStartRide = async () => {
     try {
@@ -28,6 +30,15 @@ export function RideActions({
     try {
       await endRide(rideId);
       onRideUpdate("end");
+    } catch (err) {
+      console.error("Failed to end ride:", err);
+    }
+  };
+
+  const handleCancelRide = async () => {
+    try {
+      await cancelRide(rideId);
+      onRideUpdate("cancel");
     } catch (err) {
       console.error("Failed to end ride:", err);
     }
@@ -82,6 +93,26 @@ export function RideActions({
             <FaCheckCircle className="mr-2" />
             Ride Completed
           </div>
+        )}
+
+        {isDriver && status === "Scheduled" && (
+          <button
+            onClick={handleCancelRide}
+            disabled={isLoading}
+            className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-[#f54e54] text-gray-800 rounded-lg hover:bg-[#F96167] transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#F9D423] focus:ring-opacity-50 disabled:opacity-50 shadow-md"
+          >
+            {isLoading ? (
+              <span className="flex items-center">
+                <FaClock className="animate-spin mr-2" />
+                Cancel...
+              </span>
+            ) : (
+              <>
+                <FaPlay className="mr-2" />
+                Cancel Ride
+              </>
+            )}
+          </button>
         )}
       </div>
       {error && (

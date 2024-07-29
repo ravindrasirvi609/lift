@@ -17,7 +17,7 @@ export const RideHistory: React.FC<RideHistoryProps> = ({
         <div key={ride._id} className="bg-white p-4 rounded-lg shadow">
           <div className="flex justify-between">
             <span>{formatDate(new Date(ride.departureTime))}</span>
-            <span className="font-medium">${ride.price.toFixed(2)}</span>
+            <span className="font-medium">₹{ride.price.toFixed(2)}</span>
           </div>
           <div className="mt-2">
             <p>From: {ride.startLocation.city}</p>

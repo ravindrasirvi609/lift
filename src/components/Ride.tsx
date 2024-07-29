@@ -139,7 +139,7 @@ const Rides: React.FC<Props> = ({ rides, loading, error }) => {
         <div className="space-y-6">
           <div className="filter-item">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Price Range: ${priceRange[0]} - ${priceRange[1]}
+              Price Range: ₹{priceRange[0]} - ₹{priceRange[1]}
             </label>
             <div className="flex space-x-4">
               <Slider

@@ -49,11 +49,11 @@ const rideSchema = new mongoose.Schema({
   distance: { type: Number }, // in kilometers
   duration: { type: Number }, // in minutes
   route: { type: String }, // Encoded polyline of the route
-  recurrence: {
-    isRecurring: { type: Boolean, default: false },
-    frequency: { type: String, enum: ["Daily", "Weekly", "Monthly"] },
-    endDate: { type: Date },
-  },
+  // recurrence: {
+  //   isRecurring: { type: Boolean, default: false },
+  //   frequency: { type: String, enum: ["Daily", "Weekly", "Monthly"] },
+  //   endDate: { type: Date },
+  // },
   allowedLuggage: { type: String },
   amenities: [{ type: String }], // e.g., ["WiFi", "Air Conditioning", "Pet Friendly"]
   bookings: [{ type: mongoose.Schema.Types.ObjectId, ref: "Booking" }],

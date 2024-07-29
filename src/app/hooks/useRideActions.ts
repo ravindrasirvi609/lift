@@ -42,5 +42,23 @@ export function useRideActions() {
     }
   };
 
-  return { startRide, endRide, isLoading, error };
+  const cancelRide = async (rideId: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await axios.post(`/api/ride/${rideId}/cancel`);
+      if (response.status !== 200) {
+        throw new Error("Failed to cancel ride");
+      }
+      router.push("/"); // Redirect to dashboard after cancellation
+      return response.data;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { startRide, endRide, cancelRide, isLoading, error };
 }

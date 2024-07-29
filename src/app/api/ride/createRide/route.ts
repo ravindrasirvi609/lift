@@ -31,7 +31,6 @@ export async function POST(request: NextRequest) {
       "endLocation",
       "departureTime",
       "estimatedArrivalTime",
-      "totalSeats",
       "availableSeats",
       "price",
     ];
@@ -82,13 +81,13 @@ export async function POST(request: NextRequest) {
       status: "Scheduled",
       distance: body.distance,
       duration: body.duration,
-      recurrence: {
-        isRecurring: body.recurrence.isRecurring,
-        frequency: body.recurrence.frequency,
-        endDate: body.recurrence.endDate
-          ? new Date(body.recurrence.endDate)
-          : undefined,
-      },
+      // recurrence: {
+      //   isRecurring: body.recurrence.isRecurring,
+      //   frequency: body.recurrence.frequency,
+      //   endDate: body.recurrence.endDate
+      //     ? new Date(body.recurrence.endDate)
+      //     : undefined,
+      // },
       allowedLuggage: body.allowedLuggage,
       amenities: body.amenities,
       notes: body.notes,

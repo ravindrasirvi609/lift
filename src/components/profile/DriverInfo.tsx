@@ -29,7 +29,7 @@ const DriverInfo: React.FC<DriverInfoProps> = ({ user }) => {
         <InfoItem
           icon={<FaMoneyBillWave className="text-2xl text-[#F96167]" />}
           label="Total Earnings"
-          value={`$${user.earnings.toFixed(2)}`}
+          value={`₹${user.earnings.toFixed(2)}`}
         />
       </div>
       <div className="mt-6 flex justify-between items-center">

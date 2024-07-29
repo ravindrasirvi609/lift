@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import RideTracker from "@/components/RideTracker";
 import { RideActions } from "@/components/RideActions";
-import RideReviewForm from "@/components/RideReviewForm";
 import { useRideActions } from "@/app/hooks/useRideActions";
 import {
   FaMapMarkerAlt,
@@ -14,6 +13,8 @@ import {
   FaDollarSign,
 } from "react-icons/fa";
 import { useAuth } from "@/app/contexts/AuthContext";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface DataType {
   _id: string;
@@ -37,14 +38,17 @@ interface DataType {
   departureTime: string;
   estimatedArrivalTime: string;
   price: number;
+  availableSeats?: number;
 }
 
 const RidePage = () => {
   const params = useParams();
-  const userId = useAuth().user?.id ?? "";
+  const { user } = useAuth();
+  const router = useRouter();
+  const userId = user?.id ?? "";
   const id = params.id as string;
   const [rideData, setRideData] = useState<null | DataType>(null);
-  const { startRide, endRide, isLoading, error } = useRideActions();
+  const { startRide, endRide, cancelRide, isLoading, error } = useRideActions();
 
   useEffect(() => {
     if (id) {
@@ -56,22 +60,21 @@ const RidePage = () => {
     try {
       const response = await fetch(`/api/ride/${id}`);
       const data = await response.json();
-      console.log("data", data);
-
       setRideData(data);
     } catch (error) {
       console.error("Failed to fetch ride data:", error);
     }
   };
 
-  console.log("userId", userId);
-
-  const handleRideUpdate = async (action: "start" | "end") => {
+  const handleRideUpdate = async (action: "start" | "end" | "cancel") => {
     try {
       if (action === "start") {
         await startRide(id);
-      } else {
+      } else if (action === "end") {
         await endRide(id);
+        router.push("/driver/requests");
+      } else {
+        await cancelRide(id);
       }
       await fetchRideData();
     } catch (error) {
@@ -86,6 +89,8 @@ const RidePage = () => {
       </div>
     );
   }
+
+  const isDriver = userId === rideData.driver._id;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F9D423] to-white">
@@ -123,6 +128,14 @@ const RidePage = () => {
                 value={rideData.passenger?.fullName}
                 iconColor="text-purple-500"
               />
+              {isDriver && (
+                <InfoItem
+                  icon={FaUser}
+                  label="Available Seats"
+                  value={rideData.availableSeats}
+                  iconColor="text-yellow-500"
+                />
+              )}
               <StatusBadge status={rideData.status} />
             </div>
             <div className="space-y-4">
@@ -144,19 +157,29 @@ const RidePage = () => {
               <InfoItem
                 icon={FaDollarSign}
                 label="Price"
-                value={`$${rideData.price.toFixed(2)}`}
+                value={`₹${rideData.price.toFixed(2)}`}
                 iconColor="text-green-500"
               />
+              {isDriver && (
+                <div className="flex justify-between items-center">
+                  <Link href={"/driver/requests"}>
+                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                      Check Requests
+                    </button>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
-          <div className="mt-6">
+          <div className="mt-6 flex justify-between items-center">
             <RideActions
               rideId={id}
               status={rideData.status}
               onRideUpdate={handleRideUpdate}
+              isDriver={isDriver}
             />
-            {error && <p className="text-[#F96167] mt-2">{error}</p>}
           </div>
+          {error && <p className="text-[#F96167] mt-2">{error}</p>}
         </div>
         <RideTracker
           rideId={id}

@@ -196,7 +196,7 @@ const BookRidePage = () => {
             </div>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-bold text-[#F96167]">${ride.price}</p>
+            <p className="text-2xl font-bold text-[#F96167]">₹{ride.price}</p>
             <p className="text-sm text-gray-600">per seat</p>
           </div>
         </div>
@@ -251,7 +251,7 @@ const BookRidePage = () => {
           <p className="text-lg font-semibold">
             Total:{" "}
             <span className="text-[#F96167]">
-              ${(numberOfSeats * ride.price).toFixed(2)}
+              ₹{(numberOfSeats * ride.price).toFixed(2)}
             </span>
           </p>
         </div>

@@ -126,6 +126,9 @@ export interface Ride {
   };
   departureTime: Date;
   actualArrivalTime?: Date;
+  estimatedArrivalTime: Date;
+  totalSeats?: number;
+  availableSeats?: number;
   price: number;
   status: "Scheduled" | "In Progress" | "Completed" | "Cancelled";
   distance: number;
