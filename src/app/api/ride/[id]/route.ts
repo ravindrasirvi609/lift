@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 mongoose.model("User", User.schema);
 
 connect();
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -21,11 +22,11 @@ export async function GET(
 
     const user = await verifyToken(token);
 
-    const newRide = await Ride.findById(params.id)
+    const ride = await Ride.findById(params.id)
       .populate("driver", "firstName lastName")
       .populate("bookings");
 
-    if (!newRide) {
+    if (!ride) {
       return NextResponse.json({ error: "Ride not found" }, { status: 404 });
     }
 
@@ -46,14 +47,19 @@ export async function GET(
       dropoffLocation: booking.dropoffLocation,
     }));
 
-    const ride = {
-      ...newRide.toObject(),
+    const totalBookedSeats = passengers.reduce(
+      (sum, p) => sum + p.numberOfSeats,
+      0
+    );
+
+    const rideDetails = {
+      ...ride.toObject(),
       driver: {
-        fullName: `${newRide.driver.firstName} ${newRide.driver.lastName}`,
-        _id: newRide.driver._id,
+        fullName: `${ride.driver.firstName} ${ride.driver.lastName}`,
+        _id: ride.driver._id,
       },
-      passengers: passengers,
-      totalBookedSeats: passengers.reduce((sum, p) => sum + p.numberOfSeats, 0),
+      passengers,
+      totalBookedSeats,
       bookings: bookings.map((booking) => ({
         _id: booking._id,
         status: booking.status,
@@ -65,7 +71,7 @@ export async function GET(
       })),
     };
 
-    return NextResponse.json(ride);
+    return NextResponse.json(rideDetails);
   } catch (error) {
     console.error("Error fetching ride:", error);
     return NextResponse.json(

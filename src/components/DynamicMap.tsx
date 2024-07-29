@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   MapContainer,
   TileLayer,
@@ -7,9 +8,15 @@ import {
   Polyline,
   useMap,
 } from "react-leaflet";
-import { Icon, LatLngExpression } from "leaflet";
+import {
+  Icon,
+  LatLngExpression,
+  latLng,
+  latLngBounds,
+  LatLngTuple,
+} from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { FaMapMarkerAlt, FaFlag, FaCrosshairs } from "react-icons/fa";
+import { FaMapMarkerAlt, FaFlag, FaCrosshairs, FaRoute } from "react-icons/fa";
 
 interface DynamicMapProps {
   rideId: string;
@@ -26,6 +33,7 @@ const DynamicMap: React.FC<DynamicMapProps> = ({
 }) => {
   const [mapCenter, setMapCenter] = useState<LatLngExpression>(initialLocation);
   const [zoomLevel, setZoomLevel] = useState(13);
+  const [route, setRoute] = useState<LatLngTuple[]>([]);
 
   const currentLocationIcon = new Icon({
     iconUrl:
@@ -51,6 +59,36 @@ const DynamicMap: React.FC<DynamicMapProps> = ({
     return null;
   };
 
+  const fetchRoute = async () => {
+    try {
+      const response = await axios.get(
+        `https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf6248a7d7a7ac2b8049ea919989da4d14253c&start=${currentLocation[1]},${currentLocation[0]}&end=${destination[1]},${destination[0]}`
+      );
+      const coordinates = response.data.features[0].geometry.coordinates;
+      setRoute(
+        coordinates.map(
+          (coord: number[]) => [coord[1], coord[0]] as LatLngTuple
+        )
+      );
+    } catch (error) {
+      console.error("Error fetching route:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchRoute();
+  }, [currentLocation, destination]);
+
+  const fitMapToBounds = () => {
+    if (route.length > 0) {
+      const bounds = latLngBounds(
+        route.map((coord) => latLng(coord[0], coord[1]))
+      );
+      setMapCenter(bounds.getCenter());
+      setZoomLevel(12);
+    }
+  };
+
   return (
     <div className="map-container bg-white rounded-lg shadow-lg overflow-hidden">
       <MapContainer
@@ -69,11 +107,9 @@ const DynamicMap: React.FC<DynamicMapProps> = ({
         <Marker position={destination} icon={destinationIcon}>
           <Popup>Destination</Popup>
         </Marker>
-        <Polyline
-          positions={[currentLocation, destination]}
-          color="#F96167"
-          weight={4}
-        />
+        {route.length > 0 && (
+          <Polyline positions={route} color="#F96167" weight={4} />
+        )}
         <MapUpdater />
       </MapContainer>
       <div className="map-controls p-4 bg-gray-100 flex justify-between items-center">
@@ -97,19 +133,20 @@ const DynamicMap: React.FC<DynamicMapProps> = ({
             <FaFlag className="mr-2" /> Destination
           </button>
         </div>
-        <button
-          onClick={() => {
-            const bounds = [currentLocation, destination];
-            setMapCenter([
-              (bounds[0][0] + bounds[1][0]) / 2,
-              (bounds[0][1] + bounds[1][1]) / 2,
-            ]);
-            setZoomLevel(12);
-          }}
-          className="flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-300"
-        >
-          <FaCrosshairs className="mr-2" /> View All
-        </button>
+        <div className="flex space-x-2">
+          <button
+            onClick={fitMapToBounds}
+            className="flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-300"
+          >
+            <FaCrosshairs className="mr-2" /> View All
+          </button>
+          <button
+            onClick={fetchRoute}
+            className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300"
+          >
+            <FaRoute className="mr-2" /> Update Route
+          </button>
+        </div>
       </div>
     </div>
   );

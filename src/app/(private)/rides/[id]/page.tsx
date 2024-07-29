@@ -33,7 +33,7 @@ interface DataType {
   passenger: {
     _id: string;
     fullName: string;
-  };
+  }[];
   status: string;
   departureTime: string;
   estimatedArrivalTime: string;
@@ -122,12 +122,29 @@ const RidePage = () => {
                 value={rideData.driver.fullName}
                 iconColor="text-blue-500"
               />
-              <InfoItem
-                icon={FaUser}
-                label="Passenger"
-                value={rideData.passenger?.fullName}
-                iconColor="text-purple-500"
-              />
+              <div className="space-y-4">
+                <h2 className="text-2xl font-semibold mb-4 text-[#F96167]">
+                  Passengers
+                </h2>
+                {rideData.passenger.map((passenger, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between"
+                  >
+                    <InfoItem
+                      icon={FaUser}
+                      label={`Passenger ${index + 1}`}
+                      value={passenger.fullName}
+                      iconColor="text-purple-500"
+                    />
+                    <Link href={`/profile/${passenger._id}`}>
+                      <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        View Profile
+                      </button>
+                    </Link>
+                  </div>
+                ))}
+              </div>
               {isDriver && (
                 <InfoItem
                   icon={FaUser}
@@ -186,6 +203,8 @@ const RidePage = () => {
           userId={userId}
           initialLocation={rideData.startLocation.coordinates}
           destination={rideData.endLocation.coordinates}
+          isDriver={isDriver}
+          passengers={rideData.passenger}
         />
       </div>
     </div>

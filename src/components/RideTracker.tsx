@@ -10,6 +10,8 @@ interface RideTrackerProps {
   userId: string;
   initialLocation: [number, number];
   destination: [number, number];
+  isDriver: boolean;
+  passengers: { _id: string; fullName: string }[];
 }
 
 const RideTracker: React.FC<RideTrackerProps> = ({
@@ -17,6 +19,8 @@ const RideTracker: React.FC<RideTrackerProps> = ({
   userId,
   initialLocation,
   destination,
+  isDriver,
+  passengers,
 }) => {
   const { socket, isConnected } = useSocket();
   const [currentLocation, setCurrentLocation] = useState(initialLocation);
@@ -69,7 +73,12 @@ const RideTracker: React.FC<RideTrackerProps> = ({
             currentLocation={currentLocation}
           />
         ) : (
-          <DynamicChat rideId={rideId} userId={userId} />
+          <DynamicChat
+            rideId={rideId}
+            userId={userId}
+            isDriver={isDriver}
+            passengers={passengers}
+          />
         )}
       </div>
     </div>
