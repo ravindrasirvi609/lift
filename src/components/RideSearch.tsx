@@ -16,6 +16,21 @@ const RideSearch: React.FC<Props> = ({ onSearch }) => {
   const [destination, setDestination] = useState<Location | null>(null);
   const [date, setDate] = useState("");
   const [passengerCount, setPassengerCount] = useState(1);
+
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const [minDate, setMinDate] = useState(getTodayDate());
+
+  useEffect(() => {
+    setMinDate(getTodayDate());
+  }, []);
+
   const formRef = useRef<HTMLFormElement>(null);
 
   useGSAP(() => {
@@ -87,6 +102,7 @@ const RideSearch: React.FC<Props> = ({ onSearch }) => {
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
+                min={minDate}
                 className="w-full p-3 pl-10 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#F96167]"
                 required
               />

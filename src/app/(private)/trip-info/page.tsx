@@ -93,6 +93,22 @@ const CreateTrip: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
 
+  const getTodayDateTime = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    const hours = String(today.getHours()).padStart(2, "0");
+    const minutes = String(today.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  const [minDate, setMinDate] = useState(getTodayDateTime());
+
+  useEffect(() => {
+    setMinDate(getTodayDateTime());
+  }, []);
+
   const handleLocationChange = useCallback(
     (field: "startLocation" | "endLocation") => (value: LocationAddress) => {
       setTripInfo((prev) => ({
@@ -306,6 +322,7 @@ const CreateTrip: React.FC = () => {
                   name="departureTime"
                   value={tripInfo.departureTime}
                   onChange={handleChange}
+                  min={minDate}
                   required
                   className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
                 />
@@ -323,6 +340,7 @@ const CreateTrip: React.FC = () => {
                   name="estimatedArrivalTime"
                   value={tripInfo.estimatedArrivalTime}
                   onChange={handleChange}
+                  min={minDate}
                   required
                   className={`mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-[${PRIMARY_COLOR}] focus:ring focus:ring-[${SECONDARY_COLOR}] focus:ring-opacity-50`}
                 />
