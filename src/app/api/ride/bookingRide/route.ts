@@ -141,17 +141,14 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     await connect();
-    console.log("htting the get bookings route");
 
     const token = req.cookies.get("token")?.value;
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const decodedToken = await verifyToken(token);
-    console.log("Decoded token:", decodedToken);
 
     const user = await User.findById(decodedToken.id);
-    console.log("User:", user);
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -159,7 +156,6 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const rideId = searchParams.get("rideId");
-    console.log("Ride ID:", rideId);
 
     let query = {};
 
@@ -173,14 +169,12 @@ export async function GET(req: NextRequest) {
       query = { ...query, ride: rideId };
     }
 
-    console.log("Query:", query);
-
-    if (rideId) {
-      query = { ...query, ride: rideId };
-    }
-
-    const bookings = await Booking.find(query).populate("ride");
-    console.log("Bookings:", JSON.stringify(bookings, null, 2));
+    const bookings = await Booking.find(query)
+      .populate({
+        path: "ride",
+        populate: { path: "driver", select: "firstName lastName" },
+      })
+      .populate("passenger", "firstName lastName");
 
     return NextResponse.json(bookings);
   } catch (error) {

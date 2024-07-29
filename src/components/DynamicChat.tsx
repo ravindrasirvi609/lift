@@ -139,7 +139,7 @@ const DynamicChat: React.FC<DynamicChatProps> = ({
           {isDriver ? "Passengers" : "Chat with"}
         </div>
         {isDriver ? (
-          passengers.map((passenger) => (
+          passengers?.map((passenger) => (
             <div
               key={passenger._id}
               onClick={() => setSelectedChat(passenger._id)}

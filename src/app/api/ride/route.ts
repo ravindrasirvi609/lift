@@ -31,9 +31,11 @@ export async function GET(request: NextRequest) {
       .populate("driver", "firstName lastName");
 
     const total = await Ride.countDocuments(query);
+    console.log("hitting");
 
     return NextResponse.json({
       rides,
+
       currentPage: page,
       totalPages: Math.ceil(total / limit),
       total,

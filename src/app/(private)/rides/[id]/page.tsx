@@ -126,7 +126,7 @@ const RidePage = () => {
                 <h2 className="text-2xl font-semibold mb-4 text-[#F96167]">
                   Passengers
                 </h2>
-                {rideData.passenger.map((passenger, index) => (
+                {rideData?.passenger?.map((passenger, index) => (
                   <div
                     key={index}
                     className="flex items-center justify-between"
