@@ -20,6 +20,8 @@ import { gsap } from "gsap";
 import { motion, AnimatePresence } from "framer-motion";
 import Matter from "matter-js";
 import { useGSAP } from "@gsap/react";
+import Link from "next/link";
+import { formatDateWithTime } from "@/utils/utils";
 
 const BookRidePage = () => {
   const { user } = useAuth();
@@ -181,17 +183,24 @@ const BookRidePage = () => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
             <Image
-              src={ride.driver.image}
+              src={ride.driver.profilePicture}
               alt={ride.driver.name}
               width={64}
               height={64}
               className="w-16 h-16 rounded-full mr-4 border-2 border-[#F9D423]"
             />
             <div>
-              <h2 className="text-xl font-semibold">{ride.driver.name}</h2>
+              <h2 className="text-xl font-semibold">
+                <Link
+                  href={`/profile/${ride.driver._id}`}
+                  className="hover:text-[#F96167] hover:underline"
+                >
+                  {ride.driver.fullName}
+                </Link>
+              </h2>
               <div className="flex items-center">
                 <FaStar className="text-[#F9D423] mr-1" />
-                <span>{ride.driver?.rating?.toFixed(1)}</span>
+                <span>{ride.driver?.driverRating?.toFixed(1)}</span>
               </div>
             </div>
           </div>
@@ -204,7 +213,7 @@ const BookRidePage = () => {
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="flex items-center">
             <FaCar className="text-[#F96167] mr-2" />
-            {/* <span>{ride.vehicle}</span> */}
+            <span>{ride.vehicle.type}</span>
           </div>
           <div className="flex items-center">
             <FaUsers className="text-[#F96167] mr-2" />
@@ -220,7 +229,7 @@ const BookRidePage = () => {
           </div>
           <div className="flex items-center">
             <FaClock className="text-[#F96167] mr-2" />
-            <span>{new Date(ride.departureTime).toLocaleString()}</span>
+            <span>{formatDateWithTime(new Date(ride.departureTime))}</span>
           </div>
         </div>
       </div>

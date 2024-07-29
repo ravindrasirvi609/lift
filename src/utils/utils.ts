@@ -6,3 +6,13 @@ export function formatDate(date: Date): string {
     day: "2-digit",
   });
 }
+export function formatDateWithTime(date: Date): string {
+  return date.toLocaleString("en-US", {
+    weekday: "short",
+    year: "numeric",
+    month: "long",
+    day: "2-digit",
+    hour: "numeric",
+    minute: "numeric",
+  });
+}
