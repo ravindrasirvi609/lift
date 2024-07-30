@@ -38,6 +38,8 @@ const SignIn: React.FC<SignInProps> = ({ userType, onSwitch }) => {
   });
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
+  const [showPopup, setShowPopup] = useState(false);
   const router = useRouter();
 
   const handleChange = (
@@ -57,16 +59,26 @@ const SignIn: React.FC<SignInProps> = ({ userType, onSwitch }) => {
         ...formData,
         isDriver: userType === "vehicle-owner",
       });
+      console.log("Success:", response);
+
       login(response.data.user);
 
-      console.log("Success:", response.data.user);
-      if (response.data.success) {
-        router.push("/trip-info");
+      if (response) {
+        setPopupMessage(response.data.message);
+        setShowPopup(true);
+        setTimeout(() => {
+          setShowPopup(false);
+          router.push("/");
+        }, 3000); // Show popup for 3 seconds before redirecting
       }
     } catch (err: any) {
       setError(
         err.response?.data?.error || "Authentication failed. Please try again."
       );
+      setPopupMessage(
+        err.response?.data?.error || "Authentication failed. Please try again."
+      );
+      setShowPopup(true);
     } finally {
       setIsLoading(false);
     }
@@ -252,7 +264,11 @@ const SignIn: React.FC<SignInProps> = ({ userType, onSwitch }) => {
             </button>
           </div>
         </form>
-
+        {showPopup && (
+          <div className="popup">
+            <p>{popupMessage}</p>
+          </div>
+        )}
         <div className="text-sm text-center">
           <button
             onClick={toggleSignUp}

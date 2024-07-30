@@ -119,8 +119,8 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      newUser.driverLicense = driverLicense;
-      newUser.vehicleInfo = vehicleInfo;
+      newUser.driverLicense.number = driverLicense;
+      newUser.vehicleInfo.model = vehicleInfo;
     }
 
     const savedUser = await newUser.save();

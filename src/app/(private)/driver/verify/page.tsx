@@ -1,4 +1,3 @@
-// app/driver/verify/page.tsx
 "use client";
 
 import { useAuth } from "@/app/contexts/AuthContext";
@@ -26,9 +25,6 @@ export default function DriverVerifyPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">
-        Driver Verification
-      </h1>
       <DocumentVerification userId={userId} />
     </div>
   );
