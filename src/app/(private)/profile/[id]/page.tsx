@@ -1,11 +1,10 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import { useState, useRef } from "react";
+import { useQuery, gql } from "@apollo/client";
 import Image from "next/image";
 import {
   FaStar,
   FaCar,
-  FaUser,
   FaMapMarkerAlt,
   FaCalendar,
   FaCheckCircle,
@@ -15,8 +14,59 @@ import {
 } from "react-icons/fa";
 import Loading from "@/components/Loading";
 
+const GET_USER = gql`
+  query GetUser($id: ID!) {
+    user(id: $id) {
+      id
+      firstName
+      lastName
+      email
+      profilePicture
+      isDriver
+      driverRating
+      passengerRating
+      totalRidesAsDriver
+      totalRidesAsTakenPassenger
+      membershipTier
+      verifiedBadges
+      driverVerificationStatus
+    }
+  }
+`;
+
+const GET_USER_REVIEWS = gql`
+  query GetUserReviews($userId: ID!) {
+    reviews(userId: $userId) {
+      id
+      reviewer {
+        firstName
+        lastName
+        profilePicture
+      }
+      rating
+      comment
+      createdAt
+    }
+  }
+`;
+
+const GET_USER_RIDES = gql`
+  query GetUserRides($userId: ID!) {
+    rides(userId: $userId) {
+      id
+      startLocation {
+        address
+      }
+      endLocation {
+        address
+      }
+      departureTime
+      status
+    }
+  }
+`;
 interface User {
-  _id: string;
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -32,7 +82,7 @@ interface User {
 }
 
 interface Review {
-  _id: string;
+  id: string;
   reviewer: {
     firstName: string;
     lastName: string;
@@ -44,7 +94,7 @@ interface Review {
 }
 
 interface Ride {
-  _id: string;
+  id: string;
   startLocation: {
     address: string;
   };
@@ -56,43 +106,56 @@ interface Ride {
 }
 
 export default function ProfilePage({ params }: { params: { id: string } }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [rides, setRides] = useState<Ride[]>([]);
   const [activeTab, setActiveTab] = useState("info");
+
+  const {
+    loading: userLoading,
+    error: userError,
+    data: userData,
+  } = useQuery(GET_USER, {
+    variables: { id: params.id },
+  });
+
+  const {
+    loading: reviewsLoading,
+    error: reviewsError,
+    data: reviewsData,
+  } = useQuery(GET_USER_REVIEWS, {
+    variables: { userId: params.id },
+  });
+
+  const {
+    loading: ridesLoading,
+    error: ridesError,
+    data: ridesData,
+  } = useQuery(GET_USER_RIDES, {
+    variables: { userId: params.id },
+  });
 
   const profileRef = useRef(null);
   const tabsRef = useRef(null);
   const contentRef = useRef(null);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const userResponse = await axios.get(`/api/users/${params.id}`);
-        setUser(userResponse.data);
-
-        const reviewsResponse = await axios.get(
-          `/api/users/${params.id}/reviews`
-        );
-        setReviews(reviewsResponse.data);
-
-        const ridesResponse = await axios.get(`/api/users/${params.id}/rides`);
-        setRides(ridesResponse.data);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-
-    fetchUserData();
-  }, [params.id]);
-
-  if (!user) {
+  if (userLoading || reviewsLoading || ridesLoading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gradient-to-br from-[#F9D423] to-[#F96167]">
         <Loading />
       </div>
     );
   }
+
+  if (userError || reviewsError || ridesError) {
+    return (
+      <div>
+        Error:{" "}
+        {userError?.message || reviewsError?.message || ridesError?.message}
+      </div>
+    );
+  }
+
+  const user: User = userData.user;
+  const reviews: Review[] = reviewsData.reviews;
+  const rides: Ride[] = ridesData.rides;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F9D423] to-[#F96167] py-12 px-4 sm:px-6 lg:px-8">
@@ -198,7 +261,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                       Reviews
                     </h2>
                     {reviews.map((review) => (
-                      <ReviewCard key={review._id} review={review} />
+                      <ReviewCard key={review.id} review={review} />
                     ))}
                   </div>
                 )}
@@ -209,7 +272,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                       Past Rides
                     </h2>
                     {rides.map((ride) => (
-                      <RideCard key={ride._id} ride={ride} />
+                      <RideCard key={ride.id} ride={ride} />
                     ))}
                   </div>
                 )}

@@ -4,19 +4,23 @@ import { Inter } from "next/font/google";
 import { AuthProvider } from "./contexts/AuthContext";
 import { getServerSession } from "@/utils/getServerSession";
 import Header from "@/components/Headers";
+import { ApolloProvider } from "@apollo/client";
+import client from "@/utils/apollo-client";
+import ApolloWrapper from "@/components/ApolloWrapper";
 
 export const metadata: Metadata = {
   title: "RideShare Connect",
   description:
     "RideShare Connect emphasizes the platform’s core purpose of connecting drivers and passengers for shared rides between cities.",
 };
+
 const inter = Inter({ subsets: ["latin"] });
 
 export default async function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   const session = await getServerSession();
 
   return (
@@ -31,12 +35,15 @@ export default async function RootLayout({
       </head>
       <body className={inter.className}>
         <AuthProvider initialSession={session}>
-          <div>
-            <Header />
-          </div>
-          <div className="pt-16">
-            <main>{children}</main>
-          </div>
+          <ApolloWrapper>
+            {" "}
+            <div>
+              <Header />
+            </div>
+            <div className="pt-16">
+              <main>{children}</main>
+            </div>
+          </ApolloWrapper>{" "}
         </AuthProvider>
       </body>
     </html>
