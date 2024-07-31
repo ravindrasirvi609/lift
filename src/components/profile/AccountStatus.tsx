@@ -5,13 +5,9 @@ import axios from "axios";
 
 interface AccountStatusProps {
   user: User;
-  onStatusUpdate: (updatedUser: User) => void;
 }
 
-const AccountStatus: React.FC<AccountStatusProps> = ({
-  user,
-  onStatusUpdate,
-}) => {
+const AccountStatus: React.FC<AccountStatusProps> = ({ user }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [localUser, setLocalUser] = useState(user);
@@ -26,7 +22,6 @@ const AccountStatus: React.FC<AccountStatusProps> = ({
 
       const updatedUser = response.data.updatedUser;
       setLocalUser(updatedUser);
-      onStatusUpdate(updatedUser);
 
       if (updatedUser.driverVerificationStatus === "Approved") {
         // You can add a success message here if needed
