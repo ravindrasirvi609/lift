@@ -40,7 +40,8 @@ export async function POST(req: Request) {
       .populate({
         path: "driver",
         model: User, // Explicitly specify the User model
-        select: "firstName lastName email",
+        select:
+          "firstName lastName email profilePicture driverVerificationStatus driverRating",
       })
       .sort({ departureTime: 1 });
     console.log("rides", rides);

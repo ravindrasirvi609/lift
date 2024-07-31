@@ -168,20 +168,19 @@ userSchema.methods.updateMembershipTier = function () {
 };
 // Method to calculate average rating
 
-userSchema.methods.calculateAverageRating = async function (type: string) {
-  const reviews = type === "driver" ? this.reviewsReceived : this.reviewsGiven;
+userSchema.methods.calculateAverageDriverRating = async function () {
+  const Review = mongoose.model("Review");
+  const reviews = await Review.find({ _id: { $in: this.reviewsReceived } });
+
   if (reviews.length === 0) return 0;
 
-  const Review = mongoose.model("Review");
-  const populatedReviews = await Review.find({ _id: { $in: reviews } });
-
-  const sum = populatedReviews.reduce((acc, review) => acc + review.rating, 0);
-  return sum / populatedReviews.length;
+  const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
+  return sum / reviews.length;
 };
 
-// Method to update ratings
+// Method to update ratings (updated)
 userSchema.methods.updateRatings = async function () {
-  this.driverRating = await this.calculateAverageRating("driver");
+  this.driverRating = await this.calculateAverageDriverRating();
   this.passengerRating = await this.calculateAverageRating("passenger");
   await this.save();
 };

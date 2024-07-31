@@ -30,7 +30,7 @@ interface DataType {
     _id: string;
     fullName: string;
   };
-  passenger: {
+  passengers: {
     _id: string;
     fullName: string;
   }[];
@@ -126,7 +126,7 @@ const RidePage = () => {
                 <h2 className="text-2xl font-semibold mb-4 text-[#F96167]">
                   Passengers
                 </h2>
-                {rideData?.passenger?.map((passenger, index) => (
+                {rideData?.passengers?.map((passenger, index) => (
                   <div
                     key={index}
                     className="flex items-center justify-between"
@@ -204,7 +204,7 @@ const RidePage = () => {
           initialLocation={rideData.startLocation.coordinates}
           destination={rideData.endLocation.coordinates}
           isDriver={isDriver}
-          passengers={rideData.passenger}
+          passengers={rideData.passengers}
         />
       </div>
     </div>

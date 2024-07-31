@@ -21,6 +21,8 @@ interface Props {
 }
 
 const AvailableRides: React.FC<Props> = ({ rides }) => {
+  console.log("rides", rides);
+
   useGSAP(() => {
     rides.forEach((_, index) => {
       gsap.from(`#ride-${index}`, {
@@ -51,7 +53,7 @@ const AvailableRides: React.FC<Props> = ({ rides }) => {
               <div className="flex items-center">
                 <div className="relative">
                   <Image
-                    src={ride.driver.image}
+                    src={ride.driver.profilePicture}
                     alt={ride.driver.name}
                     className="w-20 h-20 rounded-full mr-4 border-4 border-[#F9D423]"
                     width={80}
@@ -67,22 +69,37 @@ const AvailableRides: React.FC<Props> = ({ rides }) => {
                   )}
                 </div>
                 <div>
-                  <h3 className="font-bold text-xl text-[#F96167]">
-                    {ride.driver.name}
+                  <h3 className="font-bold text-xl text-[#F96167] hover:text-[#F9D423]">
+                    <Link href={`/profile/${ride.driver._id}`}>
+                      {ride.driver.firstName} {ride.driver.lastName}
+                    </Link>
                   </h3>
                   <div className="flex items-center mt-1">
                     {[...Array(5)].map((_, i) => (
                       <FaStar
                         key={i}
                         className={`${
-                          i < Math.floor(ride.driver.rating)
+                          i < Math.floor(ride.driver.driverRating)
                             ? "text-[#F9D423]"
                             : "text-gray-300"
                         } mr-1`}
                       />
                     ))}
                     <span className="ml-1 text-gray-600">
-                      ({ride?.driver?.rating?.toFixed(1)})
+                      ({ride?.driver?.driverRating?.toFixed(1)})
+                    </span>
+                    <span>
+                      {" "}
+                      {ride.driver.driverVerificationStatus === "Approved" && (
+                        <span className="text-[#089814] ml-1">
+                          Verified Driver
+                        </span>
+                      )}
+                      {ride.driver.driverVerificationStatus !== "Approved" && (
+                        <span className="text-[#ff3a3a] ml-1">
+                          Driver is Not Verified
+                        </span>
+                      )}
                     </span>
                   </div>
                 </div>

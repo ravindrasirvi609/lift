@@ -156,7 +156,6 @@ const BookRidePage = () => {
       if (response.ok) {
         const data = await response.json();
         alert("Booking request sent successfully!");
-        router.push(`/bookings/${data.booking._id}`);
       } else {
         const errorData = await response.json();
         alert(`Booking failed: ${errorData.error}`);
