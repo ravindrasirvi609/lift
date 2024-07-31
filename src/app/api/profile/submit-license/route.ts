@@ -30,35 +30,25 @@ export async function POST(request: NextRequest) {
     if ("error" in requestId) {
       return NextResponse.json(requestId, { status: 400 });
     }
-
-    const verificationResult = await verifyLicense(requestId.request_id);
-    if ("error" in verificationResult) {
-      return NextResponse.json(verificationResult, { status: 400 });
-    }
+    console.log("License requestId", requestId);
 
     user.driverLicense = {
       ...driverLicense,
-      verificationStatus: verificationResult.status,
+      verificationStatus: "in_progress",
       requestId: requestId.request_id,
     };
     user.vehicleInfo = vehicleInfo;
     user.isDriver = true;
-    user.driverVerificationStatus =
-      verificationResult.result[0]?.result?.source_output?.status || "Unknown";
-    user.verificationResult =
-      verificationResult.result[0]?.result?.source_output || {};
-
+    user.driverVerificationStatus = "Pending";
     await user.save();
 
     return NextResponse.json({
-      status: verificationResult.status,
-      message: verificationResult.message,
+      status: "in_progress",
+      message: "License verification in progress",
       updatedUser: {
         driverLicense: user.driverLicense,
         vehicleInfo: user.vehicleInfo,
         isDriver: user.isDriver,
-        driverVerificationStatus: user.driverVerificationStatus,
-        verificationResult: user.verificationResult,
       },
     });
   } catch (error) {
@@ -102,32 +92,6 @@ async function findRequestId(id_number: string, date_of_birth: string) {
         "api-key": apiKey!,
       },
       body: JSON.stringify(requestBody),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("License verification failed:", error);
-    return { error: "License verification failed", status: "Failed" };
-  }
-}
-
-async function verifyLicense(requestId: string) {
-  const apiUrl = `https://eve.idfy.com/v3/tasks?request_id=${requestId}`;
-  const accountId = process.env.IDFY_ACCOUNT_ID;
-  const apiKey = process.env.IDFY_API_KEY;
-
-  try {
-    const response = await fetch(apiUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "account-id": accountId!,
-        "api-key": apiKey!,
-      },
     });
 
     if (!response.ok) {

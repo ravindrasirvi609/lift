@@ -48,11 +48,18 @@ export async function POST(request: NextRequest) {
     const id = user.driverLicense?.requestId || requestId;
 
     const verificationResult = await verifyLicense(id);
+    console.log("verificationResult", verificationResult);
 
-    if (verificationResult.status === "success") {
+    console.log(
+      "verificationResult.result?.[0]?.result?.source_output?.status",
+      verificationResult[0]?.result?.source_output?.status
+    );
+
+    if (verificationResult[0].status === "completed") {
       const verificationStatus =
-        verificationResult.result?.[0]?.result?.source_output?.status ||
-        "Unknown";
+        verificationResult[0]?.result?.source_output?.status === "id_found"
+          ? "Approved"
+          : "Rejected" || "Pending";
       user.driverVerificationStatus =
         verificationStatus === "Approved" ? "Approved" : "Rejected";
     } else {
