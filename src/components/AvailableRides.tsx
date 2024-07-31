@@ -13,6 +13,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { Ride } from "@/types/types";
+import { formatDateWithTime } from "@/utils/utils";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -131,11 +132,11 @@ const AvailableRides: React.FC<Props> = ({ rides }) => {
               />
               <RideInfoItem
                 icon={FaClock}
-                text={new Date(ride.departureTime).toLocaleString()}
+                text={formatDateWithTime(new Date(ride.departureTime))}
               />
               <RideInfoItem
                 icon={FaClock}
-                text={new Date(ride?.estimatedArrivalTime).toLocaleString()}
+                text={formatDateWithTime(new Date(ride.estimatedArrivalTime))}
               />
             </div>
 

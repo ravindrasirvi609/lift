@@ -15,6 +15,7 @@ import {
   FaCar,
 } from "react-icons/fa";
 import Link from "next/link";
+import { formatDateWithTime } from "@/utils/utils";
 
 interface Location {
   type: string;
@@ -194,7 +195,9 @@ const DriverRequestsPage = () => {
                   <div className="flex items-center">
                     <FaClock className="text-[#F96167] mr-2" />
                     <span>
-                      {new Date(request?.ride?.departureTime).toLocaleString()}
+                      {formatDateWithTime(
+                        new Date(request?.ride?.departureTime)
+                      )}
                     </span>
                   </div>
                   <div className="flex items-center">

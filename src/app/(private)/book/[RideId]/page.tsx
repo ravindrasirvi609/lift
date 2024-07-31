@@ -155,7 +155,9 @@ const BookRidePage = () => {
 
       if (response.ok) {
         const data = await response.json();
-        alert("Booking request sent successfully!");
+        alert(
+          "Booking request sent successfully! Please wait for confirmation."
+        );
       } else {
         const errorData = await response.json();
         alert(`Booking failed: ${errorData.error}`);

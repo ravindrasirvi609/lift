@@ -15,6 +15,7 @@ import {
 import { useAuth } from "@/app/contexts/AuthContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { formatDateWithTime } from "@/utils/utils";
 
 interface DataType {
   _id: string;
@@ -161,14 +162,16 @@ const RidePage = () => {
               </h2>
               <InfoItem
                 icon={FaClock}
-                label="Departure"
-                value={new Date(rideData.departureTime).toLocaleString()}
+                label="Departure Time"
+                value={formatDateWithTime(new Date(rideData.departureTime))}
                 iconColor="text-[#F9D423]"
               />
               <InfoItem
                 icon={FaClock}
-                label="Estimated Arrival"
-                value={new Date(rideData.estimatedArrivalTime).toLocaleString()}
+                label="Estimated Arrival Time"
+                value={formatDateWithTime(
+                  new Date(rideData.estimatedArrivalTime)
+                )}
                 iconColor="text-[#F9D423]"
               />
               <InfoItem
