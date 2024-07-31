@@ -61,7 +61,7 @@ const ProfilePage: React.FC = () => {
       <header className="bg-[#F96167] text-white p-6 flex items-center justify-between">
         <div>
           <Image
-            src={user.profilePicture}
+            src={user?.profilePicture}
             alt="Profile Picture"
             width={100}
             height={100}

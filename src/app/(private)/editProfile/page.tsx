@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { formatDate } from "@/utils/utils";
+import { useRouter } from "next/navigation";
 
 import Loading from "@/components/Loading";
 import {
@@ -18,6 +19,7 @@ export default function EditProfilePage() {
   const [formData, setFormData] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     fetchUserData();
@@ -89,6 +91,7 @@ export default function EditProfilePage() {
     try {
       const response = await axios.put("/api/profile/profileDetails", formData);
       toast.success("Profile updated successfully");
+      router.push("/profile");
     } catch (err) {
       toast.error("Failed to update profile");
     } finally {
