@@ -73,7 +73,7 @@ const RidePage = () => {
         await startRide(id);
       } else if (action === "end") {
         await endRide(id);
-        router.push("/driver/requests");
+        router.push(`/ride-complete/${id}`);
       } else {
         await cancelRide(id);
       }

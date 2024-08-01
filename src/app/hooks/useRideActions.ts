@@ -32,7 +32,6 @@ export function useRideActions() {
       if (response.status !== 200) {
         throw new Error("Failed to end ride");
       }
-      router.push(`/ride-complete/${rideId}`);
       return response.data;
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
