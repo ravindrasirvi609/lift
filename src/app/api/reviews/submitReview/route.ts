@@ -55,13 +55,22 @@ export async function POST(req: NextRequest) {
     // Verify that the reviewer is part of the ride
     console.log("reviewerRole:", reviewerRole);
     console.log("reviewerId:", reviewerId);
-    console.log("ride.passengerId:", ride.passenger.toString());
+
+    // Check if ride.driver and ride.passenger are defined before using toString()
+    console.log("ride.driver", ride.driver);
+    console.log("ride.passenger", ride.passenger);
+
+    if (!ride.driver || !ride.passenger) {
+      return NextResponse.json(
+        { error: "Driver or passenger information not available" },
+        { status: 400 }
+      );
+    }
+
+    console.log("ride.passengerId:", ride.passenger);
     console.log("ride.driverId:", ride.driver.toString());
 
-    if (
-      reviewerRole === "passenger" &&
-      ride.passenger.toString() !== reviewerId
-    ) {
+    if (reviewerRole === "passenger" && ride.passenger !== reviewerId) {
       return NextResponse.json(
         { error: "You are not authorized to review this ride as a passenger" },
         { status: 403 }

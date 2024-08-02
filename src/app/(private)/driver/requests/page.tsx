@@ -16,6 +16,7 @@ import {
 } from "react-icons/fa";
 import Link from "next/link";
 import { formatDateWithTime } from "@/utils/utils";
+import { useSocket } from "@/app/hooks/useSocket";
 
 interface Location {
   type: string;
@@ -25,19 +26,6 @@ interface Location {
   locationId: string;
 }
 
-interface Ride {
-  startLocation: Location;
-  endLocation: Location;
-  _id: string;
-  driver: string;
-  vehicle: Vehicle; // Updated to Vehicle object
-  departureTime: string;
-  estimatedArrivalTime: string;
-  availableSeats: number;
-  price: number;
-  status: string;
-}
-
 interface Vehicle {
   type: string;
   make: string;
@@ -45,6 +33,19 @@ interface Vehicle {
   year: number;
   color: string;
   licensePlate: string;
+}
+
+interface Ride {
+  startLocation: Location;
+  endLocation: Location;
+  _id: string;
+  driver: string;
+  vehicle: Vehicle;
+  departureTime: string;
+  estimatedArrivalTime: string;
+  availableSeats: number;
+  price: number;
+  status: string;
 }
 
 interface BookingRequest {
@@ -70,6 +71,7 @@ const DriverRequestsPage = () => {
   const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const { socket, isConnected } = useSocket();
 
   useEffect(() => {
     if (user === null) {
@@ -90,7 +92,6 @@ const DriverRequestsPage = () => {
         if (response.ok) {
           const data = await response.json();
           console.log("Booking requests:", data);
-
           setBookingRequests(data);
         } else {
           console.error("Failed to fetch booking requests");
@@ -104,6 +105,22 @@ const DriverRequestsPage = () => {
 
     fetchBookingRequests();
   }, []);
+
+  useEffect(() => {
+    if (socket && user) {
+      socket.on("booking_status_update", (updatedBooking: BookingRequest) => {
+        setBookingRequests((prevRequests) =>
+          prevRequests.map((request) =>
+            request._id === updatedBooking._id ? updatedBooking : request
+          )
+        );
+      });
+
+      return () => {
+        socket.off("booking_status_update");
+      };
+    }
+  }, [socket, user]);
 
   if (isAuthLoading || isLoading) {
     return <Loading />;
@@ -125,12 +142,21 @@ const DriverRequestsPage = () => {
       });
 
       if (response.ok) {
+        const updatedBooking = await response.json();
         setBookingRequests((prevRequests) =>
           prevRequests.map((request) =>
             request._id === bookingId ? { ...request, status: action } : request
           )
         );
         alert(`Booking ${action} successfully`);
+
+        if (socket) {
+          socket.emit("booking_action", {
+            bookingId,
+            action,
+            passengerId: updatedBooking.passenger._id,
+          });
+        }
       } else {
         const errorData = await response.json();
         alert(`Action failed: ${errorData.error}`);
@@ -146,6 +172,9 @@ const DriverRequestsPage = () => {
       <h1 className="text-3xl font-bold mb-6 text-[#F96167] text-center">
         Booking Requests
       </h1>
+      {!isConnected && (
+        <p className="text-red-500 text-center mb-4">Connecting to server...</p>
+      )}
       {bookingRequests.length === 0 ? (
         <p className="text-center text-lg text-gray-600">
           No pending booking requests.
@@ -162,16 +191,13 @@ const DriverRequestsPage = () => {
                   <div className="flex items-center">
                     <FaUser className="text-[#F96167] mr-2" />
                     <span className="font-semibold">
-                      <span className="font-semibold">
-                        Passenger:{" "}
-                        <Link
-                          href={`/profile/${request.passenger._id}`}
-                          className="text-[#F96167] hover:underline"
-                        >
-                          {request.passenger.firstName}{" "}
-                          {request.passenger.lastName}
-                        </Link>
-                      </span>{" "}
+                      <Link
+                        href={`/profile/${request.passenger._id}`}
+                        className="text-[#F96167] hover:underline"
+                      >
+                        {request.passenger.firstName}{" "}
+                        {request.passenger.lastName}
+                      </Link>
                     </span>
                   </div>
                   <div className="flex items-center justify-end">

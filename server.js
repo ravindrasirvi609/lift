@@ -20,8 +20,17 @@ app.prepare().then(() => {
     },
   });
 
+  // Store connected users
+  const connectedUsers = new Map();
+
   io.on('connection', (socket) => {
     console.log('New client connected');
+
+    // User authentication
+    socket.on('authenticate', (userId) => {
+      connectedUsers.set(userId, socket.id);
+      console.log(`User ${userId} authenticated`);
+    });
 
     socket.on('join-ride', (rideId) => {
       socket.join(rideId);
@@ -35,11 +44,32 @@ app.prepare().then(() => {
 
     socket.on('send-message', ({ rideId, message }) => {
       console.log(`New message in ride ${rideId}:`, message);
-      
       io.to(rideId).emit('new-message', { rideId, message });
     });
 
+    // New event for booking actions
+    socket.on('booking_action', ({ bookingId, action, passengerId }) => {
+      console.log(`Booking action: ${action} for booking ${bookingId}`);
+      
+      // Emit to the specific passenger
+      const passengerSocketId = connectedUsers.get(passengerId);
+      if (passengerSocketId) {
+        io.to(passengerSocketId).emit('ride_status', { status: action.toLowerCase() });
+      }
+
+      // Emit to all connected clients
+      io.emit('booking_status_update', { bookingId, status: action });
+    });
+
     socket.on('disconnect', () => {
+      // Remove user from connectedUsers on disconnect
+      for (const [userId, socketId] of connectedUsers.entries()) {
+        if (socketId === socket.id) {
+          connectedUsers.delete(userId);
+          console.log(`User ${userId} disconnected`);
+          break;
+        }
+      }
       console.log('Client disconnected');
     });
   });

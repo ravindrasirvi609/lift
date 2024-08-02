@@ -158,6 +158,7 @@ const BookRidePage = () => {
         alert(
           "Booking request sent successfully! Please wait for confirmation."
         );
+        router.push(`/waiting-room`);
       } else {
         const errorData = await response.json();
         alert(`Booking failed: ${errorData.error}`);
