@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     // Create token
     const token = jwt.sign(tokenData, process.env.TOKEN_SECRET!, {
-      expiresIn: "1d",
+      expiresIn: "7d",
     });
 
     // Create response
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 86400, // 1 day in seconds
+      maxAge: 604800, // 1 week in seconds
       path: "/",
     });
 
