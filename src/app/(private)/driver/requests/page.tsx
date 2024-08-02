@@ -140,9 +140,12 @@ const DriverRequestsPage = () => {
         },
         body: JSON.stringify({ status: action }),
       });
+      console.log("Response:", response);
 
       if (response.ok) {
         const updatedBooking = await response.json();
+        console.log("Updated booking:", updatedBooking);
+
         setBookingRequests((prevRequests) =>
           prevRequests.map((request) =>
             request._id === bookingId ? { ...request, status: action } : request
@@ -154,7 +157,7 @@ const DriverRequestsPage = () => {
           socket.emit("booking_action", {
             bookingId,
             action,
-            passengerId: updatedBooking.passenger._id,
+            passengerId: updatedBooking.booking.passenger._id,
           });
         }
       } else {

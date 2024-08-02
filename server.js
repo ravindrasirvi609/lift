@@ -54,7 +54,7 @@ app.prepare().then(() => {
       // Emit to the specific passenger
       const passengerSocketId = connectedUsers.get(passengerId);
       if (passengerSocketId) {
-        io.to(passengerSocketId).emit('ride_status', { status: action.toLowerCase() });
+        io.to(passengerSocketId).emit("ride_status", { status: action.toLowerCase() });
       }
 
       // Emit to all connected clients

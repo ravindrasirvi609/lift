@@ -13,7 +13,9 @@ const WaitingRoom: React.FC = () => {
   useEffect(() => {
     if (socket) {
       socket.on("ride_status", (data: { status: "accepted" | "rejected" }) => {
+        console.log("Received ride_status event:", data);
         setStatus(data.status);
+        console.log("Updated status:", data.status);
       });
     }
 

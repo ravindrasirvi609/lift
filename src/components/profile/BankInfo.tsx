@@ -64,7 +64,7 @@ const BankInfo: React.FC<BankInfoProps> = ({ user }) => {
           label="Account Holder"
           value={user.bankAccountInfo?.accountHolderName}
         />
-        {user.bankAccountInfo.accountNumber && (
+        {user?.bankAccountInfo?.accountNumber && (
           <InfoItem
             icon={<FaCreditCard className="text-2xl text-[#F96167]" />}
             label="Account Number"
