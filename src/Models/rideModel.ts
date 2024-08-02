@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const rideSchema = new mongoose.Schema({
   driver: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  passenger: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   vehicle: {
     type: { type: String },
     make: { type: String },

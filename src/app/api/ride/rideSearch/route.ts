@@ -1,6 +1,6 @@
 import { connect } from "@/dbConfig/dbConfig";
 import Ride from "@/Models/rideModel";
-import User from "@/Models/userModel"; // Ensure the User model is imported
+import User from "@/Models/userModel";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -37,14 +37,25 @@ export async function POST(req: Request) {
     };
 
     const rides = await Ride.find(query)
+      .select(
+        "startLocation endLocation departureTime availableSeats status price"
+      )
       .populate({
         path: "driver",
-        model: User, // Explicitly specify the User model
+        model: User,
         select:
           "firstName lastName email profilePicture driverVerificationStatus driverRating",
       })
       .sort({ departureTime: 1 });
-    console.log("rides", rides);
+
+    console.log("Rides found:", JSON.parse(JSON.stringify(rides)));
+
+    if (rides.length === 0) {
+      return NextResponse.json(
+        { message: "No rides found matching the criteria" },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json({ rides }, { status: 200 });
   } catch (error) {

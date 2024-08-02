@@ -38,20 +38,21 @@ export async function PUT(
     if (!booking) {
       return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
+    console.log("Booking:", JSON.stringify(booking, null, 2));
 
     if (booking.driver.toString() !== decodedToken.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     booking.status = status;
-    console.log("Updating booking:", JSON.stringify(booking, null, 2));
+    console.log("Updating booking:", booking);
 
     await booking.save();
 
     if (status === "Confirmed") {
       await Ride.findByIdAndUpdate(booking.ride, {
         $inc: { availableSeats: -booking.numberOfSeats },
-        $push: { bookings: booking._id },
+        $push: { bookings: booking._id, passengers: booking.passenger },
       });
     }
 

@@ -4,6 +4,7 @@ import User from "@/Models/userModel";
 import Ride from "@/Models/rideModel";
 import Review from "@/Models/reviewModel";
 import { verifyToken } from "@/utils/verifyToken";
+import mongoose from "mongoose"; // Import mongoose to handle ObjectId
 
 export async function POST(req: NextRequest) {
   try {
@@ -42,6 +43,7 @@ export async function POST(req: NextRequest) {
     const reviewer = await User.findById(reviewerId);
     const reviewed = await User.findById(reviewedId);
     const ride = await Ride.findById(rideId);
+    console.log("ride", ride);
 
     if (!reviewer || !reviewed || !ride) {
       return NextResponse.json(
@@ -51,9 +53,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Verify that the reviewer is part of the ride
+    console.log("reviewerRole:", reviewerRole);
+    console.log("reviewerId:", reviewerId);
+    console.log("ride.passengerId:", ride.passenger.toString());
+    console.log("ride.driverId:", ride.driver.toString());
+
     if (
       reviewerRole === "passenger" &&
-      ride.passengerId.toString() !== reviewerId
+      ride.passenger.toString() !== reviewerId
     ) {
       return NextResponse.json(
         { error: "You are not authorized to review this ride as a passenger" },
@@ -61,7 +68,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (reviewerRole === "driver" && ride.driverId.toString() !== reviewerId) {
+    if (reviewerRole === "driver" && ride.driver.toString() !== reviewerId) {
       return NextResponse.json(
         { error: "You are not authorized to review this ride as a driver" },
         { status: 403 }
