@@ -24,18 +24,15 @@ app.prepare().then(() => {
   const connectedUsers = new Map();
 
   io.on('connection', (socket) => {
-    console.log('New client connected');
+    console.log('New client connected in server.js File Line 27');
 
-    // User authentication
-    socket.on('authenticate', (userId) => {
-      connectedUsers.set(userId, socket.id);
-      console.log(`User ${userId} authenticated`);
-    });
 
-    socket.on('join-ride', (rideId) => {
-      socket.join(rideId);
-      console.log(`Client joined ride: ${rideId}`);
-    });
+
+  socket.on('join-ride', (rideId) => {
+    socket.join(rideId);
+    connectedUsers.set(socket.id, rideId);
+    console.log(`Client joined ride: ${rideId}`);
+  });
 
     socket.on('update-location', ({ rideId, location }) => {
       console.log(`Location update for ride ${rideId}:`, location);
@@ -43,8 +40,8 @@ app.prepare().then(() => {
     });
 
     socket.on('send-message', ({ rideId, message }) => {
-      console.log(`New message in ride ${rideId}:`, message);
-      io.to(rideId).emit('new-message', { rideId, message });
+      console.log(`New message for ride ${rideId}:`, message);
+      io.to(rideId).emit('new-message', message);
     });
 
     // New event for booking actions

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
 import { useSocket } from "@/app/hooks/useSocket";
 import axios from "axios";
+import { useEffect, useRef, useState } from "react";
 import { FaPaperPlane, FaSpinner } from "react-icons/fa";
 
 interface Message {
@@ -40,18 +40,21 @@ const DynamicChat: React.FC<DynamicChatProps> = ({
     if (socket && isConnected) {
       socket.emit("join-ride", rideId);
 
-      socket.on("new-message", (message: Message) => {
+      const handleNewMessage = (message: Message) => {
+        console.log("New message received:", message);
         setChats((prevChats) => {
-          const chatKey = isDriver ? message.sender : message.recipient;
+          const chatKey = isDriver ? message.sender : "driver";
           return {
             ...prevChats,
             [chatKey]: [...(prevChats[chatKey] || []), message],
           };
         });
-      });
+      };
+
+      socket.on("new-message", handleNewMessage);
 
       return () => {
-        socket.off("new-message");
+        socket.off("new-message", handleNewMessage);
       };
     }
   }, [socket, isConnected, rideId, isDriver]);
@@ -61,18 +64,16 @@ const DynamicChat: React.FC<DynamicChatProps> = ({
       try {
         const response = await axios.get(`/api/ride/${rideId}/messages`);
         const messages: Message[] = response.data;
-
-        // Organize messages by sender for driver, or by recipient for passenger
-        const organizedChats = messages.reduce(
-          (acc: { [key: string]: Message[] }, message: Message) => {
-            const chatKey = isDriver ? message.sender : message.recipient;
-            if (!acc[chatKey]) acc[chatKey] = [];
-            acc[chatKey].push(message);
-            return acc;
-          },
-          {}
-        );
-
+        const organizedChats = messages.reduce((acc, message) => {
+          const chatKey = isDriver
+            ? message.sender === userId
+              ? message.recipient
+              : message.sender
+            : "driver";
+          if (!acc[chatKey]) acc[chatKey] = [];
+          acc[chatKey].push(message);
+          return acc;
+        }, {} as { [key: string]: Message[] });
         setChats(organizedChats);
       } catch (error) {
         console.error("Failed to fetch messages:", error);
@@ -80,7 +81,7 @@ const DynamicChat: React.FC<DynamicChatProps> = ({
     };
 
     fetchMessages();
-  }, [rideId, isDriver]);
+  }, [rideId, isDriver, userId]);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -100,6 +101,7 @@ const DynamicChat: React.FC<DynamicChatProps> = ({
       };
       try {
         await socket.emit("send-message", { rideId, message: messageData });
+        console.log("Message sent:", messageData);
         setChats((prevChats) => ({
           ...prevChats,
           [selectedChat]: [
@@ -139,7 +141,7 @@ const DynamicChat: React.FC<DynamicChatProps> = ({
           {isDriver ? "Passengers" : "Chat with"}
         </div>
         {isDriver ? (
-          passengers?.map((passenger) => (
+          passengers.map((passenger) => (
             <div
               key={passenger._id}
               onClick={() => setSelectedChat(passenger._id)}
