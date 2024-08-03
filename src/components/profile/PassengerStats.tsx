@@ -18,9 +18,9 @@ const PassengerStats: React.FC<PassengerStatsProps> = ({ user }) => {
           {user.totalRidesAsTakenPassenger}
         </div>
         <div className="text-xl font-medium">Total Rides Taken</div>
-        <div className="mt-4 text-lg">
+        {/* <div className="mt-4 text-lg">
           Total Distance Traveled: {user.totalDistanceTraveled.toFixed(2)} km
-        </div>
+        </div> */}
       </div>
     </div>
   );

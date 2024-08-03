@@ -100,13 +100,15 @@ const DynamicChat: React.FC<DynamicChatProps> = ({
         timestamp: new Date(),
       };
       try {
+        // Send the message to the server
         await socket.emit("send-message", { rideId, message: messageData });
-        console.log("Message sent:", messageData);
+
+        // Update the local state to display the sent message
         setChats((prevChats) => ({
           ...prevChats,
           [selectedChat]: [
             ...(prevChats[selectedChat] || []),
-            messageData as Message,
+            { ...messageData, _id: new Date().getTime().toString() } as Message,
           ],
         }));
         setInputMessage("");

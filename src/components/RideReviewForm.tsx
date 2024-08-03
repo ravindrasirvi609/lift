@@ -41,7 +41,6 @@ export default function RideReviewForm({
       if (onReviewSubmit) {
         onReviewSubmit(revieweeId); // Call the onReviewSubmit function if it exists
       }
-      router.push("/review-success");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     }

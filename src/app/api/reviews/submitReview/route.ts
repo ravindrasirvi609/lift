@@ -4,7 +4,6 @@ import User from "@/Models/userModel";
 import Ride from "@/Models/rideModel";
 import Review from "@/Models/reviewModel";
 import { verifyToken } from "@/utils/verifyToken";
-import mongoose from "mongoose"; // Import mongoose to handle ObjectId
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,7 +15,6 @@ export async function POST(req: NextRequest) {
     }
 
     const decodedToken = await verifyToken(token);
-    console.log("Decoded token:", decodedToken);
     const reviewerId = decodedToken.id;
 
     const body = await req.json();
@@ -43,7 +41,6 @@ export async function POST(req: NextRequest) {
     const reviewer = await User.findById(reviewerId);
     const reviewed = await User.findById(reviewedId);
     const ride = await Ride.findById(rideId);
-    console.log("ride", ride);
 
     if (!reviewer || !reviewed || !ride) {
       return NextResponse.json(
@@ -53,24 +50,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Verify that the reviewer is part of the ride
-    console.log("reviewerRole:", reviewerRole);
-    console.log("reviewerId:", reviewerId);
-
-    // Check if ride.driver and ride.passenger are defined before using toString()
-    console.log("ride.driver", ride.driver);
-    console.log("ride.passenger", ride.passenger);
-
-    if (!ride.driver || !ride.passenger) {
+    if (!ride.driver || !ride.passengers) {
       return NextResponse.json(
         { error: "Driver or passenger information not available" },
         { status: 400 }
       );
     }
 
-    console.log("ride.passengerId:", ride.passenger);
-    console.log("ride.driverId:", ride.driver.toString());
-
-    if (reviewerRole === "passenger" && ride.passenger !== reviewerId) {
+    if (reviewerRole === "passenger" && !ride.passengers.includes(reviewerId)) {
       return NextResponse.json(
         { error: "You are not authorized to review this ride as a passenger" },
         { status: 403 }
@@ -100,8 +87,20 @@ export async function POST(req: NextRequest) {
 
     await newReview.save();
 
+    // Update user's ratings
+    await Promise.all([reviewer.updateRatings(), reviewed.updateRatings()]);
+
+    console.log("Updated reviewed user:", reviewed);
+
     return NextResponse.json(
-      { message: "Review submitted successfully", review: newReview },
+      {
+        message: "Review submitted successfully",
+        review: newReview,
+        updatedUserRating:
+          reviewerRole === "passenger"
+            ? reviewed.driverRating
+            : reviewed.passengerRating,
+      },
       { status: 201 }
     );
   } catch (error) {

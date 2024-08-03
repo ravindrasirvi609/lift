@@ -23,6 +23,7 @@ interface Props {
 
 const AvailableRides: React.FC<Props> = ({ rides }) => {
   console.log("rides", rides);
+  console.log("ride?.driver?.driverRating", rides[0]?.driver?.driverRating);
 
   useGSAP(() => {
     rides.forEach((_, index) => {

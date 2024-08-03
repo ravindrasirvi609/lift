@@ -49,6 +49,14 @@ export async function POST(req: Request) {
       .sort({ departureTime: 1 });
 
     console.log("Rides found:", JSON.parse(JSON.stringify(rides)));
+    const updatedRides = await Promise.all(
+      rides.map(async (ride) => {
+        const updatedDriver = await User.findById(ride.driver._id);
+        await updatedDriver.updateRatings(); // Force update ratings
+        ride.driver = updatedDriver;
+        return ride;
+      })
+    );
 
     if (rides.length === 0) {
       return NextResponse.json(

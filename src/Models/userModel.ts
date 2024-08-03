@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Review from "./reviewModel"; // Add this import
 
 const userSchema = new mongoose.Schema(
   {
@@ -62,18 +63,10 @@ const userSchema = new mongoose.Schema(
       enum: ["Available", "Busy", "Offline"],
       default: "Offline",
     },
-    passengerRating: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 5,
-    },
-    driverRating: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 5,
-    },
+    passengerRating: { type: Number, default: 0, min: 0, max: 5 },
+    passengerRatingCount: { type: Number, default: 0 },
+    driverRating: { type: Number, default: 0, min: 0, max: 5 },
+    driverRatingCount: { type: Number, default: 0 },
     earnings: { type: Number, default: 0 },
     bankAccountInfo: {
       accountNumber: String,
@@ -166,31 +159,39 @@ userSchema.methods.updateMembershipTier = function () {
   else if (this.loyaltyPoints >= 1000) this.membershipTier = "Silver";
   else this.membershipTier = "Bronze";
 };
-// Method to calculate average rating
 
-// Method to calculate average rating for passenger or driver
-userSchema.methods.calculateAverageRating = async function (role: string) {
-  const Review = mongoose.model("Review");
-  const reviews = await Review.find({
-    _id: { $in: this.reviewsReceived },
-    revieweeRole: role, // 'passenger' or 'driver'
-  });
-
-  if (reviews.length === 0) return 0;
-
-  const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
-  return sum / reviews.length;
-};
-
-// Method to calculate average driver rating
-userSchema.methods.calculateAverageDriverRating = async function () {
-  return this.calculateAverageRating("driver");
-};
-
-// Method to update ratings
+// Add this method to your userSchema in userModel.js
 userSchema.methods.updateRatings = async function () {
-  this.driverRating = await this.calculateAverageRating("driver");
-  this.passengerRating = await this.calculateAverageRating("passenger");
+  const Review = mongoose.model("Review");
+
+  // Calculate passenger rating
+  const passengerReviews = await Review.find({
+    reviewed: this._id,
+    reviewerRole: "driver",
+  });
+  if (passengerReviews.length > 0) {
+    const passengerRatingSum = passengerReviews.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    );
+    this.passengerRating = passengerRatingSum / passengerReviews.length;
+    this.passengerRatingCount = passengerReviews.length;
+  }
+
+  // Calculate driver rating
+  const driverReviews = await Review.find({
+    reviewed: this._id,
+    reviewerRole: "passenger",
+  });
+  if (driverReviews.length > 0) {
+    const driverRatingSum = driverReviews.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    );
+    this.driverRating = driverRatingSum / driverReviews.length;
+    this.driverRatingCount = driverReviews.length;
+  }
+
   await this.save();
 };
 

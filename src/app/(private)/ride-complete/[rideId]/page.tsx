@@ -51,7 +51,7 @@ export default function RideCompletePage() {
   }, [rideId]);
 
   if (loading) return <Loading />;
-  if (error) return;
+  if (error) return <div>{error}</div>;
   if (!rideDetails || !currentUser)
     return <div>Failed to load necessary data. Please try again.</div>;
 
@@ -69,8 +69,6 @@ export default function RideCompletePage() {
   };
 
   const revieweeId = getRevieweeId();
-
-  console.log("revieweeId", revieweeId);
 
   const handleReviewSubmit = (passengerId: string) => {
     setReviewedPassengers([...reviewedPassengers, passengerId]);
