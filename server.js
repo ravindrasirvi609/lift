@@ -24,15 +24,14 @@ app.prepare().then(() => {
   const connectedUsers = new Map();
 
   io.on('connection', (socket) => {
-    console.log('New client connected in server.js File Line 27');
+    console.log('New client connected', socket.id);
 
-
-
-  socket.on('join-ride', (rideId) => {
-    socket.join(rideId);
-    connectedUsers.set(socket.id, rideId);
-    console.log(`Client joined ride: ${rideId}`);
-  });
+    socket.on('join-ride', (rideId) => {
+      socket.join(rideId);
+      connectedUsers.set(socket.id, rideId);
+      console.log(`Client ${socket.id} joined ride: ${rideId}`);
+      io.to(rideId).emit('user-joined', { userId: socket.id, rideId });
+    });
 
     socket.on('update-location', ({ rideId, location }) => {
       console.log(`Location update for ride ${rideId}:`, location);
@@ -41,33 +40,31 @@ app.prepare().then(() => {
 
     socket.on('send-message', ({ rideId, message }) => {
       console.log(`New message for ride ${rideId}:`, message);
-      io.to(rideId).emit('new-message', message);
+      io.to(rideId).emit('new-message', { rideId, message });
     });
 
-    // New event for booking actions
-    socket.on('booking_action', ({ bookingId, action, passengerId }) => {
+    socket.on('booking-action', ({ bookingId, action, passengerId }) => {
       console.log(`Booking action: ${action} for booking ${bookingId}`);
       
       // Emit to the specific passenger
-      const passengerSocketId = connectedUsers.get(passengerId);
-      if (passengerSocketId) {
-        io.to(passengerSocketId).emit("ride_status", { status: action.toLowerCase() });
-      }
+      io.to(passengerId).emit('ride-status', { bookingId, status: action.toLowerCase() });
+console.log("booking-action",connectedUsers);
 
-      // Emit to all connected clients
-      io.emit('booking_status_update', { bookingId, status: action });
+      // Emit to all connected clients in the ride
+      const rideId = connectedUsers.get(socket.id);
+      console.log("rideId",rideId);
+      if (rideId) {
+        io.to(rideId).emit('booking-status-update', { bookingId, status: action });
+      }
     });
 
     socket.on('disconnect', () => {
-      // Remove user from connectedUsers on disconnect
-      for (const [userId, socketId] of connectedUsers.entries()) {
-        if (socketId === socket.id) {
-          connectedUsers.delete(userId);
-          console.log(`User ${userId} disconnected`);
-          break;
-        }
+      const rideId = connectedUsers.get(socket.id);
+      if (rideId) {
+        connectedUsers.delete(socket.id);
+        console.log(`Client ${socket.id} disconnected from ride ${rideId}`);
+        io.to(rideId).emit('user-left', { userId: socket.id, rideId });
       }
-      console.log('Client disconnected');
     });
   });
 

@@ -102,8 +102,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    console.log("Creating new booking:", JSON.stringify(newBooking, null, 2));
-
     await newBooking.save();
 
     // Notify the driver about the new booking request

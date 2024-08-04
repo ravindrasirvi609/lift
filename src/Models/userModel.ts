@@ -162,8 +162,6 @@ userSchema.methods.updateMembershipTier = function () {
 
 // Add this method to your userSchema in userModel.js
 userSchema.methods.updateRatings = async function () {
-  const Review = mongoose.model("Review");
-
   // Calculate passenger rating
   const passengerReviews = await Review.find({
     reviewed: this._id,

@@ -22,10 +22,13 @@ import Matter from "matter-js";
 import { useGSAP } from "@gsap/react";
 import Link from "next/link";
 import { formatDateWithTime } from "@/utils/utils";
+import { useSocket } from "@/app/hooks/useSocket";
 
 const BookRidePage = () => {
   const { user } = useAuth();
   const params = useParams();
+  const { socket, isConnected } = useSocket();
+
   const { RideId } = params;
 
   const router = useRouter();
@@ -148,7 +151,7 @@ const BookRidePage = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          rideId: { RideId: RideId },
+          rideId: RideId,
           numberOfSeats,
         }),
       });
@@ -158,7 +161,15 @@ const BookRidePage = () => {
         alert(
           "Booking request sent successfully! Please wait for confirmation."
         );
-        router.push(`/waiting-room`);
+
+        // Emit the join-ride event after successful booking
+        if (socket && isConnected) {
+          socket.emit("join-ride", RideId);
+        } else {
+          console.log("Socket not connected. Unable to join ride.");
+        }
+
+        router.push(`/waiting-room/${data.bookingId}`);
       } else {
         const errorData = await response.json();
         alert(`Booking failed: ${errorData.error}`);

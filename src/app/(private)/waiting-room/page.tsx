@@ -2,32 +2,41 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSocket } from "@/app/hooks/useSocket";
+import { useParams } from "next/navigation";
 
 const WaitingRoom: React.FC = () => {
   const router = useRouter();
   const { socket, isConnected } = useSocket();
-  const [status, setStatus] = useState<"waiting" | "accepted" | "rejected">(
+  const [status, setStatus] = useState<"waiting" | "confirmed" | "cancelled">(
     "waiting"
   );
+  const { bookingId } = useParams();
 
   useEffect(() => {
-    if (socket) {
-      socket.on("ride_status", (data: { status: "accepted" | "rejected" }) => {
-        console.log("Received ride_status event:", data);
-        setStatus(data.status);
-        console.log("Updated status:", data.status);
-      });
+    if (socket && isConnected) {
+      socket.emit("join-ride", bookingId);
+
+      socket.on(
+        "ride-status",
+        (data: { bookingId: string; status: "confirmed" | "cancelled" }) => {
+          console.log("Received ride-status event:", data);
+          if (data.bookingId === bookingId) {
+            setStatus(data.status);
+            console.log("Updated status:", data.status);
+          }
+        }
+      );
     }
 
     return () => {
       if (socket) {
-        socket.off("ride_status");
+        socket.off("ride-status");
       }
     };
-  }, [socket]);
+  }, [socket, isConnected, bookingId]);
 
   const handleRedirectToRide = () => {
-    router.push("/ride");
+    router.push(`/ride/${bookingId}`);
   };
 
   return (
@@ -50,7 +59,7 @@ const WaitingRoom: React.FC = () => {
           </div>
         )}
 
-        {status === "accepted" && (
+        {status === "confirmed" && (
           <div className="text-center">
             <p className="text-lg text-green-600 mb-4">
               A driver has accepted your ride!
@@ -64,7 +73,7 @@ const WaitingRoom: React.FC = () => {
           </div>
         )}
 
-        {status === "rejected" && (
+        {status === "cancelled" && (
           <div className="text-center">
             <p className="text-lg text-red-600 mb-4">
               Sorry, your ride request was rejected.

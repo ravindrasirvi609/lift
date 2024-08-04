@@ -108,7 +108,7 @@ const DriverRequestsPage = () => {
 
   useEffect(() => {
     if (socket && user) {
-      socket.on("booking_status_update", (updatedBooking: BookingRequest) => {
+      socket.on("booking-status-update", (updatedBooking: BookingRequest) => {
         setBookingRequests((prevRequests) =>
           prevRequests.map((request) =>
             request._id === updatedBooking._id ? updatedBooking : request
@@ -117,7 +117,7 @@ const DriverRequestsPage = () => {
       });
 
       return () => {
-        socket.off("booking_status_update");
+        socket.off("booking-status-update");
       };
     }
   }, [socket, user]);
@@ -140,11 +140,9 @@ const DriverRequestsPage = () => {
         },
         body: JSON.stringify({ status: action }),
       });
-      console.log("Response:", response);
 
       if (response.ok) {
         const updatedBooking = await response.json();
-        console.log("Updated booking:", updatedBooking);
 
         setBookingRequests((prevRequests) =>
           prevRequests.map((request) =>
@@ -153,12 +151,14 @@ const DriverRequestsPage = () => {
         );
         alert(`Booking ${action} successfully`);
 
-        if (socket) {
-          socket.emit("booking_action", {
+        if (socket && isConnected) {
+          socket.emit("booking-action", {
             bookingId,
             action,
-            passengerId: updatedBooking.booking.passenger._id,
+            passengerId: updatedBooking.passenger._id,
           });
+        } else {
+          console.log("Socket not connected. Unable to emit booking-action.");
         }
       } else {
         const errorData = await response.json();
