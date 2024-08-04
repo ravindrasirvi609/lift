@@ -7,6 +7,8 @@ import {
   FaClock,
   FaUsers,
   FaRoute,
+  FaCheckCircle,
+  FaTimesCircle,
 } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { gsap } from "gsap";
@@ -22,9 +24,6 @@ interface Props {
 }
 
 const AvailableRides: React.FC<Props> = ({ rides }) => {
-  console.log("rides", rides);
-  console.log("ride?.driver?.driverRating", rides[0]?.driver?.driverRating);
-
   useGSAP(() => {
     rides.forEach((_, index) => {
       gsap.from(`#ride-${index}`, {
@@ -42,36 +41,36 @@ const AvailableRides: React.FC<Props> = ({ rides }) => {
   }, [rides]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 max-w-4xl mx-auto">
       {rides.map((ride, index) => (
         <motion.div
           key={ride._id}
           id={`ride-${index}`}
-          className="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:shadow-2xl"
+          className="bg-white rounded-xl shadow-md overflow-hidden transform transition duration-300 hover:shadow-xl border border-gray-100"
           whileHover={{ scale: 1.02 }}
         >
           <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+              <div className="flex items-center mb-4 md:mb-0">
                 <div className="relative">
                   <Image
                     src={ride.driver.profilePicture}
                     alt={ride.driver.name}
-                    className="w-20 h-20 rounded-full mr-4 border-4 border-[#F9D423]"
-                    width={80}
-                    height={80}
+                    className="w-16 h-16 rounded-full mr-4 border-2 border-[#F9D423]"
+                    width={64}
+                    height={64}
                   />
                   {ride.driver.isVerified && (
                     <motion.div
                       className="absolute -top-1 -right-1 bg-[#F96167] rounded-full p-1"
                       whileHover={{ scale: 1.1 }}
                     >
-                      <FaStar className="text-white" />
+                      <FaStar className="text-white text-xs" />
                     </motion.div>
                   )}
                 </div>
                 <div>
-                  <h3 className="font-bold text-xl text-[#F96167] hover:text-[#F9D423]">
+                  <h3 className="font-bold text-lg text-[#F96167] hover:text-[#F9D423]">
                     <Link href={`/profile/${ride.driver._id}`}>
                       {ride.driver.firstName} {ride.driver.lastName}
                     </Link>
@@ -84,25 +83,23 @@ const AvailableRides: React.FC<Props> = ({ rides }) => {
                           i < Math.floor(ride.driver.driverRating)
                             ? "text-[#F9D423]"
                             : "text-gray-300"
-                        } mr-1`}
+                        } text-sm mr-1`}
                       />
                     ))}
-                    <span className="ml-1 text-gray-600">
+                    <span className="ml-1 text-sm text-gray-600">
                       ({ride?.driver?.driverRating?.toFixed(1)})
                     </span>
-                    <span>
-                      {" "}
-                      {ride.driver.driverVerificationStatus === "Approved" && (
-                        <span className="text-[#089814] ml-1">
-                          Verified Driver
-                        </span>
-                      )}
-                      {ride.driver.driverVerificationStatus !== "Approved" && (
-                        <span className="text-[#ff3a3a] ml-1">
-                          Driver is Not Verified
-                        </span>
-                      )}
-                    </span>
+                  </div>
+                  <div className="mt-1">
+                    {ride.driver.driverVerificationStatus === "Approved" ? (
+                      <span className="text-[#089814] text-sm flex items-center">
+                        <FaCheckCircle className="mr-1" /> Verified Driver
+                      </span>
+                    ) : (
+                      <span className="text-[#ff3a3a] text-sm flex items-center">
+                        <FaTimesCircle className="mr-1" /> Not Verified
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -117,8 +114,7 @@ const AvailableRides: React.FC<Props> = ({ rides }) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-6 mb-6">
-              {/* <RideInfoItem icon={FaCar} text={ride.vehicle} /> */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <RideInfoItem
                 icon={FaUsers}
                 text={`${ride.availableSeats} available seats`}
@@ -135,10 +131,6 @@ const AvailableRides: React.FC<Props> = ({ rides }) => {
                 icon={FaClock}
                 text={formatDateWithTime(new Date(ride.departureTime))}
               />
-              <RideInfoItem
-                icon={FaClock}
-                text={formatDateWithTime(new Date(ride.estimatedArrivalTime))}
-              />
             </div>
 
             <div className="mb-6">
@@ -153,7 +145,7 @@ const AvailableRides: React.FC<Props> = ({ rides }) => {
                   animate={{ width: "100%" }}
                   transition={{ duration: 1.5, ease: "easeInOut" }}
                 />
-                <FaRoute className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white" />
+                <FaRoute className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-xs" />
               </div>
             </div>
 
@@ -178,8 +170,8 @@ const RideInfoItem: React.FC<{ icon: React.ElementType; text: string }> = ({
   text,
 }) => (
   <motion.div className="flex items-center" whileHover={{ scale: 1.05 }}>
-    <Icon className="text-[#F96167] mr-2" />
-    <span className="text-gray-700">{text}</span>
+    <Icon className="text-[#F96167] mr-2 text-lg" />
+    <span className="text-gray-700 text-sm">{text}</span>
   </motion.div>
 );
 

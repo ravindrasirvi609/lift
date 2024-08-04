@@ -9,14 +9,15 @@ import {
   FaMapMarkerAlt,
   FaClock,
   FaUsers,
-  FaDollarSign,
   FaCheck,
   FaTimes,
   FaCar,
+  FaRupeeSign,
 } from "react-icons/fa";
 import Link from "next/link";
 import { formatDateWithTime } from "@/utils/utils";
 import { useSocket } from "@/app/hooks/useSocket";
+import Image from "next/image";
 
 interface Location {
   type: string;
@@ -55,6 +56,7 @@ interface BookingRequest {
     firstName: string;
     lastName: string;
     _id: string;
+    profilePicture: string;
   };
   driver: string;
   numberOfSeats: number;
@@ -187,7 +189,7 @@ const DriverRequestsPage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-6 bg-[#F9E795] rounded-lg shadow-xl">
+    <div className="w-screen h-screen mx-auto mt-2 py-6 px-16 bg-[#F9E795]  shadow-xl">
       <h1 className="text-3xl font-bold mb-6 text-[#F96167] text-center">
         Booking Requests
       </h1>
@@ -209,6 +211,13 @@ const DriverRequestsPage = () => {
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div className="flex items-center">
                     <FaUser className="text-[#F96167] mr-2" />
+                    <Image
+                      src={request.passenger.profilePicture}
+                      alt={request.passenger.firstName}
+                      width={64}
+                      height={64}
+                      className="w-16 h-16 rounded-full"
+                    />
                     <span className="font-semibold">
                       <Link
                         href={`/profile/${request.passenger._id}`}
@@ -220,8 +229,8 @@ const DriverRequestsPage = () => {
                     </span>
                   </div>
                   <div className="flex items-center justify-end">
-                    <FaDollarSign className="text-[#F96167] mr-2" />
-                    <span className="font-bold text-lg">₹{request.price}</span>
+                    <FaRupeeSign className="text-[#F96167] mr-2" />
+                    <span className="font-bold text-lg">{request.price}</span>
                   </div>
                   <div className="flex items-center">
                     <FaMapMarkerAlt className="text-[#F96167] mr-2" />
@@ -258,7 +267,7 @@ const DriverRequestsPage = () => {
                     </span>
                   </div>
                   <div className="flex items-center">
-                    <FaDollarSign className="text-[#F96167] mr-2" />
+                    <FaRupeeSign className="text-[#F96167] mr-2" />
                     <span>Payment: {request?.paymentStatus}</span>
                   </div>
                 </div>

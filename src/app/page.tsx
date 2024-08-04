@@ -30,7 +30,6 @@ const Home: React.FC = () => {
       <HowItWorks />
       <SafetyAndSecurity />
       <Features />
-      <Footer />
     </div>
   );
 };

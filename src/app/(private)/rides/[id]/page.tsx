@@ -10,7 +10,7 @@ import {
   FaCar,
   FaInfoCircle,
   FaClock,
-  FaDollarSign,
+  FaRupeeSign,
 } from "react-icons/fa";
 import { useAuth } from "@/app/contexts/AuthContext";
 import Link from "next/link";
@@ -175,7 +175,7 @@ const RidePage = () => {
                 iconColor="text-[#F9D423]"
               />
               <InfoItem
-                icon={FaDollarSign}
+                icon={FaRupeeSign}
                 label="Price"
                 value={`₹${rideData.price.toFixed(2)}`}
                 iconColor="text-green-500"

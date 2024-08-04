@@ -7,6 +7,7 @@ import Header from "@/components/Headers";
 import { ApolloProvider } from "@apollo/client";
 import client from "@/utils/apollo-client";
 import ApolloWrapper from "@/components/ApolloWrapper";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "RideShare Connect",
@@ -42,6 +43,7 @@ export default async function RootLayout({
             </div>
             <div className="pt-16">
               <main>{children}</main>
+              <Footer />
             </div>
           </ApolloWrapper>{" "}
         </AuthProvider>

@@ -168,12 +168,15 @@ export async function GET(req: NextRequest) {
     }
 
     const bookings = await Booking.find(query)
+      .sort({ createdAt: -1 }) // Sort by createdAt in descending order
       .populate({
         path: "ride",
-        populate: { path: "driver", select: "firstName lastName" },
+        populate: {
+          path: "driver",
+          select: "firstName lastName profilePicture",
+        },
       })
-      .populate("passenger", "firstName lastName");
-
+      .populate("passenger", "firstName lastName profilePicture");
     return NextResponse.json(bookings);
   } catch (error) {
     console.error("Error fetching bookings:", error);
