@@ -1,8 +1,14 @@
-import React, { useEffect, useRef } from "react";
+"use client";
+import React, { useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion } from "framer-motion";
-import { FaSearch, FaCarSide, FaCheckCircle } from "react-icons/fa";
+import {
+  FaSearch,
+  FaCarSide,
+  FaCheckCircle,
+  FaArrowRight,
+} from "react-icons/fa";
 import { useGSAP } from "@gsap/react";
 import Link from "next/link";
 
@@ -52,17 +58,25 @@ const HowItWorks: React.FC = () => {
   return (
     <section ref={sectionRef} className="py-20 bg-white">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl font-bold mb-12 text-center text-[#F96167]">
+        <motion.h2
+          className="text-4xl font-bold mb-12 text-center text-[#F96167]"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           How It Works
-        </h2>
+        </motion.h2>
         <div className="grid md:grid-cols-3 gap-8">
           {steps.map((step, index) => (
             <motion.div
               key={index}
-              className="step-item bg-gradient-to-br from-[#F9E795] to-[#F9D423] p-6 rounded-lg shadow-lg text-center"
-              whileHover={{ y: -10 }}
+              className="step-item bg-gradient-to-br from-[#F9E795] to-[#F9D423] p-6 rounded-lg shadow-lg text-center relative overflow-hidden"
+              whileHover={{ y: -10, boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }}
               transition={{ type: "spring", stiffness: 300 }}
             >
+              <div className="absolute top-0 right-0 bg-[#F96167] text-white w-10 h-10 flex items-center justify-center rounded-bl-lg text-xl font-bold">
+                {index + 1}
+              </div>
               <step.icon className="text-5xl mb-4 text-[#F96167] mx-auto" />
               <h3 className="text-2xl font-semibold mb-3 text-[#F96167]">
                 {step.title}
@@ -71,17 +85,25 @@ const HowItWorks: React.FC = () => {
             </motion.div>
           ))}
         </div>
-        <div className="mt-16 text-center">
+        <motion.div
+          className="mt-16 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
           <Link href={"/#rideSearch"}>
             <motion.button
-              whileHover={{ scale: 1.05 }}
+              whileHover={{
+                scale: 1.05,
+                boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
+              }}
               whileTap={{ scale: 0.95 }}
-              className="bg-[#F96167] hover:bg-[#F9D423] text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg transition duration-300"
+              className="bg-[#F96167] hover:bg-[#F9D423] text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg transition duration-300 flex items-center justify-center mx-auto"
             >
-              Find a Ride Now
+              Find a Ride Now <FaArrowRight className="ml-2" />
             </motion.button>
           </Link>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -33,29 +33,38 @@ const Hero: React.FC = () => {
   }, []);
 
   return (
-    <section className="bg-gradient-to-b from-[#F96167] to-[#F9D423] text-white py-20 text-center relative overflow-hidden">
-      <div className="container mx-auto relative z-10">
-        <div ref={logoRef} className=" w-[200px] h-[200px] mx-auto mb-8">
+    <section className="h-screen w-screen bg-gradient-to-b from-[#F96167] to-[#F9D423] text-white flex flex-col justify-center items-center relative overflow-hidden">
+      <div className="container mx-auto relative z-10 flex flex-col items-center">
+        <div ref={logoRef} className="w-[200px] h-[200px] mb-8">
           <Image
             src="/logo.png"
             alt="Lift team"
             width={500}
             height={300}
             className="rounded-lg"
-          />{" "}
+          />
         </div>
-        <div ref={textRef}>
+        <div ref={textRef} className="text-center">
           <h1 className="text-5xl font-bold mb-4">Welcome to lift</h1>
           <p className="text-xl mb-8">
             Your reliable platform to find and book rides easily.
           </p>
-          <Link href={"/#rideSearch"}>
+          <Link href={"/#rideSearch"} className="mr-4">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="bg-white text-[#F96167] font-bold py-3 px-8 rounded-full text-lg shadow-lg"
             >
-              Get Started
+              Find a Ride
+            </motion.button>
+          </Link>
+          <Link href={"/trip-info"}>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-white text-[#F96167] font-bold py-3 px-8 rounded-full text-lg shadow-lg"
+            >
+              Offer a Ride
             </motion.button>
           </Link>
         </div>

@@ -102,7 +102,7 @@ const AboutPage: React.FC = () => {
                 Lift was born out of a simple idea: to make transportation more
                 efficient and environmentally friendly. Our founders, a group of
                 tech enthusiasts and environmental advocates, came together in
-                2020 with a vision to create a platform that would connect
+                2024 with a vision to create a platform that would connect
                 people going the same way.
               </p>
               <p className="text-gray-700">

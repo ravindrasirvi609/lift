@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import Rides from "./Ride";
 import { useGSAP } from "@gsap/react";
+import { FaSearch, FaCar } from "react-icons/fa";
 
 const RideSearchAndResults: React.FC = () => {
   const [searchParams, setSearchParams] = useState<SearchParams | null>(null);
@@ -61,14 +62,18 @@ const RideSearchAndResults: React.FC = () => {
   return (
     <div
       ref={componentRef}
-      className="min-h-screen bg-gradient-to-br from-[#F9E795] to-[#F9D423]"
+      className="min-h-screen bg-gradient-to-br from-[#F9E795] to-[#F9D423] py-12 px-4 sm:px-6 lg:px-8"
       id="rideSearch"
     >
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
+        className="max-w-4xl mx-auto"
       >
+        <h1 className="text-4xl font-bold text-center mb-8 text-[#F96167] flex items-center justify-center">
+          <FaSearch className="mr-4" /> Find Your Ride
+        </h1>
         <RideSearch onSearch={handleSearch} />
       </motion.div>
       <AnimatePresence>
@@ -79,6 +84,7 @@ const RideSearchAndResults: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.5 }}
+            className="mt-12"
           >
             <Rides rides={rides} loading={loading} error={error} />
           </motion.div>
@@ -89,9 +95,15 @@ const RideSearchAndResults: React.FC = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-center mt-8 text-2xl font-semibold text-[#F96167]"
+            className="text-center mt-12 p-8 bg-white rounded-lg shadow-lg"
           >
-            Search for rides to see results
+            <FaCar className="text-6xl text-[#F96167] mx-auto mb-4" />
+            <p className="text-2xl font-semibold text-[#F96167] mb-2">
+              Ready to go?
+            </p>
+            <p className="text-gray-600">
+              Search for rides to see available options
+            </p>
           </motion.div>
         )}
       </AnimatePresence>

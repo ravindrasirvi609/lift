@@ -60,8 +60,8 @@ export async function POST(req: Request) {
 
     if (rides.length === 0) {
       return NextResponse.json(
-        { message: "No rides found matching the criteria" },
-        { status: 404 }
+        { rides, message: "No rides found matching the criteria" },
+        { status: 200 }
       );
     }
 
