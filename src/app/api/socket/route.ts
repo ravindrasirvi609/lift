@@ -47,7 +47,7 @@ export async function GET(req: NextRequest, res: NextApiResponseServerIO) {
       });
 
       // New event for booking actions
-      socket.on("booking_action", ({ bookingId, action, passengerId }) => {
+      socket.on("booking-action", ({ bookingId, action, passengerId }) => {
         console.log(`Booking action: ${action} for booking ${bookingId}`);
 
         // Emit to the specific passenger
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest, res: NextApiResponseServerIO) {
         }
 
         // Emit to all connected clients
-        io.emit("booking_status_update", { bookingId, status: action });
+        io.emit("booking-status-update", { bookingId, status: action });
       });
 
       socket.on("disconnect", () => {
@@ -101,7 +101,7 @@ export async function POST(req: Request) {
       await addMessageToRide(rideId, data);
       io.to(rideId).emit("new-message", { rideId, message: data });
       break;
-    case "booking_action":
+    case "booking-action":
       const { bookingId, action: bookingAction, passengerId } = data;
       const passengerSocketId = connectedUsers.get(passengerId);
       if (passengerSocketId) {

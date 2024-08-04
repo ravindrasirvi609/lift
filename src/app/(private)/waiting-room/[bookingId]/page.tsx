@@ -10,10 +10,38 @@ const WaitingRoom: React.FC = () => {
   const [status, setStatus] = useState<"waiting" | "confirmed" | "cancelled">(
     "waiting"
   );
+  const [data, setData] = useState<any>(null);
   const { bookingId } = useParams();
 
   useEffect(() => {
-    if (socket && isConnected) {
+    const getRideDetails = async () => {
+      try {
+        const response = await fetch("/api/ride/find-by-booking", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ bookingId }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Ride details:", data.ride._id);
+          setData(data);
+        } else {
+          console.error("Failed to fetch ride details:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error fetching ride details:", error);
+      }
+    };
+
+    getRideDetails();
+  }, [bookingId, router]);
+
+  useEffect(() => {
+    if (socket && isConnected && bookingId) {
+      console.log(`Joining room for booking: ${bookingId}`);
       socket.emit("join-ride", bookingId);
 
       socket.on(
@@ -26,17 +54,17 @@ const WaitingRoom: React.FC = () => {
           }
         }
       );
-    }
 
-    return () => {
-      if (socket) {
+      return () => {
+        console.log(`Leaving room for booking: ${bookingId}`);
         socket.off("ride-status");
-      }
-    };
+        socket.emit("leave-ride", bookingId);
+      };
+    }
   }, [socket, isConnected, bookingId]);
 
   const handleRedirectToRide = () => {
-    router.push(`/ride/${bookingId}`);
+    router.push(`/rides/${data.ride._id}`);
   };
 
   return (

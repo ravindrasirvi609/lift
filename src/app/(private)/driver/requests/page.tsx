@@ -122,6 +122,18 @@ const DriverRequestsPage = () => {
     }
   }, [socket, user]);
 
+  useEffect(() => {
+    if (socket && isConnected && bookingRequests.length > 0) {
+      const joinedBookings = new Set();
+      bookingRequests.forEach((request) => {
+        if (!joinedBookings.has(request._id)) {
+          socket.emit("join-ride", request._id);
+          joinedBookings.add(request._id);
+        }
+      });
+    }
+  }, [socket, isConnected, bookingRequests]);
+
   if (isAuthLoading || isLoading) {
     return <Loading />;
   }
@@ -143,6 +155,7 @@ const DriverRequestsPage = () => {
 
       if (response.ok) {
         const updatedBooking = await response.json();
+        console.log("updatedBooking", updatedBooking);
 
         setBookingRequests((prevRequests) =>
           prevRequests.map((request) =>
@@ -150,13 +163,16 @@ const DriverRequestsPage = () => {
           )
         );
         alert(`Booking ${action} successfully`);
+        console.log("updatedBooking.passenger._id", updatedBooking);
 
         if (socket && isConnected) {
           socket.emit("booking-action", {
             bookingId,
             action,
-            passengerId: updatedBooking.passenger._id,
+            passengerId: updatedBooking.booking.passenger._id,
           });
+
+          alert("Booking-action emitted");
         } else {
           console.log("Socket not connected. Unable to emit booking-action.");
         }

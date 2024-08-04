@@ -26,46 +26,54 @@ app.prepare().then(() => {
   io.on('connection', (socket) => {
     console.log('New client connected', socket.id);
 
-    socket.on('join-ride', (rideId) => {
-      socket.join(rideId);
-      connectedUsers.set(socket.id, rideId);
-      console.log(`Client ${socket.id} joined ride: ${rideId}`);
-      io.to(rideId).emit('user-joined', { userId: socket.id, rideId });
+socket.on('join-ride', (bookingId) => {
+  console.log(`Client ${socket.id} attempting to join booking: ${bookingId}`);
+  if (!socket.rooms.has(bookingId)) {
+    socket.join(bookingId);
+    connectedUsers.set(socket.id, bookingId);
+    console.log(`Client ${socket.id} joined booking: ${bookingId}`);
+    io.to(bookingId).emit('user-joined', { userId: socket.id, bookingId });
+  } else {
+    console.log(`Client ${socket.id} already in booking: ${bookingId}`);
+  }
+});
+
+    socket.on('update-location', ({ bookingId, location }) => {
+      console.log(`Location update for booking ${bookingId}:`, location);
+      io.to(bookingId).emit('location-updated', { bookingId, location });
     });
 
-    socket.on('update-location', ({ rideId, location }) => {
-      console.log(`Location update for ride ${rideId}:`, location);
-      io.to(rideId).emit('location-updated', { rideId, location });
-    });
-
-    socket.on('send-message', ({ rideId, message }) => {
-      console.log(`New message for ride ${rideId}:`, message);
-      io.to(rideId).emit('new-message', { rideId, message });
+    socket.on('send-message', ({ bookingId, message }) => {
+      console.log(`New message for booking ${bookingId}:`, message);
+      io.to(bookingId).emit('new-message', { bookingId, message });
     });
 
     socket.on('booking-action', ({ bookingId, action, passengerId }) => {
       console.log(`Booking action: ${action} for booking ${bookingId}`);
       
-      // Emit to the specific passenger
-      io.to(passengerId).emit('ride-status', { bookingId, status: action.toLowerCase() });
-console.log("booking-action",connectedUsers);
+      // Emit to the specific booking room
+      io.to(bookingId).emit('ride-status', { bookingId, status: action.toLowerCase() });
+      console.log(`Emitted ride-status to booking ${bookingId}`);
 
-      // Emit to all connected clients in the ride
-      const rideId = connectedUsers.get(socket.id);
-      console.log("rideId",rideId);
-      if (rideId) {
-        io.to(rideId).emit('booking-status-update', { bookingId, status: action });
-      }
+      // Optionally, you can still emit a general update to all clients in the booking
+      io.to(bookingId).emit('booking-status-update', { bookingId, status: action });
     });
 
-    socket.on('disconnect', () => {
-      const rideId = connectedUsers.get(socket.id);
-      if (rideId) {
-        connectedUsers.delete(socket.id);
-        console.log(`Client ${socket.id} disconnected from ride ${rideId}`);
-        io.to(rideId).emit('user-left', { userId: socket.id, rideId });
-      }
-    });
+    socket.on('leave-ride', (bookingId) => {
+  console.log(`Client ${socket.id} leaving booking: ${bookingId}`);
+  socket.leave(bookingId);
+  connectedUsers.delete(socket.id);
+});
+
+socket.on('disconnect', () => {
+  const bookingId = connectedUsers.get(socket.id);
+  if (bookingId) {
+    connectedUsers.delete(socket.id);
+    console.log(`Client ${socket.id} disconnected from booking ${bookingId}`);
+    socket.leave(bookingId);
+    io.to(bookingId).emit('user-left', { userId: socket.id, bookingId });
+  }
+});
   });
 
   // Handle Socket.IO handshake
