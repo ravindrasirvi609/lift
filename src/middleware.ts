@@ -9,7 +9,14 @@ export async function middleware(request: NextRequest) {
     path === "/" ||
     path.startsWith("/api") ||
     path.startsWith("/_next") ||
-    path.startsWith("/verifyemail");
+    path.startsWith("/verifyemail") ||
+    path.startsWith("/privacy") ||
+    path.startsWith("/terms") ||
+    path.startsWith("/cookies") ||
+    path.startsWith("/about") ||
+    path.startsWith("/contact") ||
+    path.startsWith("/public");
+
   const token = request.cookies.get("token")?.value;
 
   if (isAuthPath) {

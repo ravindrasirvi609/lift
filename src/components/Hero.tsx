@@ -35,17 +35,17 @@ const Hero: React.FC = () => {
   return (
     <section className="h-screen w-screen bg-gradient-to-b from-[#F96167] to-[#F9D423] text-white flex flex-col justify-center items-center relative overflow-hidden">
       <div className="container mx-auto relative z-10 flex flex-col items-center">
-        <div ref={logoRef} className="w-[200px] h-[200px] mb-8">
+        <div ref={logoRef} className="w-[400px] h-[400px] mb-2">
           <Image
             src="/logo.png"
             alt="Lift team"
-            width={500}
-            height={300}
+            width={800}
+            height={500}
             className="rounded-lg"
           />
         </div>
         <div ref={textRef} className="text-center">
-          <h1 className="text-5xl font-bold mb-4">Welcome to lift</h1>
+          <h1 className="text-5xl font-bold mb-4">Welcome to LIFT</h1>
           <p className="text-xl mb-8">
             Your reliable platform to find and book rides easily.
           </p>

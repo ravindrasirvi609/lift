@@ -7,7 +7,7 @@ const AboutPage: React.FC = () => {
       {/* Hero Section */}
       <header className="bg-gradient-to-r from-[#F96167] to-[#F9D423] text-white py-20">
         <div className="container mx-auto px-4">
-          <h1 className="text-5xl font-bold mb-4">About Lift</h1>
+          <h1 className="text-5xl font-bold mb-4">About LIFT</h1>
           <p className="text-xl">
             Connecting journeys, sharing rides, reducing carbon footprints.
           </p>
@@ -21,7 +21,7 @@ const AboutPage: React.FC = () => {
             Our Mission
           </h2>
           <p className="text-xl text-gray-700 max-w-3xl mx-auto text-center">
-            At Lift, we&apos;re on a mission to revolutionize transportation by
+            At LIFT, we&apos;re on a mission to revolutionize transportation by
             making ride-sharing accessible, affordable, and eco-friendly. We
             believe in the power of community to create a more connected and
             sustainable world.
@@ -99,7 +99,7 @@ const AboutPage: React.FC = () => {
             </div>
             <div className="md:w-1/2 md:pl-8">
               <p className="text-gray-700 mb-4">
-                Lift was born out of a simple idea: to make transportation more
+                LIFT was born out of a simple idea: to make transportation more
                 efficient and environmentally friendly. Our founders, a group of
                 tech enthusiasts and environmental advocates, came together in
                 2024 with a vision to create a platform that would connect
