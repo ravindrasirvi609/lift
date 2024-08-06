@@ -38,6 +38,11 @@ socket.on('join-ride', (bookingId) => {
   }
 });
 
+socket.on('send-notification', ({ userId, notification }) => {
+    console.log(`Sending notification to user ${userId}:`, notification);
+    io.to(userId).emit('new-notification', notification);
+  });
+
     socket.on('update-location', ({ bookingId, location }) => {
       console.log(`Location update for booking ${bookingId}:`, location);
       io.to(bookingId).emit('location-updated', { bookingId, location });

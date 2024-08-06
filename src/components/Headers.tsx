@@ -5,6 +5,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/app/contexts/AuthContext";
+import {
+  FaUser,
+  FaSignOutAlt,
+  FaHome,
+  FaInfoCircle,
+  FaEnvelope,
+  FaBars,
+  FaTimes,
+} from "react-icons/fa";
+import Notifications from "./Notifications";
 
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
@@ -29,77 +39,80 @@ const Header: React.FC = () => {
     router.push("/");
   };
 
+  const NavLink: React.FC<{
+    href: string;
+    icon: React.ReactNode;
+    text: string;
+  }> = ({ href, icon, text }) => (
+    <Link
+      href={href}
+      className={`flex items-center space-x-2 ${
+        pathname === href
+          ? "text-[#F96167] font-bold"
+          : "text-gray-700 hover:text-[#F96167]"
+      } transition duration-300`}
+    >
+      {icon}
+      <span>{text}</span>
+    </Link>
+  );
+
   return (
     <header
       className={`fixed w-full z-50 transition-all duration-300 ${
-        scrolled ? "bg-[#F9D423] shadow-md" : "bg-[#F9D423]"
+        scrolled ? "bg-white shadow-md" : "bg-[#F9D423]"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center">
-            <Link href="/" className="text-[#F96167] text-2xl font-bold">
+            <Link
+              href="/"
+              className="text-[#F96167] text-2xl font-bold flex items-center"
+            >
+              <FaHome className="mr-2" />
               LIFT
             </Link>
           </div>
 
           {/* Desktop menu */}
-          <nav className="hidden md:flex space-x-4">
-            <Link
-              href="/"
-              className={`${
-                pathname === "/"
-                  ? "text-[#F96167] font-bold"
-                  : "text-[#F96167] hover:text-[#F96167]/80"
-              }`}
-            >
-              Home
-            </Link>
-            <Link
-              href="/about"
-              className={`${
-                pathname === "/about"
-                  ? "text-[#F96167] font-bold"
-                  : "text-[#F96167] hover:text-[#F96167]/80"
-              }`}
-            >
-              About
-            </Link>
-            <Link
-              href="/contact"
-              className={`${
-                pathname === "/contact"
-                  ? "text-[#F96167] font-bold"
-                  : "text-[#F96167] hover:text-[#F96167]/80"
-              }`}
-            >
-              Contact
-            </Link>
+          <nav className="hidden md:flex space-x-6">
+            <NavLink href="/" icon={<FaHome />} text="Home" />
+            <NavLink href="/about" icon={<FaInfoCircle />} text="About" />
+            <NavLink href="/contact" icon={<FaEnvelope />} text="Contact" />
           </nav>
 
-          {/* User info, profile, and logout for desktop */}
+          {/* User info, profile, notifications, and logout for desktop */}
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <>
-                <span className="text-[#F96167]">Welcome, {user.email}</span>
-                <Link
-                  href="/profile"
-                  className="text-[#F96167] hover:text-[#F96167]/80"
-                >
-                  Profile
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="bg-[#F96167] text-white px-4 py-2 rounded hover:bg-[#F96167]/80 transition duration-300"
-                >
-                  Logout
-                </button>
+                <Notifications />
+                <div className="relative group">
+                  <button className="flex items-center space-x-2 text-gray-700 hover:text-[#F96167] transition duration-300">
+                    <FaUser />
+                    <span>{user.email}</span>
+                  </button>
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden group-hover:block">
+                    <Link
+                      href="/profile"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Profile
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
               </>
             ) : (
               <>
                 <Link
                   href="/login"
-                  className="text-[#F96167] hover:text-[#F96167]/80"
+                  className="text-gray-700 hover:text-[#F96167] transition duration-300"
                 >
                   Login
                 </Link>
@@ -115,85 +128,69 @@ const Header: React.FC = () => {
 
           {/* Mobile menu button */}
           <div className="md:hidden">
-            <button onClick={toggleMenu} className="text-[#F96167]">
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d={
-                    isMenuOpen
-                      ? "M6 18L18 6M6 6l12 12"
-                      : "M4 6h16M4 12h16M4 18h16"
-                  }
-                />
-              </svg>
+            <button
+              onClick={toggleMenu}
+              className="text-gray-700 hover:text-[#F96167] transition duration-300"
+            >
+              {isMenuOpen ? (
+                <FaTimes className="h-6 w-6" />
+              ) : (
+                <FaBars className="h-6 w-6" />
+              )}
             </button>
           </div>
         </div>
 
         {/* Mobile menu */}
         {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              <Link
-                href="/"
-                className="block text-[#F96167] hover:bg-[#F96167] hover:text-white px-3 py-2 rounded-md"
-              >
-                Home
-              </Link>
-              <Link
-                href="/about"
-                className="block text-[#F96167] hover:bg-[#F96167] hover:text-white px-3 py-2 rounded-md"
-              >
-                About
-              </Link>
-              <Link
-                href="/contact"
-                className="block text-[#F96167] hover:bg-[#F96167] hover:text-white px-3 py-2 rounded-md"
-              >
-                Contact
-              </Link>
+          <div className="md:hidden bg-white rounded-b-lg shadow-lg">
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              <NavLink href="/" icon={<FaHome />} text="Home" />
+              <NavLink href="/about" icon={<FaInfoCircle />} text="About" />
+              <NavLink href="/contact" icon={<FaEnvelope />} text="Contact" />
             </div>
             {user ? (
-              <div className="pt-4 pb-3 border-t border-[#F96167]">
+              <div className="pt-4 pb-3 border-t border-gray-200">
                 <div className="flex items-center px-5">
-                  <div className="text-[#F96167]">
-                    <span>Welcome, {user.email}</span>
+                  <div className="flex-shrink-0">
+                    <FaUser className="h-6 w-6 text-gray-700" />
+                  </div>
+                  <div className="ml-3">
+                    <div className="text-base font-medium text-gray-800">
+                      {user.email}
+                    </div>
+                  </div>
+                  <div className="ml-auto">
+                    <Notifications />
                   </div>
                 </div>
                 <div className="mt-3 px-2 space-y-1">
                   <Link
                     href="/profile"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-[#F96167] hover:text-white hover:bg-[#F96167] transition duration-300"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#F96167] hover:bg-gray-100 transition duration-300"
                   >
                     Profile
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-[#F96167] hover:text-white hover:bg-[#F96167] transition duration-300"
+                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#F96167] hover:bg-gray-100 transition duration-300"
                   >
                     Logout
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="pt-4 pb-3 border-t border-[#F96167]">
+              <div className="pt-4 pb-3 border-t border-gray-200">
                 <div className="px-2 space-y-1">
                   <Link
                     href="/login"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-[#F96167] hover:text-white hover:bg-[#F96167] transition duration-300"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#F96167] hover:bg-gray-100 transition duration-300"
                   >
                     Login
                   </Link>
                   <Link
                     href="/register"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-[#F96167] hover:text-white hover:bg-[#F96167] transition duration-300"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-white bg-[#F96167] hover:bg-[#F96167]/80 transition duration-300"
                   >
                     Register
                   </Link>
