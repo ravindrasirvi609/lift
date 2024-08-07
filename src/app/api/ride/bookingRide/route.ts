@@ -104,6 +104,11 @@ export async function POST(req: NextRequest) {
 
     await newBooking.save();
 
+    // Update ride model with the new booking ID and decrement available seats
+    ride.bookings.push(newBooking._id);
+    ride.availableSeats -= numberOfSeats;
+    await ride.save();
+
     // Notify the driver about the new booking request
     // await sendSMS(
     //   ride.driver.phoneNumber,

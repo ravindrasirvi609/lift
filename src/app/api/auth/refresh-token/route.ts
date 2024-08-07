@@ -20,8 +20,7 @@ export async function POST(req: NextRequest) {
         isDriver: decoded.isDriver,
         firstName: decoded.firstName,
         lastName: decoded.lastName,
-        mobileNumber: decoded.mobileNumber,
-        profilePicture: decoded.profilePicture,
+        phoneNumber: decoded.phoneNumber,
         exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60,
       },
       process.env.JWT_SECRET!
@@ -37,8 +36,7 @@ export async function POST(req: NextRequest) {
           isDriver: decoded.isDriver,
           firstName: decoded.firstName,
           lastName: decoded.lastName,
-          mobileNumber: decoded.mobileNumber,
-          profilePicture: decoded.profilePicture,
+          phoneNumber: decoded.phoneNumber,
         },
       },
       { status: 200 }

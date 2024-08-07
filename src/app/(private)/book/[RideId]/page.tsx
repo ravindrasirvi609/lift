@@ -96,7 +96,7 @@ const BookRidePage = () => {
           );
         }
 
-        router.push(`/waiting-room/${data._id}`);
+        router.push(`/waiting-room/${data.booking._id}`);
       } else {
         const errorData = await response.json();
         alert(`Booking failed: ${errorData.error}`);
