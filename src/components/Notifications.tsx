@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useSocket } from "@/app/hooks/useSocket";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   FaBell,
   FaTimes,
@@ -11,6 +11,7 @@ import {
   FaUser,
   FaExclamationCircle,
 } from "react-icons/fa";
+import { toast } from "react-hot-toast";
 
 interface Notification {
   id: string;
@@ -23,55 +24,95 @@ interface Notification {
   message: string;
   time: string;
   read: boolean;
+  bookingId?: string;
 }
 
 const NotificationIcon: React.FC<{ type: Notification["type"] }> = ({
   type,
 }) => {
-  switch (type) {
-    case "ride_request":
-      return <FaCar className="text-blue-500" />;
-    case "ride_accepted":
-      return <FaCheck className="text-green-500" />;
-    case "ride_cancelled":
-      return <FaTimes className="text-red-500" />;
-    case "payment_received":
-      return <FaUser className="text-purple-500" />;
-    case "system_alert":
-      return <FaExclamationCircle className="text-yellow-500" />;
-    default:
-      return null;
-  }
+  const iconMap = {
+    ride_request: <FaCar className="text-blue-500" />,
+    ride_accepted: <FaCheck className="text-green-500" />,
+    ride_cancelled: <FaTimes className="text-red-500" />,
+    payment_received: <FaUser className="text-purple-500" />,
+    system_alert: <FaExclamationCircle className="text-yellow-500" />,
+  };
+  return iconMap[type] || null;
 };
 
 const Notifications: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const { user } = useAuth();
-  const { notifications: socketNotifications } = useSocket(user?.id || "");
+  const { socket, isConnected } = useSocket(user?.id || "");
 
-  useEffect(() => {
-    if (user?.id) {
-      fetchNotifications();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (socketNotifications.length > 0) {
-      setNotifications((prev) => [...socketNotifications, ...prev]);
-    }
-  }, [socketNotifications]);
-
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
+    if (!user?.id) return;
     try {
-      const response = await fetch(`/api/notifications/${user?.id}`, {
-        method: "GET",
-        credentials: "include",
-      });
+      const response = await fetch(`/api/notifications/${user.id}`);
+      if (!response.ok) throw new Error("Failed to fetch notifications");
       const data = await response.json();
       setNotifications(data);
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
+      toast.error("Failed to load notifications");
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  useEffect(() => {
+    if (socket && user) {
+      const handleNewNotification = (newNotification: Notification) => {
+        console.log("New notification received:", newNotification);
+
+        setNotifications((prev) => [newNotification, ...prev]);
+        toast.success(newNotification.message);
+      };
+
+      socket.on("new-notification", handleNewNotification);
+      console.log("Listening for new notifications");
+
+      return () => {
+        socket.off("new-notification", handleNewNotification);
+      };
+    }
+  }, [socket, user]);
+
+  const markAsRead = async (id: string) => {
+    try {
+      const response = await fetch(`/api/notifications/${user?.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notificationIds: [id] }),
+      });
+      if (!response.ok) throw new Error("Failed to mark notification as read");
+      setNotifications(
+        notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
+      );
+    } catch (error) {
+      console.error("Failed to mark notification as read:", error);
+      toast.error("Failed to update notification");
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      const unreadIds = notifications.filter((n) => !n.read).map((n) => n.id);
+      const response = await fetch(`/api/notifications/${user?.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notificationIds: unreadIds }),
+      });
+      if (!response.ok)
+        throw new Error("Failed to mark all notifications as read");
+      setNotifications(notifications.map((n) => ({ ...n, read: true })));
+      toast.success("All notifications marked as read");
+    } catch (error) {
+      console.error("Failed to mark all notifications as read:", error);
+      toast.error("Failed to update notifications");
     }
   };
 
@@ -80,42 +121,6 @@ const Notifications: React.FC = () => {
   if (unreadCount > 0) {
     unreadCount = notifications.filter((n) => !n.read).length;
   }
-
-  const markAsRead = async (id: string) => {
-    try {
-      await fetch(`/api/notifications/${user?.id}`, {
-        method: "PUT",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ notificationIds: [id] }),
-      });
-      setNotifications(
-        notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
-      );
-    } catch (error) {
-      console.error("Failed to mark notification as read:", error);
-    }
-  };
-
-  const markAllAsRead = async () => {
-    try {
-      const unreadIds = notifications.filter((n) => !n.read).map((n) => n.id);
-      await fetch(`/api/notifications/${user?.id}`, {
-        method: "PUT",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ notificationIds: unreadIds }),
-      });
-      setNotifications(notifications.map((n) => ({ ...n, read: true })));
-    } catch (error) {
-      console.error("Failed to mark all notifications as read:", error);
-    }
-  };
-
   return (
     <div className="relative">
       <button

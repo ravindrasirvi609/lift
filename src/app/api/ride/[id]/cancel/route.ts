@@ -1,6 +1,7 @@
 import { connect } from "@/dbConfig/dbConfig";
 import Ride from "@/Models/rideModel";
 import { NextRequest, NextResponse } from "next/server";
+import Notification from "@/Models/notificationModel";
 
 export async function POST(
   request: NextRequest,
@@ -26,6 +27,18 @@ export async function POST(
     await ride.save();
 
     // TODO: Send notification to affected users (driver/passengers)
+
+    const notificationType = "ride_cancelled";
+    const notificationMessage = `Ride cancelled by ${ride.driver.firstName} ${ride.driver.lastName}`;
+
+    const notification = new Notification({
+      userId: ride.driver,
+      type: notificationType,
+      message: notificationMessage,
+      relatedId: ride._id,
+    });
+
+    await notification.save();
 
     return NextResponse.json({ message: "Ride cancelled successfully" });
   } catch (error) {

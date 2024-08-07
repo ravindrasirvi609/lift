@@ -6,10 +6,11 @@ import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { sendSMS, sendWhatsApp } from "@/utils/messaging";
 import User from "@/Models/userModel";
+import Notification from "@/Models/notificationModel";
 
 connect();
 
-function isValidCoordinate(coord: string[]) {
+function isValidCoordinate(coord: any[]) {
   return (
     Array.isArray(coord) &&
     coord.length === 2 &&
@@ -109,7 +110,7 @@ export async function POST(req: NextRequest) {
     ride.availableSeats -= numberOfSeats;
     await ride.save();
 
-    // Notify the driver about the new booking request
+    // Send notifications to the driver
     // await sendSMS(
     //   ride.driver.phoneNumber,
     //   `New ride request (ID: ${rideIdString}) for ${numberOfSeats} seats. Please check your app to accept or reject.`
@@ -119,6 +120,19 @@ export async function POST(req: NextRequest) {
     //   ride.driver.phoneNumber,
     //   `New ride request (ID: ${rideIdString}) for ${numberOfSeats} seats. Tap to view details: http://localhost:3000/driver/requests/${newBooking._id}`
     // );
+
+    // Create a notification for the driver
+    const notificationType = "ride_request";
+    const notificationMessage = `New ride request (ID: ${newBooking._id})`;
+
+    const notification = new Notification({
+      userId: ride.driver,
+      type: notificationType,
+      message: notificationMessage,
+      relatedId: newBooking._id,
+    });
+
+    await notification.save();
 
     return NextResponse.json(
       { message: "Booking request created successfully", booking: newBooking },
@@ -138,56 +152,5 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
-  }
-}
-
-export async function GET(req: NextRequest) {
-  try {
-    await connect();
-
-    const token = req.cookies.get("token")?.value;
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    const decodedToken = await verifyToken(token);
-
-    const user = await User.findById(decodedToken.id);
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    const { searchParams } = new URL(req.url);
-    const rideId = searchParams.get("rideId");
-
-    let query = {};
-
-    if (user.role === "driver") {
-      query = { driver: decodedToken.id };
-    } else if (user.role === "passenger") {
-      query = { passenger: decodedToken.id };
-    }
-
-    if (rideId) {
-      query = { ...query, ride: rideId };
-    }
-
-    const bookings = await Booking.find(query)
-      .sort({ createdAt: -1 }) // Sort by createdAt in descending order
-      .populate({
-        path: "ride",
-        populate: {
-          path: "driver",
-          select: "firstName lastName profilePicture",
-        },
-      })
-      .populate("passenger", "firstName lastName profilePicture");
-    return NextResponse.json(bookings);
-  } catch (error) {
-    console.error("Error fetching bookings:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
   }
 }

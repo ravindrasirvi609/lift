@@ -23,6 +23,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { formatDateWithTime } from "@/utils/utils";
 import { useSocket } from "@/app/hooks/useSocket";
+import toast from "react-hot-toast"; // Add this import
 
 const BookRidePage = () => {
   const { user } = useAuth();
@@ -48,10 +49,11 @@ const BookRidePage = () => {
           const data = await response.json();
           setRide(data);
         } else {
-          console.error("Failed to fetch ride");
+          toast.error("Failed to fetch ride details");
         }
       } catch (error) {
         console.error("Error fetching ride:", error);
+        toast.error("An error occurred while fetching ride details");
       }
     };
 
@@ -59,6 +61,15 @@ const BookRidePage = () => {
       fetchRide();
     }
   }, [RideId]);
+
+  useEffect(() => {
+    if (socket && isConnected && RideId) {
+      socket.emit("join-ride", RideId);
+      return () => {
+        socket.emit("leave-ride", RideId);
+      };
+    }
+  }, [socket, isConnected, RideId]);
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,37 +84,34 @@ const BookRidePage = () => {
 
       if (response.ok) {
         const data = await response.json();
-        alert(
+        toast.success(
           "Booking request sent successfully! Please wait for confirmation."
         );
 
         if (socket && isConnected && ride) {
-          socket.emit("join-ride", RideId);
-
-          // Send notification to driver
           const notificationMessage = `New booking request from ${user?.firstName} ${user?.lastName} for ${numberOfSeats} seat(s).`;
           sendNotification(ride.driver._id, {
-            type: "booking_request",
+            type: "ride_request",
             message: notificationMessage,
             bookingId: data._id,
-            rideId: RideId,
+            rideId: RideId as string,
           });
 
-          console.log("Notification sent to driver");
+          toast.success("Notification sent to driver");
         } else {
-          console.log(
-            "Socket not connected. Unable to join ride or send notification."
-          );
+          toast.error("Unable to send real-time notification to driver");
         }
 
         router.push(`/waiting-room/${data.booking._id}`);
       } else {
         const errorData = await response.json();
-        alert(`Booking failed: ${errorData.error}`);
+        toast.error(`Booking failed: ${errorData.error}`);
       }
     } catch (error) {
       console.error("Error creating booking:", error);
-      alert("An error occurred while creating the booking. Please try again.");
+      toast.error(
+        "An error occurred while creating the booking. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -112,7 +120,6 @@ const BookRidePage = () => {
   if (!ride) {
     return <Loading />;
   }
-
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">

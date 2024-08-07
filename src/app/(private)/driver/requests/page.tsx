@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { withAuth } from "@/components/withAuth";
 import Loading from "@/components/Loading";
@@ -18,6 +18,7 @@ import Link from "next/link";
 import { formatDateWithTime } from "@/utils/utils";
 import { useSocket } from "@/app/hooks/useSocket";
 import Image from "next/image";
+import toast from "react-hot-toast";
 
 interface Location {
   type: string;
@@ -25,6 +26,19 @@ interface Location {
   city: string;
   region: string;
   locationId: string;
+}
+
+interface Notification {
+  id: string;
+  type:
+    | "ride_request"
+    | "ride_accepted"
+    | "ride_cancelled"
+    | "payment_received"
+    | "system_alert";
+  message: string;
+  time: string;
+  read: boolean;
 }
 
 interface Vehicle {
@@ -87,39 +101,51 @@ const DriverRequestsPage = () => {
     }
   }, [user, router]);
 
-  useEffect(() => {
-    const fetchBookingRequests = async () => {
-      try {
-        const response = await fetch("/api/ride/bookingRide?status=Pending");
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Booking requests:", data);
-          setBookingRequests(data);
-        } else {
-          console.error("Failed to fetch booking requests");
-        }
-      } catch (error) {
-        console.error("Error fetching booking requests:", error);
-      } finally {
-        setIsLoading(false);
+  const fetchBookingRequests = useCallback(async () => {
+    try {
+      const response = await fetch("/api/ride/bookingRide?status=Pending");
+      if (response.ok) {
+        const data = await response.json();
+        setBookingRequests(data);
+      } else {
+        toast.error("Failed to fetch booking requests");
       }
-    };
-
-    fetchBookingRequests();
+    } catch (error) {
+      console.error("Error fetching booking requests:", error);
+      toast.error("An error occurred while fetching booking requests");
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
+    fetchBookingRequests();
+  }, [fetchBookingRequests]);
+
+  useEffect(() => {
     if (socket && user) {
-      socket.on("booking-status-update", (updatedBooking: BookingRequest) => {
+      const handleBookingStatusUpdate = (updatedBooking: BookingRequest) => {
         setBookingRequests((prevRequests) =>
           prevRequests.map((request) =>
             request._id === updatedBooking._id ? updatedBooking : request
           )
         );
-      });
+        toast.success(
+          `Booking ${updatedBooking._id} status updated to ${updatedBooking.status}`
+        );
+      };
+
+      const handleNewBookingRequest = (newBooking: BookingRequest) => {
+        setBookingRequests((prevRequests) => [...prevRequests, newBooking]);
+        toast.success("New booking request received!");
+      };
+
+      socket.on("booking-status-update", handleBookingStatusUpdate);
+      socket.on("new-booking-request", handleNewBookingRequest);
 
       return () => {
-        socket.off("booking-status-update");
+        socket.off("booking-status-update", handleBookingStatusUpdate);
+        socket.off("new-booking-request", handleNewBookingRequest);
       };
     }
   }, [socket, user]);
@@ -151,14 +177,12 @@ const DriverRequestsPage = () => {
 
       if (response.ok) {
         const updatedBooking = await response.json();
-        console.log("updatedBooking", updatedBooking);
-
         setBookingRequests((prevRequests) =>
           prevRequests.map((request) =>
             request._id === bookingId ? { ...request, status: action } : request
           )
         );
-        alert(`Booking ${action} successfully`);
+        toast.success(`Booking ${action} successfully`);
 
         if (isConnected) {
           const notificationMessage =
@@ -166,23 +190,27 @@ const DriverRequestsPage = () => {
               ? `Your booking (ID: ${bookingId}) has been Confirmed by the driver.`
               : `Your booking (ID: ${bookingId}) has been Cancelled by the driver.`;
 
-          sendNotification(updatedBooking.booking.passenger._id, {
+          const notification: Notification = {
             type: action === "Confirmed" ? "ride_accepted" : "ride_cancelled",
             message: notificationMessage,
             bookingId: bookingId,
-          });
+          } as Notification & { bookingId: string };
 
-          alert("Notification sent to passenger");
+          sendNotification(updatedBooking.booking.passenger._id, notification);
+
+          toast.success("Notification sent to passenger");
         } else {
-          console.log("Socket not connected. Unable to send notification.");
+          toast.error("Socket not connected. Unable to send notification.");
         }
       } else {
         const errorData = await response.json();
-        alert(`Action failed: ${errorData.error}`);
+        toast.error(`Action failed: ${errorData.error}`);
       }
     } catch (error) {
       console.error(`Error ${action} booking:`, error);
-      alert(`An error occurred while ${action} the booking. Please try again.`);
+      toast.error(
+        `An error occurred while ${action} the booking. Please try again.`
+      );
     }
   };
 
