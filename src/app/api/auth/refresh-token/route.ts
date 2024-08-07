@@ -18,6 +18,10 @@ export async function POST(req: NextRequest) {
         id: decoded.id,
         email: decoded.email,
         isDriver: decoded.isDriver,
+        firstName: decoded.firstName,
+        lastName: decoded.lastName,
+        mobileNumber: decoded.mobileNumber,
+        profilePicture: decoded.profilePicture,
         exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60,
       },
       process.env.JWT_SECRET!
@@ -31,6 +35,10 @@ export async function POST(req: NextRequest) {
           id: decoded.id,
           email: decoded.email,
           isDriver: decoded.isDriver,
+          firstName: decoded.firstName,
+          lastName: decoded.lastName,
+          mobileNumber: decoded.mobileNumber,
+          profilePicture: decoded.profilePicture,
         },
       },
       { status: 200 }

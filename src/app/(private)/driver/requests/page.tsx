@@ -73,7 +73,7 @@ const DriverRequestsPage = () => {
   const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const { socket, isConnected } = useSocket();
+  const { socket, isConnected, sendNotification } = useSocket(user?.id);
 
   useEffect(() => {
     if (user === null) {
@@ -136,12 +136,6 @@ const DriverRequestsPage = () => {
     }
   }, [socket, isConnected, bookingRequests]);
 
-  if (isAuthLoading || isLoading) {
-    return <Loading />;
-  }
-
-  if (!user || !user.isDriver) return null;
-
   const handleRequestAction = async (
     bookingId: string,
     action: "Confirmed" | "Cancelled"
@@ -165,18 +159,22 @@ const DriverRequestsPage = () => {
           )
         );
         alert(`Booking ${action} successfully`);
-        console.log("updatedBooking.passenger._id", updatedBooking);
 
-        if (socket && isConnected) {
-          socket.emit("booking-action", {
-            bookingId,
-            action,
-            passengerId: updatedBooking.booking.passenger._id,
+        if (isConnected) {
+          const notificationMessage =
+            action === "Confirmed"
+              ? `Your booking (ID: ${bookingId}) has been Confirmed by the driver.`
+              : `Your booking (ID: ${bookingId}) has been Cancelled by the driver.`;
+
+          sendNotification(updatedBooking.booking.passenger._id, {
+            type: action === "Confirmed" ? "ride_accepted" : "ride_cancelled",
+            message: notificationMessage,
+            bookingId: bookingId,
           });
 
-          alert("Booking-action emitted");
+          alert("Notification sent to passenger");
         } else {
-          console.log("Socket not connected. Unable to emit booking-action.");
+          console.log("Socket not connected. Unable to send notification.");
         }
       } else {
         const errorData = await response.json();
@@ -188,8 +186,14 @@ const DriverRequestsPage = () => {
     }
   };
 
+  if (isAuthLoading || isLoading) {
+    return <Loading />;
+  }
+
+  if (!user || !user.isDriver) return null;
+
   return (
-    <div className="w-screen h-screen mx-auto mt-2 py-6 px-16 bg-[#F9E795]  shadow-xl">
+    <div className="w-screen h-screen mx-auto mt-2 py-6 px-16 bg-[#F9E795] shadow-xl">
       <h1 className="text-3xl font-bold mb-6 text-[#F96167] text-center">
         Booking Requests
       </h1>

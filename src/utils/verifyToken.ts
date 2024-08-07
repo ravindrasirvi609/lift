@@ -4,7 +4,10 @@ interface TokenPayload extends JWTPayload {
   id: string;
   email: string;
   isDriver: boolean;
+  firstName: string;
+  lastName: string;
   phoneNumber: string;
+  profilePicture: string;
 }
 
 export async function verifyToken(token: string): Promise<TokenPayload> {
@@ -18,7 +21,15 @@ export async function verifyToken(token: string): Promise<TokenPayload> {
       typeof payload.id !== "string" ||
       !payload.email ||
       typeof payload.email !== "string" ||
-      typeof payload.isDriver !== "boolean"
+      typeof payload.isDriver !== "boolean" ||
+      !payload.firstName ||
+      typeof payload.firstName !== "string" ||
+      !payload.lastName ||
+      typeof payload.lastName !== "string" ||
+      !payload.phoneNumber ||
+      typeof payload.phoneNumber !== "string" ||
+      !payload.profilePicture ||
+      typeof payload.profilePicture !== "string"
     ) {
       throw new Error("Invalid token payload");
     }

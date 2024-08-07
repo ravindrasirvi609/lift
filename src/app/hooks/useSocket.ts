@@ -15,7 +15,7 @@ export const useSocket = (userId?: string) => {
     socketInstance.on("connect", () => {
       console.log("Socket connected");
       setIsConnected(true);
-      socketInstance.emit("join-user", userId);
+      if (userId) socketInstance.emit("join-user", userId);
     });
 
     socketInstance.on("disconnect", () => {

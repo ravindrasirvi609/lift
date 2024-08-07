@@ -27,12 +27,12 @@ import { useSocket } from "@/app/hooks/useSocket";
 const BookRidePage = () => {
   const { user } = useAuth();
   const params = useParams();
-  const { socket, isConnected } = useSocket();
   const { RideId } = params;
   const router = useRouter();
   const [ride, setRide] = useState<Ride | null>(null);
   const [numberOfSeats, setNumberOfSeats] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const { socket, isConnected, sendNotification } = useSocket(user?.id);
 
   useEffect(() => {
     if (user === null) {
@@ -77,10 +77,23 @@ const BookRidePage = () => {
           "Booking request sent successfully! Please wait for confirmation."
         );
 
-        if (socket && isConnected) {
+        if (socket && isConnected && ride) {
           socket.emit("join-ride", RideId);
+
+          // Send notification to driver
+          const notificationMessage = `New booking request from ${user?.firstName} ${user?.lastName} for ${numberOfSeats} seat(s).`;
+          sendNotification(ride.driver._id, {
+            type: "booking_request",
+            message: notificationMessage,
+            bookingId: data._id,
+            rideId: RideId,
+          });
+
+          console.log("Notification sent to driver");
         } else {
-          console.log("Socket not connected. Unable to join ride.");
+          console.log(
+            "Socket not connected. Unable to join ride or send notification."
+          );
         }
 
         router.push(`/waiting-room/${data._id}`);

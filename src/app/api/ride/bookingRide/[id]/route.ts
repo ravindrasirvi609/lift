@@ -1,15 +1,10 @@
+import { NextRequest, NextResponse } from "next/server";
+import { connect } from "@/dbConfig/dbConfig";
 import Booking from "@/Models/bookingModel";
 import Ride from "@/Models/rideModel";
+import Notification from "@/Models/notificationModel";
 import { verifyToken } from "@/utils/verifyToken";
-import { NextRequest, NextResponse } from "next/server";
 import { sendSMS, sendWhatsApp } from "@/utils/messaging";
-import { connect } from "@/dbConfig/dbConfig";
-import User from "@/Models/userModel";
-import mongoose from "mongoose";
-
-mongoose.model("User", User.schema);
-mongoose.model("Booking", Booking.schema);
-mongoose.model("Ride", Ride.schema);
 
 export async function PUT(
   req: NextRequest,
@@ -44,26 +39,40 @@ export async function PUT(
     }
 
     booking.status = status;
-
     await booking.save();
 
     if (status === "Confirmed") {
       await Ride.findByIdAndUpdate(booking.ride, {
         $inc: { availableSeats: -booking.numberOfSeats },
-        $push: { bookings: booking._id, passengers: booking.passenger._id }, // Ensure passengers is an array
+        $push: { bookings: booking._id, passengers: booking.passenger._id },
       });
     }
 
-    // Notify the passenger about the booking status
-    const message =
+    // Create a notification
+    const notificationType =
+      status === "Confirmed" ? "ride_accepted" : "ride_cancelled";
+    const notificationMessage =
       status === "Confirmed"
         ? `Your booking (ID: ${booking._id}) has been Confirmed by the driver.`
         : `Your booking (ID: ${booking._id}) has been Cancelled by the driver.`;
 
-    // await sendSMS(booking.passenger.phoneNumber, message);
+    const notification = new Notification({
+      userId: booking.passenger._id,
+      type: notificationType,
+      message: notificationMessage,
+      relatedId: booking._id,
+    });
+
+    await notification.save();
+
+    // Emit socket event for real-time notification
+    // We'll handle this in a separate function
+
+    // Existing SMS and WhatsApp notifications
+    // await sendSMS(booking.passenger.phoneNumber, notificationMessage);
     // await sendWhatsApp(
     //   booking.passenger.phoneNumber,
-    //   `${message} Tap for details: http://localhost:3000/bookings/${booking._id}`
+    //   `${notificationMessage} Tap for details: http://localhost:3000/bookings/${booking._id}`
     // );
 
     return NextResponse.json(
@@ -72,16 +81,9 @@ export async function PUT(
     );
   } catch (error: any) {
     console.error("Error stack:", error.stack);
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { error: `Internal server error: ${error.message}` },
-        { status: 500 }
-      );
-    } else {
-      return NextResponse.json(
-        { error: "Internal server error" },
-        { status: 500 }
-      );
-    }
+    return NextResponse.json(
+      { error: `Internal server error: ${error.message}` },
+      { status: 500 }
+    );
   }
 }

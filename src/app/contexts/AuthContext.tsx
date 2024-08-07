@@ -5,6 +5,10 @@ interface User {
   id: string;
   email: string;
   isDriver: boolean;
+  firstName: string;
+  lastName: string;
+  profilePicture: string;
+  phoneNumber: string;
 }
 
 interface AuthContextType {
