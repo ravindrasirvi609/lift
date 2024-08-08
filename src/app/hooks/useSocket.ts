@@ -35,6 +35,14 @@ export const useSocket = (userId?: string) => {
       if (userId) socketInstance.emit("join-user", userId);
     });
 
+    socketInstance.on("connect", () => {
+      console.log("Socket connected");
+      setIsConnected(true);
+      if (userId) {
+        socketInstance.emit("join-user", userId);
+      }
+    });
+
     socketInstance.on("disconnect", () => {
       console.log("Socket disconnected");
       setIsConnected(false);
@@ -58,7 +66,11 @@ export const useSocket = (userId?: string) => {
 
   const sendNotification = useCallback(
     (targetUserId: string, notification: Notification) => {
+      console.log("Sending notification to user", targetUserId, notification);
+
       if (socket) {
+        console.log("Sending notification to user", targetUserId, notification);
+
         socket.emit("send-notification", {
           userId: targetUserId,
           notification,

@@ -81,14 +81,24 @@ const BookRidePage = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rideId: RideId, numberOfSeats }),
       });
+      console.log(
+        "Booking request sent successfully! Please wait for confirmation.",
+        response
+      );
 
       if (response.ok) {
         const data = await response.json();
         toast.success(
           "Booking request sent successfully! Please wait for confirmation."
         );
+        console.log(
+          "Booking request sent successfully! Please wait for confirmation.",
+          data
+        );
 
         if (socket && isConnected && ride) {
+          console.log("Sending notification to driver");
+
           const notificationMessage = `New booking request from ${user?.firstName} ${user?.lastName} for ${numberOfSeats} seat(s).`;
           sendNotification(ride.driver._id, {
             type: "ride_request",

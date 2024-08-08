@@ -45,24 +45,23 @@ const WaitingRoom: React.FC = () => {
       socket.emit("join-ride", bookingId);
 
       socket.on(
-        "ride-status",
-        (data: { bookingId: string; status: "confirmed" | "cancelled" }) => {
-          console.log("Received ride-status event:", data);
+        "booking-action",
+        (data: { bookingId: string; action: "confirmed" | "cancelled" }) => {
+          console.log("Received booking-action event:", data);
           if (data.bookingId === bookingId) {
-            setStatus(data.status);
-            console.log("Updated status:", data.status);
+            setStatus(data.action);
+            console.log("Updated status:", data.action);
           }
         }
       );
 
       return () => {
         console.log(`Leaving room for booking: ${bookingId}`);
-        socket.off("ride-status");
+        socket.off("booking-action");
         socket.emit("leave-ride", bookingId);
       };
     }
   }, [socket, isConnected, bookingId]);
-
   const handleRedirectToRide = () => {
     router.push(`/rides/${data.ride._id}`);
   };

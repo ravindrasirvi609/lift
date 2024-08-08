@@ -52,7 +52,7 @@ const Notifications: React.FC = () => {
       const response = await fetch(`/api/notifications/${user.id}`);
       if (!response.ok) throw new Error("Failed to fetch notifications");
       const data = await response.json();
-      setNotifications(data);
+      setNotifications(data.notifications);
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
       toast.error("Failed to load notifications");
@@ -69,11 +69,13 @@ const Notifications: React.FC = () => {
         console.log("New notification received:", newNotification);
 
         setNotifications((prev) => [newNotification, ...prev]);
+        console.log("New notification received:", newNotification);
+
         toast.success(newNotification.message);
       };
 
       socket.on("new-notification", handleNewNotification);
-      console.log("Listening for new notifications");
+      console.log("Listening for new notifications", handleNewNotification);
 
       return () => {
         socket.off("new-notification", handleNewNotification);
@@ -88,6 +90,8 @@ const Notifications: React.FC = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ notificationIds: [id] }),
       });
+      console.log("Marking notification as read", response);
+
       if (!response.ok) throw new Error("Failed to mark notification as read");
       setNotifications(
         notifications.map((n) => (n.id === id ? { ...n, read: true } : n))

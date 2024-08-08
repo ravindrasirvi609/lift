@@ -153,6 +153,7 @@ const DriverRequestsPage = () => {
   useEffect(() => {
     if (socket && isConnected && bookingRequests.length > 0) {
       const joinedBookings = new Set();
+
       bookingRequests.forEach((request) => {
         if (!joinedBookings.has(request._id)) {
           socket.emit("join-ride", request._id);
@@ -182,8 +183,15 @@ const DriverRequestsPage = () => {
             request._id === bookingId ? { ...request, status: action } : request
           )
         );
-        toast.success(`Booking ${action} successfully`);
 
+        if (isConnected && socket) {
+          socket.emit("booking-action", {
+            bookingId,
+            action: action.toLowerCase(),
+            passengerId: updatedBooking.booking.passenger._id,
+          });
+          toast.success(`Booking ${action} successfully`);
+        }
         if (isConnected) {
           const notificationMessage =
             action === "Confirmed"

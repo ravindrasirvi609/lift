@@ -154,3 +154,47 @@ export async function POST(req: NextRequest) {
     }
   }
 }
+export async function GET(req: NextRequest) {
+  try {
+    await connect();
+    const token = req.cookies.get("token")?.value;
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const decodedToken = await verifyToken(token);
+    const user = await User.findById(decodedToken.id);
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    const { searchParams } = new URL(req.url);
+    const rideId = searchParams.get("rideId");
+    let query = {};
+    if (user.role === "driver") {
+      query = { driver: decodedToken.id };
+    } else if (user.role === "passenger") {
+      query = { passenger: decodedToken.id };
+    }
+    if (rideId) {
+      query = { ...query, ride: rideId };
+    }
+
+    const bookings = await Booking.find(query)
+      .sort({ createdAt: -1 }) // Sort by createdAt in descending order
+      .populate({
+        path: "ride",
+        populate: {
+          path: "driver",
+          select: "firstName lastName profilePicture",
+        },
+      })
+      .populate("passenger", "firstName lastName profilePicture");
+    return NextResponse.json(bookings);
+  } catch (error) {
+    console.error("Error fetching bookings:", error);
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
