@@ -92,7 +92,7 @@ const Header: React.FC = () => {
                     <FaUser />
                     <span>{user.email}</span>
                   </button>
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden group-hover:block">
+                  <div className="absolute right-0 w-48 bg-white rounded-md shadow-lg py-1 hidden group-hover:block">
                     <Link
                       href="/profile"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
