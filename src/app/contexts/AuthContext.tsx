@@ -7,7 +7,6 @@ interface User {
   isDriver: boolean;
   firstName: string;
   lastName: string;
-  profilePicture: string;
   phoneNumber: string;
 }
 
