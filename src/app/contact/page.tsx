@@ -64,7 +64,7 @@ const ContactPage: React.FC = () => {
               </div>
               <h3 className="text-xl font-semibold mb-2">Address</h3>
               <p className="text-gray-600">
-                123 Lift Street, San Francisco, CA 94105
+                Mayank Nagar, Pali, Rajasthan 306401
               </p>
             </div>
           </div>
