@@ -8,6 +8,7 @@ export async function middleware(request: NextRequest) {
   const isPublicPath =
     path === "/" ||
     path.startsWith("/api") ||
+    path === "/logo.png" ||
     path.startsWith("/_next") ||
     path.startsWith("/verifyemail") ||
     path.startsWith("/privacy") ||
