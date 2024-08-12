@@ -37,7 +37,7 @@ const Hero: React.FC = () => {
       <div className="container mx-auto relative z-10 flex flex-col items-center">
         <div ref={logoRef} className="w-[400px] h-[400px] mb-2">
           <Image
-            src="/logo.png"
+            src="/public/images/logo.png"
             alt="Lift team"
             width={800}
             height={500}
