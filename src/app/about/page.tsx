@@ -1,7 +1,20 @@
+"use client";
 import React from "react";
 import Image from "next/image";
+import Map from "../../components/Map"; // Import the Map component
 
 const AboutPage: React.FC = () => {
+  // const isDriver = true; // or false, depending on the user's role
+  // const initialLocation: [number, number] = [51.5074, -0.1278]; // Example: London coordinates
+
+  // const handleRouteSelect = (
+  //   start: [number, number],
+  //   end: [number, number]
+  // ) => {
+  //   console.log("Route selected:", { start, end });
+  //   // Handle the route selection, e.g., save to state or send to server
+  // };
+
   return (
     <div className="bg-gray-100 min-h-screen">
       {/* Hero Section */}
@@ -115,6 +128,14 @@ const AboutPage: React.FC = () => {
           </div>
         </div>
       </section>
+      {/* 
+      <section className="py-16 bg-gray-50">
+        <Map
+          isDriver={isDriver}
+          initialLocation={initialLocation}
+          onRouteSelect={handleRouteSelect}
+        />
+      </section> */}
 
       {/* Join Us */}
       <section className="py-16 bg-gradient-to-r from-[#F96167] to-[#F9D423] text-white">
