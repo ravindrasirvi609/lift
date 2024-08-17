@@ -193,11 +193,11 @@ const BookRidePage = () => {
               />
               <RideInfoItem
                 icon={FaMapMarkerAlt}
-                text={ride.startLocation.city}
+                text={ride.startLocation.address}
               />
               <RideInfoItem
                 icon={FaMapMarkerAlt}
-                text={ride.endLocation.city}
+                text={ride.endLocation.address}
               />
               <RideInfoItem
                 icon={FaClock}
@@ -207,9 +207,13 @@ const BookRidePage = () => {
 
             <div className="bg-gray-50 p-4 rounded-lg mb-6">
               <div className="flex items-center justify-between">
-                <span className="font-semibold">{ride.startLocation.city}</span>
+                <span className="font-semibold">
+                  {ride.startLocation.address}
+                </span>
                 <FaArrowRight className="text-[#F96167]" />
-                <span className="font-semibold">{ride.endLocation.city}</span>
+                <span className="font-semibold">
+                  {ride.endLocation.address}
+                </span>
               </div>
             </div>
 

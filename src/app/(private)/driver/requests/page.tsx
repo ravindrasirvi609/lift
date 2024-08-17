@@ -26,6 +26,7 @@ interface Location {
   city: string;
   region: string;
   locationId: string;
+  address: string;
 }
 
 interface Notification {
@@ -275,14 +276,14 @@ const DriverRequestsPage = () => {
                   <div className="flex items-center">
                     <FaMapMarkerAlt className="text-[#F96167] mr-2" />
                     <span>
-                      {request?.ride?.startLocation?.city},{" "}
-                      {request?.ride?.startLocation?.region}
+                      {request?.ride?.startLocation?.address},{" "}
+                      {request?.ride?.startLocation?.address}
                     </span>
                   </div>
                   <div className="flex items-center">
                     <FaMapMarkerAlt className="text-[#F96167] mr-2" />
                     <span>
-                      {request?.ride?.endLocation?.city},{" "}
+                      {request?.ride?.endLocation?.address},{" "}
                       {request?.ride?.endLocation?.region}
                     </span>
                   </div>

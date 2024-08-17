@@ -121,11 +121,11 @@ const AvailableRides: React.FC<Props> = ({ rides }) => {
               />
               <RideInfoItem
                 icon={FaMapMarkerAlt}
-                text={ride.startLocation.city}
+                text={ride.startLocation.address}
               />
               <RideInfoItem
                 icon={FaMapMarkerAlt}
-                text={ride.endLocation.city}
+                text={ride.endLocation.address}
               />
               <RideInfoItem
                 icon={FaClock}
@@ -135,8 +135,8 @@ const AvailableRides: React.FC<Props> = ({ rides }) => {
 
             <div className="mb-6">
               <div className="flex items-center justify-between text-sm text-gray-600">
-                <span>{ride.startLocation.city}</span>
-                <span>{ride.endLocation.city}</span>
+                <span>{ride.startLocation.address}</span>
+                <span>{ride.endLocation.address}</span>
               </div>
               <div className="relative h-2 bg-gray-200 rounded-full mt-2">
                 <motion.div

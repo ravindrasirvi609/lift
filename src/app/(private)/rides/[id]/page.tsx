@@ -20,11 +20,11 @@ import { formatDateWithTime } from "@/utils/utils";
 interface DataType {
   _id: string;
   startLocation: {
-    city: string;
+    address: string;
     coordinates: [number, number];
   };
   endLocation: {
-    city: string;
+    address: string;
     coordinates: [number, number];
   };
   driver: {
@@ -108,13 +108,13 @@ const RidePage = () => {
               <InfoItem
                 icon={FaMapMarkerAlt}
                 label="From"
-                value={rideData.startLocation?.city}
+                value={rideData.startLocation?.address}
                 iconColor="text-green-500"
               />
               <InfoItem
                 icon={FaMapMarkerAlt}
                 label="To"
-                value={rideData.endLocation?.city}
+                value={rideData.endLocation?.address}
                 iconColor="text-[#F96167]"
               />
               <InfoItem

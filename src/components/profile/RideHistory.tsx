@@ -45,14 +45,16 @@ export const RideHistory: React.FC<RideHistoryProps> = ({
                   <FaMapMarkerAlt className="text-red-500 mt-1 mr-2" />
                   <div>
                     <p className="font-medium text-gray-800">From</p>
-                    <p className="text-gray-600">{ride.startLocation.city}</p>
+                    <p className="text-gray-600">
+                      {ride.startLocation.address}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start">
                   <FaMapMarkerAlt className="text-blue-500 mt-1 mr-2" />
                   <div>
                     <p className="font-medium text-gray-800">To</p>
-                    <p className="text-gray-600">{ride.endLocation.city}</p>
+                    <p className="text-gray-600">{ride.endLocation.address}</p>
                   </div>
                 </div>
               </div>
