@@ -9,24 +9,25 @@ import {
   FaCar,
   FaInfoCircle,
   FaArrowRight,
+  FaPlus,
+  FaMinus,
 } from "react-icons/fa";
 import AutocompleteInput from "@/components/AutocompleteInput";
 import { useRouter } from "next/navigation";
 import { withAuth } from "@/components/withAuth";
 import { useAuth } from "@/app/contexts/AuthContext";
 import Loading from "@/components/Loading";
+import Map from "@/components/Map";
 
 export interface LocationAddress {
   coordinates: [number, number];
-  city: string;
-  region: string;
-  locationId: string;
   address: string;
 }
 
 interface TripInfo {
   startLocation: LocationAddress;
   endLocation: LocationAddress;
+  intermediateStops: LocationAddress[];
   departureTime: string;
   estimatedArrivalTime: string;
   availableSeats: number;
@@ -44,18 +45,13 @@ const CreateTrip: React.FC = () => {
   const [tripInfo, setTripInfo] = useState<TripInfo>({
     startLocation: {
       coordinates: [0, 0],
-      city: "",
-      region: "",
-      locationId: "",
       address: "",
     },
     endLocation: {
       coordinates: [0, 0],
-      city: "",
-      region: "",
-      locationId: "",
       address: "",
     },
+    intermediateStops: [],
     departureTime: "",
     estimatedArrivalTime: "",
     availableSeats: 1,
@@ -68,21 +64,82 @@ const CreateTrip: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
   const [minDateTime, setMinDateTime] = useState("");
+  const [initialLocation, setInitialLocation] = useState<[number, number]>([
+    51.5074, -0.1278,
+  ]); // Default to London coordinates
+  const isDriver = user?.isDriver || false;
 
   useEffect(() => {
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     setMinDateTime(now.toISOString().slice(0, 16));
+
+    // Get user's current location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setInitialLocation([
+            position.coords.latitude,
+            position.coords.longitude,
+          ]);
+        },
+        (error) => {
+          console.error("Error getting user's location:", error);
+        }
+      );
+    }
   }, []);
 
-  const handleLocationChange = useCallback(
-    (field: "startLocation" | "endLocation") => (value: LocationAddress) => {
-      setTripInfo((prev) => ({ ...prev, [field]: value }));
-    },
-    []
-  );
+  const handleLocationChange =
+    (
+      field: "startLocation" | "endLocation" | "intermediateStops",
+      index?: number
+    ) =>
+    (value: LocationAddress) => {
+      setTripInfo((prev) => {
+        if (field === "intermediateStops" && typeof index === "number") {
+          const newStops = [...prev.intermediateStops];
+          newStops[index] = value;
+          return { ...prev, intermediateStops: newStops };
+        }
+        return { ...prev, [field]: value };
+      });
+    };
 
-  if (!user || !user.isDriver) return <Loading />;
+  const handleRouteUpdate = (
+    start: [number, number],
+    end: [number, number],
+    waypoints: [number, number][]
+  ) => {
+    setTripInfo((prev) => ({
+      ...prev,
+      startLocation: { ...prev.startLocation, coordinates: start },
+      endLocation: { ...prev.endLocation, coordinates: end },
+      intermediateStops: waypoints.map((wp) => ({
+        coordinates: wp,
+        address: "",
+      })),
+    }));
+  };
+
+  const addIntermediateStop = () => {
+    setTripInfo((prev) => ({
+      ...prev,
+      intermediateStops: [
+        ...prev.intermediateStops,
+        { coordinates: [0, 0], address: "" },
+      ],
+    }));
+  };
+
+  const removeIntermediateStop = (index: number) => {
+    setTripInfo((prev) => ({
+      ...prev,
+      intermediateStops: prev.intermediateStops.filter((_, i) => i !== index),
+    }));
+  };
+
+  if (!user || !isDriver) return <Loading />;
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -102,28 +159,6 @@ const CreateTrip: React.FC = () => {
     try {
       const response = await axios.post("/api/ride/createRide", tripInfo);
       setSuccess(true);
-      setTripInfo({
-        startLocation: {
-          coordinates: [0, 0],
-          city: "",
-          region: "",
-          locationId: "",
-          address: "",
-        },
-        endLocation: {
-          coordinates: [0, 0],
-          city: "",
-          region: "",
-          locationId: "",
-          address: "",
-        },
-        departureTime: "",
-        estimatedArrivalTime: "",
-        availableSeats: 1,
-        price: 0,
-        vehicle: { type: "" },
-        notes: "",
-      });
       router.push(`/rides/${response.data.ride._id}`);
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
@@ -143,52 +178,94 @@ const CreateTrip: React.FC = () => {
     <div className="min-h-screen bg-gray-100">
       <div className="bg-gradient-to-r from-[#F9D423] to-[#F96167] py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto text-center">
+          <h1 className="text-4xl font-bold text-white mb-4">Create a Trip</h1>
           <p className="text-xl text-white">
             Share your journey and reduce your carbon footprint!
           </p>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-screen mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="bg-white shadow-xl rounded-lg overflow-hidden">
           <div className="p-6 sm:p-10">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">
-              Trip Details
-            </h2>
             <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="flex items-center space-x-4">
-                <div className="flex-1">
-                  <label
-                    htmlFor="startLocation"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    <FaMapMarkerAlt className="inline mr-2 text-[#F96167]" />
-                    From
-                  </label>
-                  <AutocompleteInput
-                    placeholder="Enter departure city"
-                    value={tripInfo.startLocation.address}
-                    onChange={handleLocationChange("startLocation")}
-                    aria-label="Departure Location"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D423] focus:border-transparent"
-                  />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                    Trip Details
+                  </h2>
+                  <div className="space-y-6">
+                    <div>
+                      <label
+                        htmlFor="startLocation"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        <FaMapMarkerAlt className="inline mr-2 text-[#F96167]" />
+                        From
+                      </label>
+                      <AutocompleteInput
+                        placeholder="Enter departure city"
+                        value={tripInfo.startLocation.address}
+                        onChange={handleLocationChange("startLocation")}
+                        aria-label="Departure Location"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D423] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="endLocation"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        <FaMapMarkerAlt className="inline mr-2 text-[#F96167]" />
+                        To
+                      </label>
+                      <AutocompleteInput
+                        placeholder="Enter destination city"
+                        value={tripInfo.endLocation.address}
+                        onChange={handleLocationChange("endLocation")}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D423] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <FaMapMarkerAlt className="inline mr-2 text-[#F96167]" />
+                        Intermediate Stops
+                      </label>
+                      {tripInfo.intermediateStops.map((stop, index) => (
+                        <div key={index} className="flex items-center mb-2">
+                          <AutocompleteInput
+                            placeholder={`Stop ${index + 1}`}
+                            value={stop.address}
+                            onChange={handleLocationChange(
+                              "intermediateStops",
+                              index
+                            )}
+                            className="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D423] focus:border-transparent"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeIntermediateStop(index)}
+                            className="ml-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition duration-300"
+                          >
+                            <FaMinus />
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={addIntermediateStop}
+                        className="mt-2 flex items-center justify-center w-full p-2 bg-[#F9D423] text-gray-800 rounded-lg hover:bg-[#f7c800] transition duration-300"
+                      >
+                        <FaPlus className="mr-2" /> Add Stop
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <FaArrowRight className="text-2xl text-gray-400" />
-                <div className="flex-1">
-                  <label
-                    htmlFor="endLocation"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    <FaMapMarkerAlt className="inline mr-2 text-[#F96167]" />
-                    To
-                  </label>
-                  <AutocompleteInput
-                    placeholder="Enter destination city"
-                    value={tripInfo.endLocation.address}
-                    onChange={handleLocationChange("endLocation")}
-                    aria-label="Destination"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D423] focus:border-transparent"
-                  />
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                    Trip Map
+                  </h2>
+                  <Map tripInfo={tripInfo} />
                 </div>
               </div>
 

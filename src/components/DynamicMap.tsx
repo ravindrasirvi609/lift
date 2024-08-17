@@ -43,7 +43,7 @@ const DynamicMap: React.FC<DynamicMapProps> = ({
       map.current = new mapboxgl.Map({
         container: mapContainer.current!,
         style: "mapbox://styles/mapbox/streets-v11",
-        center: [initialLocation[1], initialLocation[0]],
+        center: [initialLocation[0], initialLocation[1]],
         zoom: 13,
       });
 
@@ -66,10 +66,10 @@ const DynamicMap: React.FC<DynamicMapProps> = ({
 
         // Set initial route
         directionsRef.current.setOrigin([
-          currentLocation[1],
           currentLocation[0],
+          currentLocation[1],
         ]);
-        directionsRef.current.setDestination([destination[1], destination[0]]);
+        directionsRef.current.setDestination([destination[0], destination[1]]);
 
         // Listen for route updates
         directionsRef.current.on("route", (e: any) => {
@@ -92,7 +92,7 @@ const DynamicMap: React.FC<DynamicMapProps> = ({
         map.current = null;
       }
     };
-  }, [initialLocation, destination, currentLocation]);
+  }, [initialLocation, destination, currentLocation, onRouteUpdate]);
 
   const fitMapToBounds = () => {
     if (!map.current || !directionsRef.current) return;
@@ -119,7 +119,7 @@ const DynamicMap: React.FC<DynamicMapProps> = ({
 
   const updateRoute = () => {
     if (!directionsRef.current) return;
-    directionsRef.current.setOrigin([currentLocation[1], currentLocation[0]]);
+    directionsRef.current.setOrigin([currentLocation[0], currentLocation[1]]);
   };
 
   return (

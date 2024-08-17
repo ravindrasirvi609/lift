@@ -1,18 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaMapMarkerAlt, FaSearch } from "react-icons/fa";
+import { FaMapMarkerAlt } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 
-interface Location {
+interface Feature {
+  id: string;
+  place_name: string;
+  center: [number, number];
+}
+
+interface LocationAddress {
+  address: string;
   coordinates: [number, number];
-  city: string;
-  region: string;
-  locationId: string;
 }
 
 interface AutocompleteInputProps {
   placeholder: string;
   value: string;
-  onChange: (value: Location & { address: string }) => void;
+  onChange: (value: LocationAddress) => void;
   className?: string;
 }
 
@@ -22,13 +26,15 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   onChange,
   className = "",
 }) => {
-  const [suggestions, setSuggestions] = useState<Location[]>([]);
+  const [suggestions, setSuggestions] = useState<Feature[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [inputValue, setInputValue] = useState(value);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLUListElement>(null);
+
+  const MAPBOX_ACCESS_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
   useEffect(() => {
     setInputValue(value);
@@ -38,8 +44,8 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
     const fetchSuggestions = async () => {
       if (inputValue.length > 0) {
         setIsLoading(true);
-        const locations = await fetchLocations(inputValue);
-        setSuggestions(locations);
+        const features = await fetchMapboxSuggestions(inputValue);
+        setSuggestions(features);
         setShowSuggestions(true);
         setIsLoading(false);
       } else {
@@ -55,21 +61,20 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
     return () => clearTimeout(debounceTimer);
   }, [inputValue]);
 
-  const fetchLocations = async (prefix: string): Promise<Location[]> => {
+  const fetchMapboxSuggestions = async (query: string): Promise<Feature[]> => {
     try {
-      const response = await fetch(`/api/cities?namePrefix=${prefix}`);
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+          query
+        )}.json?access_token=${MAPBOX_ACCESS_TOKEN}&types=place,locality,neighborhood`
+      );
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
       const data = await response.json();
-      return data.data.map((city: any) => ({
-        coordinates: [city.latitude, city.longitude],
-        city: city.name,
-        region: city.region,
-        locationId: city.id,
-      }));
+      return data.features;
     } catch (error) {
-      console.error("Error fetching locations:", error);
+      console.error("Error fetching Mapbox suggestions:", error);
       return [];
     }
   };
@@ -79,13 +84,14 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
     setFocusedIndex(-1);
   };
 
-  const handleSelectLocation = (location: Location) => {
-    onChange({
-      ...location,
-      address: `${location.city}, ${location.region}`,
-    });
+  const handleSelectLocation = (feature: Feature) => {
+    const location: LocationAddress = {
+      address: feature.place_name,
+      coordinates: feature.center,
+    };
+    onChange(location);
     setShowSuggestions(false);
-    setInputValue(`${location.city}, ${location.region}`);
+    setInputValue(feature.place_name);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -142,23 +148,20 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
             transition={{ duration: 0.2 }}
             className="absolute z-10 w-full bg-white border border-gray-300 mt-1 rounded-md shadow-lg max-h-60 overflow-y-auto"
           >
-            {suggestions.map((location, index) => (
+            {suggestions.map((feature, index) => (
               <motion.li
-                key={index}
+                key={feature.id}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
                 className={`p-2 hover:bg-gray-100 cursor-pointer transition duration-300 ${
                   focusedIndex === index ? "bg-gray-100" : ""
                 }`}
-                onClick={() => handleSelectLocation(location)}
+                onClick={() => handleSelectLocation(feature)}
               >
                 <div className="font-semibold flex items-center">
                   <FaMapMarkerAlt className="mr-2 text-[#F96167]" />
-                  {location.city}
-                </div>
-                <div className="text-sm text-gray-500 ml-6">
-                  {location.region}
+                  {feature.place_name}
                 </div>
               </motion.li>
             ))}
