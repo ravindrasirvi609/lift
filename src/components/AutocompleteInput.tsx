@@ -31,6 +31,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [inputValue, setInputValue] = useState(value);
   const [focusedIndex, setFocusedIndex] = useState(-1);
+  const [isLocationSelected, setIsLocationSelected] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLUListElement>(null);
 
@@ -38,9 +39,12 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
 
   useEffect(() => {
     setInputValue(value);
+    setIsLocationSelected(!!value);
   }, [value]);
 
   useEffect(() => {
+    if (isLocationSelected) return;
+
     const fetchSuggestions = async () => {
       if (inputValue.length > 0) {
         setIsLoading(true);
@@ -59,7 +63,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
     }, 300);
 
     return () => clearTimeout(debounceTimer);
-  }, [inputValue]);
+  }, [inputValue, isLocationSelected]);
 
   const fetchMapboxSuggestions = async (query: string): Promise<Feature[]> => {
     try {
@@ -82,6 +86,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
     setFocusedIndex(-1);
+    setIsLocationSelected(false);
   };
 
   const handleSelectLocation = (feature: Feature) => {
@@ -92,6 +97,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
     onChange(location);
     setShowSuggestions(false);
     setInputValue(feature.place_name);
+    setIsLocationSelected(true);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -127,7 +133,9 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
         placeholder={placeholder}
         value={inputValue}
         onChange={handleInputChange}
-        onFocus={() => setShowSuggestions(true)}
+        onFocus={() => {
+          if (!isLocationSelected) setShowSuggestions(true);
+        }}
         onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
         onKeyDown={handleKeyDown}
         className={`w-full p-3 pl-10 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#F96167] transition duration-300 ${className}`}
@@ -139,7 +147,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
         </div>
       )}
       <AnimatePresence>
-        {showSuggestions && suggestions.length > 0 && (
+        {showSuggestions && suggestions.length > 0 && !isLocationSelected && (
           <motion.ul
             ref={suggestionsRef}
             initial={{ opacity: 0, y: -10 }}
