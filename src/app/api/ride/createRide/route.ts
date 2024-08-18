@@ -26,13 +26,13 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     const requiredFields = [
-      "vehicle",
       "startLocation",
       "endLocation",
       "departureTime",
       "estimatedArrivalTime",
       "availableSeats",
       "price",
+      "vehicle",
     ];
 
     for (const field of requiredFields) {
@@ -47,49 +47,29 @@ export async function POST(request: NextRequest) {
     // Create new ride
     const newRide = new Ride({
       driver: decodedToken.id,
-      vehicle: {
-        type: body.vehicle.type,
-        make: body.vehicle.make,
-        model: body.vehicle.model,
-        year: body.vehicle.year,
-        color: body.vehicle.color,
-        licensePlate: body.vehicle.licensePlate,
-      },
       startLocation: {
         type: "Point",
         coordinates: body.startLocation.coordinates,
-        city: body.startLocation.city,
-        region: body.startLocation.region,
-        locationId: body.startLocation.locationId,
         address: body.startLocation.address,
       },
       endLocation: {
         type: "Point",
         coordinates: body.endLocation.coordinates,
-        city: body.endLocation.city,
-        region: body.endLocation.region,
-        locationId: body.endLocation.locationId,
         address: body.endLocation.address,
       },
-      waypoints: body.waypoints || [],
+      intermediateStops: body.intermediateStops.map((stop: any) => ({
+        type: "Point",
+        coordinates: stop.coordinates,
+        address: stop.address,
+        estimatedArrivalTime: stop.dateTime,
+      })),
       departureTime: new Date(body.departureTime),
       estimatedArrivalTime: new Date(body.estimatedArrivalTime),
-      totalSeats: body.totalSeats,
       availableSeats: body.availableSeats,
       price: body.price,
-      pricePerSeat: body.pricePerSeat,
-      status: "Scheduled",
-      distance: body.distance,
-      duration: body.duration,
-      // recurrence: {
-      //   isRecurring: body.recurrence.isRecurring,
-      //   frequency: body.recurrence.frequency,
-      //   endDate: body.recurrence.endDate
-      //     ? new Date(body.recurrence.endDate)
-      //     : undefined,
-      // },
-      allowedLuggage: body.allowedLuggage,
-      amenities: body.amenities,
+      vehicle: {
+        type: body.vehicle.type,
+      },
       notes: body.notes,
     });
 

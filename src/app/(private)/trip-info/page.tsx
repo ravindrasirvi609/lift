@@ -22,6 +22,7 @@ import Map from "@/components/Map";
 export interface LocationAddress {
   coordinates: [number, number];
   address: string;
+  dateTime?: string;
 }
 
 interface TripInfo {
@@ -65,7 +66,7 @@ const CreateTrip: React.FC = () => {
   const [success, setSuccess] = useState<boolean>(false);
   const [minDateTime, setMinDateTime] = useState("");
   const [initialLocation, setInitialLocation] = useState<[number, number]>([
-    51.5074, -0.1278,
+    77.20877, 28.613928,
   ]); // Default to London coordinates
   const isDriver = user?.isDriver || false;
 
@@ -90,36 +91,19 @@ const CreateTrip: React.FC = () => {
     }
   }, []);
 
-  const handleLocationChange =
-    (
-      field: "startLocation" | "endLocation" | "intermediateStops",
-      index?: number
-    ) =>
-    (value: LocationAddress) => {
-      setTripInfo((prev) => {
-        if (field === "intermediateStops" && typeof index === "number") {
-          const newStops = [...prev.intermediateStops];
-          newStops[index] = value;
-          return { ...prev, intermediateStops: newStops };
-        }
-        return { ...prev, [field]: value };
-      });
-    };
-
-  const handleRouteUpdate = (
-    start: [number, number],
-    end: [number, number],
-    waypoints: [number, number][]
+  const handleLocationChange = (
+    field: "startLocation" | "endLocation" | "intermediateStops",
+    value: LocationAddress,
+    index?: number
   ) => {
-    setTripInfo((prev) => ({
-      ...prev,
-      startLocation: { ...prev.startLocation, coordinates: start },
-      endLocation: { ...prev.endLocation, coordinates: end },
-      intermediateStops: waypoints.map((wp) => ({
-        coordinates: wp,
-        address: "",
-      })),
-    }));
+    setTripInfo((prev) => {
+      if (field === "intermediateStops" && typeof index === "number") {
+        const newStops = [...prev.intermediateStops];
+        newStops[index] = value;
+        return { ...prev, intermediateStops: newStops };
+      }
+      return { ...prev, [field]: value };
+    });
   };
 
   const addIntermediateStop = () => {
@@ -127,7 +111,7 @@ const CreateTrip: React.FC = () => {
       ...prev,
       intermediateStops: [
         ...prev.intermediateStops,
-        { coordinates: [0, 0], address: "" },
+        { coordinates: [0, 0], address: "", dateTime: "" },
       ],
     }));
   };
@@ -204,9 +188,11 @@ const CreateTrip: React.FC = () => {
                         From
                       </label>
                       <AutocompleteInput
-                        placeholder="Enter departure city"
+                        placeholder="Enter departure city or select on map"
                         value={tripInfo.startLocation.address}
-                        onChange={handleLocationChange("startLocation")}
+                        onChange={(value) =>
+                          handleLocationChange("startLocation", value)
+                        }
                         aria-label="Departure Location"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D423] focus:border-transparent"
                       />
@@ -220,9 +206,11 @@ const CreateTrip: React.FC = () => {
                         To
                       </label>
                       <AutocompleteInput
-                        placeholder="Enter destination city"
+                        placeholder="Enter destination city or select on map"
                         value={tripInfo.endLocation.address}
-                        onChange={handleLocationChange("endLocation")}
+                        onChange={(value) =>
+                          handleLocationChange("endLocation", value)
+                        }
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D423] focus:border-transparent"
                       />
                     </div>
@@ -236,11 +224,26 @@ const CreateTrip: React.FC = () => {
                           <AutocompleteInput
                             placeholder={`Stop ${index + 1}`}
                             value={stop.address}
-                            onChange={handleLocationChange(
-                              "intermediateStops",
-                              index
-                            )}
+                            onChange={(value) =>
+                              handleLocationChange(
+                                "intermediateStops",
+                                value,
+                                index
+                              )
+                            }
                             className="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D423] focus:border-transparent"
+                          />
+                          <input
+                            type="datetime-local"
+                            value={stop.dateTime || ""}
+                            onChange={(e) =>
+                              handleLocationChange(
+                                "intermediateStops",
+                                { ...stop, dateTime: e.target.value },
+                                index
+                              )
+                            }
+                            className="ml-2 p-3 border border-gray-300 rounded-lg"
                           />
                           <button
                             type="button"
@@ -265,7 +268,10 @@ const CreateTrip: React.FC = () => {
                   <h2 className="text-2xl font-bold text-gray-800 mb-6">
                     Trip Map
                   </h2>
-                  <Map tripInfo={tripInfo} />
+                  <Map
+                    tripInfo={tripInfo}
+                    onLocationSelect={handleLocationChange}
+                  />
                 </div>
               </div>
 

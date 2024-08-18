@@ -12,6 +12,7 @@ if (typeof window !== "undefined" && !mapboxgl.accessToken) {
 interface LocationAddress {
   coordinates: [number, number];
   address: string;
+  dateTime?: string;
 }
 
 interface MapProps {
@@ -20,19 +21,25 @@ interface MapProps {
     endLocation: LocationAddress;
     intermediateStops: LocationAddress[];
   };
+  onLocationSelect: (
+    field: "startLocation" | "endLocation" | "intermediateStops",
+    value: LocationAddress,
+    index?: number
+  ) => void;
 }
 
-const Map: React.FC<MapProps> = ({ tripInfo }) => {
+const Map: React.FC<MapProps> = ({ tripInfo, onLocationSelect }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: "mapbox://styles/mapbox/light-v10", // Using a light style for simplicity
+      style: "mapbox://styles/mapbox/streets-v12",
       center: [0, 0],
       zoom: 2,
     });
@@ -42,8 +49,11 @@ const Map: React.FC<MapProps> = ({ tripInfo }) => {
       console.log("Map loaded");
     });
 
+    map.current.on("click", handleMapClick);
+
     return () => {
       if (map.current) {
+        map.current.off("click", handleMapClick);
         map.current.remove();
         map.current = null;
       }
@@ -55,16 +65,48 @@ const Map: React.FC<MapProps> = ({ tripInfo }) => {
     updateRoute();
   }, [mapLoaded, tripInfo]);
 
+  const handleMapClick = async (e: mapboxgl.MapMouseEvent) => {
+    if (!selectedLocation || !map.current) return;
+
+    const coordinates: [number, number] = [e.lngLat.lng, e.lngLat.lat];
+    const address = await reverseGeocode(coordinates);
+
+    const locationData: LocationAddress = { coordinates, address };
+
+    if (selectedLocation === "intermediateStop") {
+      onLocationSelect(
+        "intermediateStops",
+        locationData,
+        tripInfo.intermediateStops.length
+      );
+    } else {
+      onLocationSelect(
+        selectedLocation as "startLocation" | "endLocation",
+        locationData
+      );
+    }
+
+    setSelectedLocation(null);
+    updateRoute();
+  };
+
+  const reverseGeocode = async (
+    coordinates: [number, number]
+  ): Promise<string> => {
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${coordinates[0]},${coordinates[1]}.json?access_token=${mapboxgl.accessToken}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    return data.features[0].place_name;
+  };
+
   const updateRoute = async () => {
     if (!map.current) return;
 
-    const { startLocation, endLocation, intermediateStops } = tripInfo;
+    // Clear previous layers and sources
+    if (map.current.getLayer("route")) map.current.removeLayer("route");
+    if (map.current.getSource("route")) map.current.removeSource("route");
 
-    // Clear previous route
-    if (map.current.getSource("route")) {
-      map.current.removeLayer("route");
-      map.current.removeSource("route");
-    }
+    const { startLocation, endLocation, intermediateStops } = tripInfo;
 
     // Prepare waypoints
     const waypoints = intermediateStops.map((stop) =>
@@ -149,12 +191,13 @@ const Map: React.FC<MapProps> = ({ tripInfo }) => {
 
   const fitMapToRoute = () => {
     if (!map.current) return;
-    updateRoute(); // This will re-fit the map to the route
+    updateRoute();
   };
 
   return (
     <div className="relative bg-white rounded-lg shadow-lg overflow-hidden">
       <div ref={mapContainer} className="h-[400px] w-full rounded-t-lg" />
+
       <div className="absolute top-4 right-4 z-10">
         <button
           onClick={fitMapToRoute}
