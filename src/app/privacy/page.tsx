@@ -63,11 +63,6 @@ const PrivacyPolicy: React.FC = () => {
           </p>
         </div>
       </main>
-      <footer className="bg-[#F9D423] text-gray-800 py-4">
-        <div className="container mx-auto px-4 text-center">
-          <p>&copy; 2024 LIFT. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   );
 };
