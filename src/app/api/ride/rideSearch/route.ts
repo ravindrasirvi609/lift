@@ -36,10 +36,10 @@ function isValidCoordinate(coordinates: number[]): boolean {
     typeof coordinates[1] === "number" &&
     !isNaN(coordinates[0]) &&
     !isNaN(coordinates[1]) &&
-    coordinates[1] >= -90 &&
-    coordinates[1] <= 90 &&
     coordinates[0] >= -180 &&
-    coordinates[0] <= 180
+    coordinates[0] <= 180 &&
+    coordinates[1] >= -90 &&
+    coordinates[1] <= 90
   );
 }
 
@@ -75,21 +75,8 @@ export async function POST(req: Request) {
     const searchDate = new Date(departureTime);
     searchDate.setHours(0, 0, 0, 0);
 
-    // Calculate the bounding box for both start and end locations
     const [startLon, startLat] = startLocation.coordinates;
     const [endLon, endLat] = endLocation.coordinates;
-    const minLon = Math.min(startLon, endLon);
-    const maxLon = Math.max(startLon, endLon);
-    const minLat = Math.min(startLat, endLat);
-    const maxLat = Math.max(startLat, endLat);
-
-    // Extend the bounding box by MAX_DISTANCE_KM
-    const extendedMinLon = minLon - MAX_DISTANCE_KM / 111.32;
-    const extendedMaxLon = maxLon + MAX_DISTANCE_KM / 111.32;
-    const extendedMinLat =
-      minLat - MAX_DISTANCE_KM / (111.32 * Math.cos(toRadians(minLat)));
-    const extendedMaxLat =
-      maxLat + MAX_DISTANCE_KM / (111.32 * Math.cos(toRadians(maxLat)));
 
     const query = {
       departureTime: { $gte: searchDate },
@@ -99,30 +86,28 @@ export async function POST(req: Request) {
         {
           "startLocation.coordinates": {
             $geoWithin: {
-              $box: [
-                [extendedMinLon, extendedMinLat],
-                [extendedMaxLon, extendedMaxLat],
-              ],
+              $centerSphere: [[startLon, startLat], MAX_DISTANCE_KM / 6371],
             },
           },
         },
         {
           "endLocation.coordinates": {
             $geoWithin: {
-              $box: [
-                [extendedMinLon, extendedMinLat],
-                [extendedMaxLon, extendedMaxLat],
-              ],
+              $centerSphere: [[endLon, endLat], MAX_DISTANCE_KM / 6371],
             },
           },
         },
         {
           "intermediateStops.coordinates": {
             $geoWithin: {
-              $box: [
-                [extendedMinLon, extendedMinLat],
-                [extendedMaxLon, extendedMaxLat],
-              ],
+              $centerSphere: [[startLon, startLat], MAX_DISTANCE_KM / 6371],
+            },
+          },
+        },
+        {
+          "intermediateStops.coordinates": {
+            $geoWithin: {
+              $centerSphere: [[endLon, endLat], MAX_DISTANCE_KM / 6371],
             },
           },
         },
@@ -141,24 +126,8 @@ export async function POST(req: Request) {
       })
       .sort({ departureTime: 1 });
 
-    const filteredRides = rides.filter((ride) => {
-      const startDistance = calculateDistance(
-        startLat,
-        startLon,
-        ride.startLocation.coordinates[1],
-        ride.startLocation.coordinates[0]
-      );
-      const endDistance = calculateDistance(
-        endLat,
-        endLon,
-        ride.endLocation.coordinates[1],
-        ride.endLocation.coordinates[0]
-      );
-      return startDistance <= MAX_DISTANCE_KM || endDistance <= MAX_DISTANCE_KM;
-    });
-
     const updatedRides = await Promise.all(
-      filteredRides.map(async (ride) => {
+      rides.map(async (ride) => {
         const updatedDriver = await User.findById(ride.driver._id);
         await updatedDriver.updateRatings();
         ride.driver = updatedDriver;

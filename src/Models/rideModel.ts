@@ -13,30 +13,20 @@ const rideSchema = new mongoose.Schema({
   },
   startLocation: {
     type: { type: String, enum: ["Point"], default: "Point" },
-    coordinates: { type: [Number] }, // [longitude, latitude]
-    city: { type: String },
-    region: { type: String },
-    locationId: { type: String },
-    address: { type: String },
+    coordinates: { type: [Number], index: "2dsphere" },
+    address: String,
   },
   endLocation: {
     type: { type: String, enum: ["Point"], default: "Point" },
-    coordinates: { type: [Number] }, // [longitude, latitude]
-    city: { type: String },
-    region: { type: String },
-    locationId: { type: String },
-    address: { type: String },
+    coordinates: { type: [Number], index: "2dsphere" },
+    address: String,
   },
   intermediateStops: [
     {
       type: { type: String, enum: ["Point"], default: "Point" },
-      coordinates: { type: [Number] }, // [longitude, latitude]
-      city: { type: String },
-      region: { type: String },
-      locationId: { type: String },
-      address: { type: String },
-      estimatedArrivalTime: { type: Date },
-      actualArrivalTime: { type: Date },
+      coordinates: { type: [Number], index: "2dsphere" },
+      address: String,
+      estimatedArrivalTime: Date,
     },
   ],
   waypoints: [
@@ -91,7 +81,8 @@ const rideSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-rideSchema.index({ startLocation: "2dsphere", endLocation: "2dsphere" });
+rideSchema.index({ "startLocation.coordinates": "2dsphere" });
+rideSchema.index({ "endLocation.coordinates": "2dsphere" });
 rideSchema.index({ "intermediateStops.coordinates": "2dsphere" });
 rideSchema.index({ departureTime: 1, status: 1 });
 rideSchema.index({ driver: 1, status: 1 });
