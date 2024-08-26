@@ -1,9 +1,9 @@
 // Location interface
 export interface Location {
   coordinates: [number, number];
-  city: string;
-  region: string;
-  locationId: string;
+  city?: string;
+  region?: string;
+  locationId?: string;
   address: string;
 }
 

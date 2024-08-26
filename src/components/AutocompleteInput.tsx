@@ -9,14 +9,17 @@ interface Feature {
 }
 
 interface LocationAddress {
-  address: string;
   coordinates: [number, number];
+  city?: string;
+  region?: string;
+  locationId?: string;
+  address: string;
 }
 
 interface AutocompleteInputProps {
   placeholder: string;
   value: string;
-  onChange: (value: LocationAddress) => void;
+  onChange: (value: LocationAddress & { address: string }) => void;
   className?: string;
 }
 
