@@ -164,10 +164,10 @@ export const typeDefs = gql`
     reviewer: User!
     reviewed: User!
     ride: Ride!
-    rating: Int!
-    driverRating: Int
-    vehicleRating: Int
-    punctualityRating: Int
+    rating: Float!
+    driverRating: Float
+    vehicleRating: Float
+    punctualityRating: Float
     comment: String
     reviewerRole: String!
     status: String!
