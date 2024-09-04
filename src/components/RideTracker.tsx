@@ -1,9 +1,9 @@
-"use client";
 import React, { useState, useEffect } from "react";
-import DynamicMap from "./DynamicMap";
-import DynamicChat from "./DynamicChat";
+import { FaMap, FaList, FaComment } from "react-icons/fa";
+import dynamic from "next/dynamic";
 import { useSocket } from "@/app/hooks/useSocket";
-import { FaMap, FaComments, FaMapMarkedAlt } from "react-icons/fa";
+import DynamicChat from "@/components/DynamicChat";
+import DynamicMap from "@/components/DynamicMap";
 
 interface Location {
   coordinates: [number, number];
@@ -40,40 +40,65 @@ const RideTracker: React.FC<RideTrackerProps> = ({
   passengers,
   status,
 }) => {
-  const { socket, isConnected } = useSocket();
-  const [currentLocation, setCurrentLocation] = useState(
+  const [activeTab, setActiveTab] = useState<"map" | "stops" | "chat">("map");
+  const [currentLocation, setCurrentLocation] = useState<[number, number]>(
     initialLocation.coordinates
   );
-  const [activeTab, setActiveTab] = useState<"map" | "chat" | "stops">("map");
   const [arrivedStops, setArrivedStops] = useState<string[]>([]);
+  const { socket, isConnected } = useSocket();
+
+  useEffect(() => {
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const newLocation: [number, number] = [
+          position.coords.latitude,
+          position.coords.longitude,
+        ];
+        console.log("New location:", newLocation);
+
+        setCurrentLocation(newLocation);
+      },
+      (error) => {
+        console.error("Error getting current location:", error);
+      },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
+    );
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, []);
 
   useEffect(() => {
     if (socket && isConnected) {
       socket.emit("join-ride", rideId);
 
-      socket.on("location-update", (data: { location: [number, number] }) => {
+      const handleLocationUpdate = (data: { location: [number, number] }) => {
         setCurrentLocation(data.location);
-      });
+      };
 
-      socket.on("stop-arrived", (stopId: string) => {
+      const handleStopArrival = (stopId: string) => {
         setArrivedStops((prev) => [...prev, stopId]);
-      });
+      };
+
+      socket.on("location-update", handleLocationUpdate);
+      socket.on("stop-arrived", handleStopArrival);
 
       return () => {
-        socket.off("location-update");
-        socket.off("stop-arrived");
+        socket.off("location-update", handleLocationUpdate);
+        socket.off("stop-arrived", handleStopArrival);
       };
     }
   }, [socket, isConnected, rideId]);
 
   const handleStopArrival = (stopId: string) => {
-    if (isDriver && status === "In Progress" && socket) {
+    if (socket && isConnected) {
       socket.emit("mark-stop-arrived", { rideId, stopId });
     }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div className="container mx-auto px-4 py-8">
+      <h2 className="text-3xl font-bold mb-6">Ride Tracker</h2>
+
       <div className="flex justify-center p-4 bg-gray-100">
         <button
           className={`flex items-center px-6 py-3 rounded-l-lg transition duration-300 ${
@@ -93,20 +118,21 @@ const RideTracker: React.FC<RideTrackerProps> = ({
           }`}
           onClick={() => setActiveTab("stops")}
         >
-          <FaMapMarkedAlt className="mr-2" /> Stops
+          <FaList className="mr-2" /> Stops
         </button>
         <button
           className={`flex items-center px-6 py-3 rounded-r-lg transition duration-300 ${
             activeTab === "chat"
-              ? "bg-[#F96167] text-white"
+              ? "bg-[#F9D423] text-gray-800"
               : "bg-gray-200 text-gray-700 hover:bg-gray-300"
           }`}
           onClick={() => setActiveTab("chat")}
         >
-          <FaComments className="mr-2" /> Chat
+          <FaComment className="mr-2" /> Chat
         </button>
       </div>
-      <div className="p-6">
+
+      <div className="mt-6">
         {activeTab === "map" && (
           <DynamicMap
             rideId={rideId}
@@ -119,13 +145,15 @@ const RideTracker: React.FC<RideTrackerProps> = ({
             }))}
           />
         )}
+
         {activeTab === "stops" && (
           <div className="space-y-4">
             <h3 className="text-xl font-semibold mb-4">Ride Stops</h3>
-            <div className="bg-green-100 p-4 rounded-lg mb-4">
-              <h4 className="font-semibold">
-                Start: {initialLocation.address}, {initialLocation.city}
-              </h4>
+            <div className="p-4 rounded-lg bg-green-100">
+              <p className="font-semibold">Initial Location</p>
+              <p>
+                {initialLocation.address}, {initialLocation.city}
+              </p>
             </div>
             {intermediateStops.map((stop, index) => (
               <div
@@ -136,20 +164,11 @@ const RideTracker: React.FC<RideTrackerProps> = ({
                     : "bg-yellow-100"
                 }`}
               >
-                <h4 className="font-semibold">
-                  Stop {index + 1}: {stop.address}, {stop.city}
-                </h4>
+                <p className="font-semibold">Stop {index + 1}</p>
                 <p>
-                  Estimated Arrival:{" "}
-                  {new Date(stop.estimatedArrivalTime).toLocaleString()}
+                  {stop.address}, {stop.city}
                 </p>
-                {arrivedStops.includes(stop.estimatedArrivalTime) &&
-                  stop.actualArrivalTime && (
-                    <p>
-                      Actual Arrival:{" "}
-                      {new Date(stop.actualArrivalTime).toLocaleString()}
-                    </p>
-                  )}
+                <p>Estimated arrival: {stop.estimatedArrivalTime}</p>
                 {isDriver &&
                   status === "In Progress" &&
                   !arrivedStops.includes(stop.estimatedArrivalTime) && (
@@ -164,13 +183,15 @@ const RideTracker: React.FC<RideTrackerProps> = ({
                   )}
               </div>
             ))}
-            <div className="bg-red-100 p-4 rounded-lg mt-4">
-              <h4 className="font-semibold">
-                End: {destination.address}, {destination.city}
-              </h4>
+            <div className="p-4 rounded-lg bg-red-100">
+              <p className="font-semibold">Destination</p>
+              <p>
+                {destination.address}, {destination.city}
+              </p>
             </div>
           </div>
         )}
+
         {activeTab === "chat" && (
           <DynamicChat
             rideId={rideId}

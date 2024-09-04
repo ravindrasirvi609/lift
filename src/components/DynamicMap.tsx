@@ -37,6 +37,7 @@ const DynamicMap: React.FC<DynamicMapProps> = ({
   const map = useRef<mapboxgl.Map | null>(null);
   const directionsRef = useRef<any>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
+
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
   useEffect(() => {

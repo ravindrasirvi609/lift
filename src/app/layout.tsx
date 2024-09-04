@@ -4,8 +4,6 @@ import { Inter } from "next/font/google";
 import { AuthProvider } from "./contexts/AuthContext";
 import { getServerSession } from "@/utils/getServerSession";
 import Header from "@/components/Headers";
-import { ApolloProvider } from "@apollo/client";
-import client from "@/utils/apollo-client";
 import ApolloWrapper from "@/components/ApolloWrapper";
 import Footer from "@/components/Footer";
 
