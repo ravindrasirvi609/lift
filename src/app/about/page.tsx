@@ -20,7 +20,7 @@ const AboutPage: React.FC = () => {
       {/* Hero Section */}
       <header className="bg-gradient-to-r from-[#F96167] to-[#F9D423] text-white py-20">
         <div className="container mx-auto px-4">
-          <h1 className="text-5xl font-bold mb-4">About LIFT</h1>
+          <h1 className="text-5xl font-bold mb-4">About Mil Kar Chale</h1>
           <p className="text-xl">
             Connecting journeys, sharing rides, reducing carbon footprints.
           </p>
@@ -34,10 +34,10 @@ const AboutPage: React.FC = () => {
             Our Mission
           </h2>
           <p className="text-xl text-gray-700 max-w-3xl mx-auto text-center">
-            At LIFT, we&apos;re on a mission to revolutionize transportation by
-            making ride-sharing accessible, affordable, and eco-friendly. We
-            believe in the power of community to create a more connected and
-            sustainable world.
+            At Mil Kar Chale, we&apos;re on a mission to revolutionize
+            transportation by making ride-sharing accessible, affordable, and
+            eco-friendly. We believe in the power of community to create a more
+            connected and sustainable world.
           </p>
         </div>
       </section>
@@ -104,7 +104,7 @@ const AboutPage: React.FC = () => {
             <div className="md:w-1/2 mb-8 md:mb-0">
               <Image
                 src="/logo.png"
-                alt="Lift team"
+                alt="Mil Kar Chale team"
                 width={500}
                 height={300}
                 className="rounded-lg shadow-lg"
@@ -112,11 +112,11 @@ const AboutPage: React.FC = () => {
             </div>
             <div className="md:w-1/2 md:pl-8">
               <p className="text-gray-700 mb-4">
-                LIFT was born out of a simple idea: to make transportation more
-                efficient and environmentally friendly. Our founders, a group of
-                tech enthusiasts and environmental advocates, came together in
-                2024 with a vision to create a platform that would connect
-                people going the same way.
+                Mil Kar Chale was born out of a simple idea: to make
+                transportation more efficient and environmentally friendly. Our
+                founders, a group of tech enthusiasts and environmental
+                advocates, came together in 2024 with a vision to create a
+                platform that would connect people going the same way.
               </p>
               <p className="text-gray-700">
                 Since our launch, we&apos;ve helped thousands of people share
@@ -141,11 +141,11 @@ const AboutPage: React.FC = () => {
       <section className="py-16 bg-gradient-to-r from-[#F96167] to-[#F9D423] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-semibold mb-8">
-            Join the Lift Community
+            Join the Mil Kar Chale Community
           </h2>
           <p className="text-xl mb-8">
-            Whether you&apos;re looking to share a ride or offer one, Lift is
-            here to connect you. Join us in creating a more connected,
+            Whether you&apos;re looking to share a ride or offer one, Mil Kar
+            Chale is here to connect you. Join us in creating a more connected,
             efficient, and sustainable future.
           </p>
           <button className="bg-white text-[#F96167] font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition duration-300">

@@ -71,7 +71,7 @@ const Header: React.FC = () => {
               className="text-[#F96167] text-2xl font-bold flex items-center"
             >
               <FaHome className="mr-2" />
-              LIFT
+              Mil Kar Chale
             </Link>
           </div>
 

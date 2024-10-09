@@ -58,7 +58,7 @@ const VehicleOwnerSection: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          Drive with LIFT
+          Drive with Mil Kar Chale
         </motion.h2>
 
         <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -106,7 +106,7 @@ const VehicleOwnerSection: React.FC = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <h3 className="text-3xl font-semibold text-[#F96167] mb-6">
-              Why Drive with LIFT?
+              Why Drive with Mil Kar Chale?
             </h3>
             <ul className="space-y-4">
               {[

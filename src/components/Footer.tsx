@@ -6,7 +6,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-lg font-semibold mb-4">LIFT</h3>
+            <h3 className="text-lg font-semibold mb-4">Mil Kar Chale</h3>
             <p className="text-sm text-gray-300">
               Connecting drivers and passengers for a greener commute.
             </p>
@@ -108,7 +108,8 @@ const Footer = () => {
         </div>
         <div className="mt-8 border-t border-gray-700 pt-8 flex items-center justify-between">
           <p className="text-sm text-gray-300">
-            &copy; {new Date().getFullYear()} Lift. All rights reserved.
+            &copy; {new Date().getFullYear()} Mil Kar Chale. All rights
+            reserved.
           </p>
           <p className="text-sm text-gray-300">
             Made with ❤️ for the environment

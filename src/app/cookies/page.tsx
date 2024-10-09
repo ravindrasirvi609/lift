@@ -16,8 +16,8 @@ const CookiesPolicy: React.FC = () => {
           </h2>
           <p className="mb-6">
             Cookies are small text files stored on your device when you use our
-            LIFT. They help us provide a better user experience and understand
-            how you interact with our service.
+            Mil Kar Chale. They help us provide a better user experience and
+            understand how you interact with our service.
           </p>
 
           <h2 className="text-2xl font-semibold mb-6 text-[#F96167]">

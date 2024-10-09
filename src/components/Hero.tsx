@@ -38,14 +38,14 @@ const Hero: React.FC = () => {
         <div ref={logoRef} className="w-[400px] h-[400px] mb-2">
           <Image
             src="/logo.png"
-            alt="Lift team"
+            alt="Mil Kar Chale team"
             width={800}
             height={500}
             className="rounded-lg"
           />
         </div>
         <div ref={textRef} className="text-center">
-          <h1 className="text-5xl font-bold mb-4">Welcome to LIFT</h1>
+          <h1 className="text-5xl font-bold mb-4">Welcome to Mil Kar Chale</h1>
           <p className="text-xl mb-8">
             Your reliable platform to find and book rides easily.
           </p>

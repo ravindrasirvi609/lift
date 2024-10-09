@@ -55,17 +55,35 @@ const RideTracker: React.FC<RideTrackerProps> = ({
           position.coords.longitude,
         ];
         console.log("New location:", newLocation);
-
         setCurrentLocation(newLocation);
       },
       (error) => {
         console.error("Error getting current location:", error);
+        // Handle the error based on its code
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            alert("Please allow location access to use this feature.");
+            break;
+          case error.POSITION_UNAVAILABLE:
+            alert(
+              "Location information is unavailable. Please check your device settings."
+            );
+            break;
+          case error.TIMEOUT:
+            alert("The request to get user location timed out.");
+            break;
+          default:
+            alert("An unknown error occurred while trying to get location.");
+            break;
+        }
+        // You might want to set a default location or disable location-dependent features
+        setCurrentLocation(initialLocation.coordinates);
       },
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
     );
 
     return () => navigator.geolocation.clearWatch(watchId);
-  }, []);
+  }, [initialLocation.coordinates]);
 
   useEffect(() => {
     if (socket && isConnected) {

@@ -165,14 +165,14 @@ const ContactPage: React.FC = () => {
           <div className="max-w-3xl mx-auto">
             {[
               {
-                question: "How do I sign up for Lift?",
+                question: "How do I sign up for Mil Kar Chale?",
                 answer:
-                  "You can sign up for Lift by downloading our app from the App Store or Google Play Store and following the registration process.",
+                  "You can sign up for Mil Kar Chale by downloading our app from the App Store or Google Play Store and following the registration process.",
               },
               {
-                question: "Is Lift available in my city?",
+                question: "Is Mil Kar Chale available in my city?",
                 answer:
-                  "Lift is currently available in major cities across the United States. Check our 'Cities' page for a full list of locations.",
+                  "Mil Kar Chale is currently available in major cities across the United States. Check our 'Cities' page for a full list of locations.",
               },
               {
                 question: "How do I report an issue with a ride?",
