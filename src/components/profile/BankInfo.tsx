@@ -6,8 +6,10 @@ import {
   FaCreditCard,
   FaBarcode,
   FaTimes,
+  FaPencilAlt,
 } from "react-icons/fa";
 import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface BankInfoProps {
   user: User;
@@ -51,9 +53,16 @@ const BankInfo: React.FC<BankInfoProps> = ({ user }) => {
   };
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-6">
-      <h2 className="text-2xl font-semibold mb-4">Bank Account Information</h2>
-      <div className="space-y-4">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="bg-gradient-to-br from-white to-gray-100 shadow-2xl rounded-3xl p-8 hover:shadow-3xl transition-all duration-300"
+    >
+      <h2 className="text-3xl font-bold mb-6 text-[#F96167] border-b-2 border-yellow-400 pb-4 flex items-center">
+        <FaUniversity className="mr-3" /> Bank Account Information
+      </h2>
+      <div className="space-y-6">
         <InfoItem
           icon={<FaUniversity className="text-2xl text-[#F96167]" />}
           label="Bank Name"
@@ -79,116 +88,96 @@ const BankInfo: React.FC<BankInfoProps> = ({ user }) => {
           value={user.bankAccountInfo?.ifscCode}
         />
       </div>
-      <div className="mt-6">
-        <button
+      <div className="mt-8">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setIsModalOpen(true)}
-          className="bg-[#F96167] text-white px-4 py-2 rounded-full hover:bg-opacity-90 transition duration-300"
+          className="bg-[#F96167] text-white px-6 py-3 rounded-full hover:bg-opacity-90 transition duration-300 flex items-center justify-center w-full md:w-auto"
         >
-          Update Bank Information
-        </button>
+          <FaPencilAlt className="mr-2" /> Update Bank Information
+        </motion.button>
       </div>
 
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 max-w-md w-full">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-2xl font-semibold">
-                Update Bank Information
-              </h3>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <FaTimes />
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label
-                  htmlFor="bankName"
-                  className="block text-sm font-medium text-gray-700"
+      <AnimatePresence>
+        {isModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-[#F96167]">
+                  Update Bank Information
+                </h3>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setIsModalOpen(false)}
+                  className="text-gray-500 hover:text-gray-700"
                 >
-                  Bank Name
-                </label>
-                <input
-                  type="text"
+                  <FaTimes className="text-xl" />
+                </motion.button>
+              </div>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <InputField
                   id="bankName"
                   name="bankName"
+                  label="Bank Name"
                   value={formData.bankName}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167]"
-                  required
+                  icon={<FaUniversity className="text-[#F96167]" />}
                 />
-              </div>
-              <div>
-                <label
-                  htmlFor="accountHolderName"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Account Holder Name
-                </label>
-                <input
-                  type="text"
+                <InputField
                   id="accountHolderName"
                   name="accountHolderName"
+                  label="Account Holder Name"
                   value={formData.accountHolderName}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167]"
-                  required
+                  icon={<FaUserAlt className="text-[#F96167]" />}
                 />
-              </div>
-              <div>
-                <label
-                  htmlFor="accountNumber"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Account Number
-                </label>
-                <input
-                  type="text"
+                <InputField
                   id="accountNumber"
                   name="accountNumber"
+                  label="Account Number"
                   value={formData.accountNumber}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167]"
-                  required
+                  icon={<FaCreditCard className="text-[#F96167]" />}
                 />
-              </div>
-              <div>
-                <label
-                  htmlFor="ifscCode"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  IFSC Code
-                </label>
-                <input
-                  type="text"
+                <InputField
                   id="ifscCode"
                   name="ifscCode"
+                  label="IFSC Code"
                   value={formData.ifscCode}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167]"
-                  required
+                  icon={<FaBarcode className="text-[#F96167]" />}
                 />
-              </div>
-              {error && <p className="text-red-500 text-sm">{error}</p>}
-              {success && <p className="text-green-500 text-sm">{success}</p>}
-              <div className="mt-6">
-                <button
+                {error && <p className="text-red-500 text-sm">{error}</p>}
+                {success && <p className="text-green-500 text-sm">{success}</p>}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   type="submit"
                   disabled={loading}
-                  className={`w-full bg-[#F96167] text-white px-4 py-2 rounded-full hover:bg-opacity-90 transition duration-300 ${
+                  className={`w-full bg-[#F96167] text-white px-6 py-3 rounded-full hover:bg-opacity-90 transition duration-300 ${
                     loading ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                 >
                   {loading ? "Updating..." : "Update"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+                </motion.button>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 
@@ -197,14 +186,50 @@ const InfoItem: React.FC<{
   label: string;
   value: string;
 }> = ({ icon, label, value }) => (
-  <div className="flex items-center">
-    <div className="mr-3">{icon}</div>
+  <motion.div
+    whileHover={{ scale: 1.05 }}
+    className="flex items-center bg-white p-4 rounded-2xl shadow-md"
+  >
+    <div className="mr-4 bg-gray-100 p-3 rounded-full">{icon}</div>
     <div>
       <p className="text-sm text-gray-600">{label}</p>
-      <p className="font-medium">{value}</p>
+      <p className="font-medium text-gray-800">{value || "Not provided"}</p>
+    </div>
+  </motion.div>
+);
+
+const InputField: React.FC<{
+  id: string;
+  name: string;
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  icon: React.ReactNode;
+}> = ({ id, name, label, value, onChange, icon }) => (
+  <div>
+    <label
+      htmlFor={id}
+      className="block text-sm font-medium text-gray-700 mb-1"
+    >
+      {label}
+    </label>
+    <div className="relative rounded-md shadow-sm">
+      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        {icon}
+      </div>
+      <input
+        type="text"
+        id={id}
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-[#F96167] focus:border-[#F96167] transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+        required
+      />
     </div>
   </div>
 );
+
 const maskAccountNumber = (accountNumber: string): string => {
   const visibleDigits = 4;
   const maskedPortion = accountNumber
@@ -213,4 +238,5 @@ const maskAccountNumber = (accountNumber: string): string => {
   const visiblePortion = accountNumber.slice(-visibleDigits);
   return maskedPortion + visiblePortion;
 };
+
 export default BankInfo;
